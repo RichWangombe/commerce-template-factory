@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSignUp } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -47,14 +46,8 @@ export default function SignUpPage() {
           description: "Your account has been created successfully.",
         });
         navigate("/");
-      } else if (result.status === "needs_verification") {
-        setPendingVerification(true);
       } else {
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive",
-        });
+        setPendingVerification(true);
       }
     } catch (err: any) {
       toast({
