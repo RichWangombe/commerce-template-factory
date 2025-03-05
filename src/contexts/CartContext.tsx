@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useUser } from '@clerk/clerk-react';
 
 export type CartItem = {
   id: number;
@@ -12,9 +12,17 @@ export type CartItem = {
   variant?: string;
 };
 
+type UserPreferences = {
+  darkMode?: boolean;
+  currency?: string;
+  notificationEnabled?: boolean;
+  language?: string;
+};
+
 type CartState = {
   items: CartItem[];
   isOpen: boolean;
+  userPreferences: UserPreferences;
 };
 
 type CartAction =
@@ -22,11 +30,18 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'CLEAR_CART' }
-  | { type: 'TOGGLE_CART'; payload?: boolean };
+  | { type: 'TOGGLE_CART'; payload?: boolean }
+  | { type: 'UPDATE_PREFERENCES'; payload: Partial<UserPreferences> };
 
 const initialState: CartState = {
   items: [],
   isOpen: false,
+  userPreferences: {
+    darkMode: false,
+    currency: 'USD',
+    notificationEnabled: true,
+    language: 'en',
+  },
 };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
@@ -37,7 +52,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       );
 
       if (existingItemIndex > -1) {
-        // Item exists, update quantity
         const updatedItems = [...state.items];
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -46,7 +60,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         return { ...state, items: updatedItems };
       }
 
-      // Item doesn't exist, add new item
       return { ...state, items: [...state.items, action.payload] };
     }
 
@@ -80,6 +93,12 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'TOGGLE_CART':
       return { ...state, isOpen: action.payload !== undefined ? action.payload : !state.isOpen };
 
+    case 'UPDATE_PREFERENCES':
+      return {
+        ...state,
+        userPreferences: { ...state.userPreferences, ...action.payload },
+      };
+
     default:
       return state;
   }
@@ -92,6 +111,7 @@ type CartContextType = {
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
   toggleCart: (isOpen?: boolean) => void;
+  updatePreferences: (preferences: Partial<UserPreferences>) => void;
   totalItems: number;
   subtotal: number;
 };
@@ -100,26 +120,64 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { isSignedIn, user } = useUser();
 
-  // Load cart from localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
+    const loadUserData = () => {
+      const userId = user?.id;
+      if (!userId) return;
+
       try {
-        const parsedCart = JSON.parse(savedCart);
-        parsedCart.items.forEach((item: CartItem) => {
-          dispatch({ type: 'ADD_ITEM', payload: item });
-        });
+        const savedCart = localStorage.getItem(`cart_${userId}`);
+        if (savedCart) {
+          const parsedCart = JSON.parse(savedCart);
+          parsedCart.items.forEach((item: CartItem) => {
+            dispatch({ type: 'ADD_ITEM', payload: item });
+          });
+        }
+
+        const savedPreferences = localStorage.getItem(`preferences_${userId}`);
+        if (savedPreferences) {
+          const parsedPreferences = JSON.parse(savedPreferences);
+          dispatch({ type: 'UPDATE_PREFERENCES', payload: parsedPreferences });
+        }
       } catch (error) {
-        console.error('Failed to parse cart from localStorage:', error);
+        console.error('Failed to load user data from localStorage:', error);
+      }
+    };
+
+    if (isSignedIn) {
+      loadUserData();
+    } else {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          const parsedCart = JSON.parse(savedCart);
+          parsedCart.items.forEach((item: CartItem) => {
+            dispatch({ type: 'ADD_ITEM', payload: item });
+          });
+        } catch (error) {
+          console.error('Failed to parse cart from localStorage:', error);
+        }
       }
     }
-  }, []);
+  }, [isSignedIn, user?.id]);
 
-  // Save cart to localStorage
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify({ items: state.items }));
-  }, [state.items]);
+    const saveUserData = () => {
+      const userId = user?.id;
+      if (!userId) return;
+
+      localStorage.setItem(`cart_${userId}`, JSON.stringify({ items: state.items }));
+      localStorage.setItem(`preferences_${userId}`, JSON.stringify(state.userPreferences));
+    };
+
+    if (isSignedIn) {
+      saveUserData();
+    } else {
+      localStorage.setItem('cart', JSON.stringify({ items: state.items }));
+    }
+  }, [state.items, state.userPreferences, isSignedIn, user?.id]);
 
   const addItem = (item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
@@ -144,6 +202,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'TOGGLE_CART', payload: isOpen });
   };
 
+  const updatePreferences = (preferences: Partial<UserPreferences>) => {
+    dispatch({ type: 'UPDATE_PREFERENCES', payload: preferences });
+    toast.success('Preferences updated');
+  };
+
   const totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
   
   const subtotal = state.items.reduce(
@@ -160,6 +223,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQuantity,
         clearCart,
         toggleCart,
+        updatePreferences,
         totalItems,
         subtotal,
       }}
