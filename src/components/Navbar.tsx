@@ -1,8 +1,12 @@
 
 import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
+import { Badge } from "@/components/ui/badge";
 
 export const Navbar = () => {
+  const { totalItems, toggleCart } = useCart();
+
   return (
     <header className="w-full border-b border-neutral-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,9 +47,22 @@ export const Navbar = () => {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </button>
-            <Link to="/cart" className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900">
+            <Link 
+              to="/cart" 
+              className="relative rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+              onClick={(e) => {
+                // prevent the default navigation to allow the cart toggle
+                e.preventDefault();
+                toggleCart(true);
+              }}
+            >
               <ShoppingCart className="h-5 w-5" />
-              <span className="sr-only">Cart</span>
+              {totalItems > 0 && (
+                <Badge variant="destructive" className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs">
+                  {totalItems}
+                </Badge>
+              )}
+              <span className="sr-only">Cart ({totalItems} items)</span>
             </Link>
             <Link to="/account" className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900">
               <User className="h-5 w-5" />

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
 
 export interface ProductCardProps {
   id: number;
@@ -25,6 +26,7 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const { addItem } = useCart();
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -37,6 +39,19 @@ export const ProductCard = ({
         currency: 'USD',
       }).format(price * (1 - discount / 100))
     : null;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addItem({
+      id,
+      name,
+      price,
+      image,
+      quantity: 1
+    });
+  };
 
   return (
     <div 
@@ -112,7 +127,10 @@ export const ProductCard = ({
           <span className="sr-only">Add to favorites</span>
         </button>
         
-        <button className="button-press ml-auto flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800">
+        <button 
+          className="button-press ml-auto flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+          onClick={handleAddToCart}
+        >
           <ShoppingCart className="h-4 w-4" />
           <span>Add to Cart</span>
         </button>
