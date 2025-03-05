@@ -3,6 +3,7 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
 export const Navbar = () => {
   const { totalItems, toggleCart } = useCart();
@@ -64,10 +65,17 @@ export const Navbar = () => {
               )}
               <span className="sr-only">Cart ({totalItems} items)</span>
             </Link>
-            <Link to="/account" className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Account</span>
-            </Link>
+            
+            {/* Authentication UI */}
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <Link to="/sign-in" className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900">
+                <User className="h-5 w-5" />
+                <span className="sr-only">Sign In</span>
+              </Link>
+            </SignedOut>
           </div>
         </div>
       </div>
