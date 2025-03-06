@@ -42,13 +42,28 @@ export default function SignInPage() {
         });
         navigate("/");
       } else {
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive",
-        });
+        console.log("Sign-in result:", result);
+        // Handle additional verification steps if needed
+        if (result.status === "needs_second_factor") {
+          toast({
+            description: "Please enter your second factor authentication code.",
+          });
+          // Handle 2FA flow here if implemented
+        } else if (result.status === "needs_new_password") {
+          toast({
+            description: "Please update your password.",
+          });
+          // Handle password reset flow here if implemented
+        } else {
+          toast({
+            title: "Error",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (err: any) {
+      console.error("Sign-in error:", err);
       toast({
         title: "Error",
         description: err.errors?.[0]?.message || "Something went wrong. Please try again.",

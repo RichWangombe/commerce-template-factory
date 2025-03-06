@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -9,54 +9,37 @@ import { RecommendationSection } from "@/components/home/RecommendationSection";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { Breadcrumb } from "@/components/product/Breadcrumb";
 import { ProductNotFound } from "@/components/product/ProductNotFound";
-import { mockProducts } from "@/data/mockProducts";
 import { useRecommendations } from "@/contexts/recommendation";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { useToast } from "@/hooks/use-toast";
+import { useProduct } from "@/utils/dataFetchers";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { recordProductView } = useRecommendations();
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const productId = parseInt(id || "0");
   const { toast } = useToast();
   
+  // Use React Query to fetch product data
+  const { data: product, isLoading, error } = useProduct(productId);
+  
   useEffect(() => {
-    // Simulate fetching product data
-    setLoading(true);
-    
-    try {
-      const productId = parseInt(id || "0");
-      const foundProduct = mockProducts.find(p => p.id === productId);
-      
-      if (foundProduct) {
-        setProduct(foundProduct);
-        // Track product view for recommendation engine
-        if (recordProductView) {
-          recordProductView(foundProduct.id);
-        }
-      } else {
-        setError("Product not found");
-      }
-    } catch (err) {
-      setError("Failed to load product");
-      console.error("Error loading product:", err);
-    } finally {
-      setLoading(false);
+    // Track product view for recommendation engine when product data is available
+    if (product && recordProductView) {
+      recordProductView(product.id);
     }
-  }, [id, recordProductView]);
+  }, [product, recordProductView]);
 
   // Handle adding product to cart or wishlist
   const handleAddToCart = () => {
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${product?.name} has been added to your cart.`,
     });
   };
   
   // Show loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
