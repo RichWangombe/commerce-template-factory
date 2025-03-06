@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ProductRecommendation, RecommendationFilter, UserPreferences } from "@/types/recommendation";
+import { ProductRecommendation, RecommendationFilter, UserPreferences, RecommendationClickEvent } from "@/types/recommendation";
 import { useCart } from "@/contexts/CartContext";
 import { mockProducts } from "@/data/mockProducts";
 import { 
@@ -22,6 +22,9 @@ interface RecommendationContextType {
   userPreferences: UserPreferences;
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
   trackRecommendationClick: (recommendation: ProductRecommendation) => void;
+  // Add these new methods to match what components are using
+  getRecommendations: (limit: number, filter?: RecommendationFilter) => Promise<ProductRecommendation[]>;
+  trackView: (event: RecommendationClickEvent) => void;
 }
 
 const RecommendationContext = createContext<RecommendationContextType | undefined>(undefined);
@@ -176,6 +179,29 @@ export const RecommendationProvider: React.FC<{ children: React.ReactNode }> = (
     return recommendations.slice(0, 8); // Limit to 8 recommendations
   };
 
+  // Implementation of getRecommendations method (to match what components are using)
+  const getRecommendations = async (limit: number, filter?: RecommendationFilter): Promise<ProductRecommendation[]> => {
+    // This is a wrapper around getPersonalizedRecommendations that returns a Promise
+    // and allows specifying a limit
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const recommendations = getPersonalizedRecommendations(filter);
+        resolve(recommendations.slice(0, limit));
+      }, 300); // Add a small delay to simulate an API call
+    });
+  };
+
+  // Implementation of trackView method (to match what components are using)
+  const trackView = (event: RecommendationClickEvent) => {
+    // Log the view event
+    console.log("Recommendation viewed:", event);
+    
+    // Store view event in localStorage for analytics
+    const viewEvents = JSON.parse(localStorage.getItem('recommendation_views') || '[]');
+    viewEvents.push(event);
+    localStorage.setItem('recommendation_views', JSON.stringify(viewEvents));
+  };
+
   return (
     <RecommendationContext.Provider
       value={{
@@ -186,7 +212,10 @@ export const RecommendationProvider: React.FC<{ children: React.ReactNode }> = (
         getPersonalizedRecommendations,
         userPreferences,
         updateUserPreferences,
-        trackRecommendationClick
+        trackRecommendationClick,
+        // Add new methods to the context value
+        getRecommendations,
+        trackView
       }}
     >
       {children}

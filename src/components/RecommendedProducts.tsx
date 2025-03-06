@@ -7,7 +7,11 @@ import { RecommendationFilter, ProductRecommendation } from "@/types/recommendat
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
-export const RecommendedProducts = () => {
+interface RecommendedProductsProps {
+  productId?: number;
+}
+
+export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => {
   const recommendations = useRecommendations();
   const { preferences } = useUserPreferences();
   const [products, setProducts] = useState<ProductRecommendation[]>([]);
@@ -36,26 +40,29 @@ export const RecommendedProducts = () => {
       }
       
       try {
-        // Check if these methods exist in the context
-        if (recommendations.getRecommendations && recommendations.trackView) {
-          // Get recommendations with user's preferences
-          const count = preferences.recommendationCount || 4;
-          const recommendedProducts = await recommendations.getRecommendations(count, filter);
-          setProducts(recommendedProducts);
-          
-          // Track that these recommendations were viewed
-          recommendedProducts.forEach(product => {
-            recommendations.trackView({
-              productId: product.id,
-              productName: product.name,
-              recommendationType: product.source.type,
-              confidence: product.source.confidence,
-              timestamp: new Date().toISOString()
-            });
-          });
+        let recommendedProducts: ProductRecommendation[] = [];
+        
+        // If productId is provided, get recommendations for that product
+        if (productId) {
+          recommendedProducts = recommendations.getRecommendationsForProduct(productId);
         } else {
-          console.error("Required methods not found in RecommendationContext");
+          // Otherwise get personalized recommendations
+          const count = preferences.recommendationCount || 4;
+          recommendedProducts = await recommendations.getRecommendations(count, filter);
         }
+        
+        setProducts(recommendedProducts);
+        
+        // Track that these recommendations were viewed
+        recommendedProducts.forEach(product => {
+          recommendations.trackView({
+            productId: product.id,
+            productName: product.name,
+            recommendationType: product.source.type,
+            confidence: product.source.confidence,
+            timestamp: new Date().toISOString()
+          });
+        });
       } catch (error) {
         console.error("Failed to load recommendations:", error);
       } finally {
@@ -64,7 +71,7 @@ export const RecommendedProducts = () => {
     };
 
     loadRecommendations();
-  }, [recommendations, preferences]);
+  }, [recommendations, preferences, productId]);
 
   // Helper function to get badge color based on recommendation type
   const getBadgeStyle = (type: string) => {
