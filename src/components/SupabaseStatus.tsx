@@ -27,7 +27,7 @@ export function SupabaseStatus() {
 
   if (isConnected) {
     return (
-      <Alert variant="success" className="mb-4">
+      <Alert className="mb-4 border-green-500 bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400">
         <AlertTitle>Supabase Connected</AlertTitle>
         <AlertDescription>Your application is successfully connected to Supabase.</AlertDescription>
       </Alert>
@@ -35,7 +35,7 @@ export function SupabaseStatus() {
   }
 
   return (
-    <Alert variant="warning" className="mb-4">
+    <Alert className="mb-4 border-yellow-500 bg-yellow-50 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
       <AlertTitle>Supabase Not Connected</AlertTitle>
       <AlertDescription>
         Please check your environment variables and make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.
