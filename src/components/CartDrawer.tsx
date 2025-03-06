@@ -2,13 +2,19 @@
 import { X, ShoppingBag, Plus, Minus, Trash } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const CartDrawer = () => {
   const { state, toggleCart, removeItem, updateQuantity, subtotal } = useCart();
   const { isOpen, items } = state;
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
+
+  const handleCheckout = () => {
+    toggleCart(false);
+    navigate("/checkout");
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -128,10 +134,7 @@ export const CartDrawer = () => {
               <div className="mt-6 space-y-3">
                 <Button 
                   className="w-full rounded-full py-6"
-                  onClick={() => {
-                    toggleCart(false);
-                    window.location.href = "/cart";
-                  }}
+                  onClick={handleCheckout}
                 >
                   Checkout
                 </Button>

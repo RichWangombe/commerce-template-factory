@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ShoppingCart, Trash, Plus, Minus, ArrowRight } from 'lucide-react';
@@ -47,9 +46,7 @@ export const CartPage = () => {
 
   // Proceed to checkout handler
   const handleCheckout = () => {
-    // In a real application, you'd likely have a checkout process
-    // For now, we'll just navigate to the order confirmation page
-    navigate('/order-confirmation');
+    navigate('/checkout');
   };
 
   useEffect(() => {

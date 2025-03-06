@@ -10,6 +10,7 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import NotFound from "./pages/NotFound";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import WishlistPage from "./pages/WishlistPage";
 import SearchPage from "./pages/SearchPage";
 import SignInPage from "./pages/SignInPage";
@@ -43,6 +44,7 @@ const App = () => (
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/sign-in" element={<SignInPage />} />
                 <Route path="/sign-up" element={<SignUpPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
                 
                 {/* Protected routes */}
                 <Route 

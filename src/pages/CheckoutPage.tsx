@@ -1,0 +1,427 @@
+
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { useCart } from "@/contexts/CartContext";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
+import { AddressForm } from "@/components/checkout/AddressForm";
+import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
+import { StripePaymentForm } from "@/components/checkout/StripePaymentForm";
+import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { CheckoutStep, ShippingMethod } from "@/types/checkout";
+import { toast } from "sonner";
+
+// Mock Stripe publishable key - in production this would come from an environment variable
+const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
+
+// Available shipping methods
+const shippingMethods: ShippingMethod[] = [
+  {
+    id: "standard",
+    name: "Standard Shipping",
+    description: "Delivered in 5-7 business days",
+    price: 4.99,
+    estimatedDays: "5-7 business days",
+  },
+  {
+    id: "express",
+    name: "Express Shipping",
+    description: "Delivered in 2-3 business days",
+    price: 12.99,
+    estimatedDays: "2-3 business days",
+  },
+  {
+    id: "overnight",
+    name: "Overnight Shipping",
+    description: "Delivered the next business day",
+    price: 24.99,
+    estimatedDays: "Next business day",
+  },
+];
+
+// Form validation schema
+const checkoutSchema = z.object({
+  shippingAddress: z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    address1: z.string().min(1, "Address is required"),
+    address2: z.string().optional(),
+    city: z.string().min(1, "City is required"),
+    state: z.string().min(1, "State is required"),
+    zipCode: z.string().min(1, "ZIP code is required"),
+    country: z.string().min(1, "Country is required"),
+    phone: z.string().optional(),
+  }),
+  sameAsBilling: z.boolean().default(true),
+  billingAddress: z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    address1: z.string().min(1, "Address is required"),
+    address2: z.string().optional(),
+    city: z.string().min(1, "City is required"),
+    state: z.string().min(1, "State is required"),
+    zipCode: z.string().min(1, "ZIP code is required"),
+    country: z.string().min(1, "Country is required"),
+    phone: z.string().optional(),
+  }).optional(),
+  shippingMethodId: z.string().min(1, "Please select a shipping method"),
+  paymentMethod: z.string().default("card"),
+  savePaymentInfo: z.boolean().default(false),
+  paymentValid: z.boolean().optional(),
+});
+
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+const CheckoutPage = () => {
+  const { isSignedIn, user } = useUser();
+  const { state, clearCart, subtotal } = useCart();
+  const { items } = state;
+  const navigate = useNavigate();
+  
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>("information");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<ShippingMethod | undefined>(undefined);
+  
+  const checkoutSteps = [
+    { id: "information" as const, label: "Information" },
+    { id: "shipping" as const, label: "Shipping" },
+    { id: "payment" as const, label: "Payment" },
+    { id: "review" as const, label: "Review" },
+  ];
+
+  // Initialize form
+  const methods = useForm<CheckoutFormValues>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      shippingAddress: {
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "United States",
+        phone: "",
+      },
+      sameAsBilling: true,
+      billingAddress: {
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "United States",
+        phone: "",
+      },
+      shippingMethodId: "",
+      paymentMethod: "card",
+      savePaymentInfo: false,
+    },
+  });
+
+  // Handle redirection if cart is empty
+  useEffect(() => {
+    if (items.length === 0) {
+      toast.info("Your cart is empty. Add some items before checking out.");
+      navigate("/");
+    }
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+  }, [items.length, navigate]);
+
+  // Update selected shipping method
+  useEffect(() => {
+    const methodId = methods.watch("shippingMethodId");
+    if (methodId) {
+      const method = shippingMethods.find(m => m.id === methodId);
+      setSelectedShippingMethod(method);
+    }
+  }, [methods.watch("shippingMethodId")]);
+
+  // Handle step navigation
+  const nextStep = async () => {
+    const currentIndex = checkoutSteps.findIndex(step => step.id === currentStep);
+    if (currentIndex < checkoutSteps.length - 1) {
+      
+      // Validate current step
+      let isValid = false;
+      
+      if (currentStep === "information") {
+        isValid = await methods.trigger("shippingAddress");
+        if (!methods.getValues("sameAsBilling")) {
+          isValid = isValid && await methods.trigger("billingAddress");
+        }
+      } else if (currentStep === "shipping") {
+        isValid = await methods.trigger("shippingMethodId");
+      } else if (currentStep === "payment") {
+        // Stripe validation happens within the component
+        isValid = methods.getValues("paymentValid") === true;
+        if (!isValid) {
+          toast.error("Please complete your payment information");
+          return;
+        }
+      }
+      
+      if (isValid) {
+        setCurrentStep(checkoutSteps[currentIndex + 1].id);
+      }
+    }
+  };
+
+  const prevStep = () => {
+    const currentIndex = checkoutSteps.findIndex(step => step.id === currentStep);
+    if (currentIndex > 0) {
+      setCurrentStep(checkoutSteps[currentIndex - 1].id);
+    }
+  };
+
+  // Handle form submission
+  const onSubmit = async (data: CheckoutFormValues) => {
+    if (!isSignedIn) {
+      toast.error("Please sign in to complete your purchase");
+      navigate("/sign-in", { state: { from: "/checkout" } });
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      // In a real app, this would be an API call to process payment and create order
+      console.log("Processing order:", data);
+      console.log("Cart items:", items);
+      
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Clear cart
+      clearCart();
+      
+      // Navigate to confirmation page
+      navigate("/order-confirmation");
+    } catch (error) {
+      console.error("Error processing order:", error);
+      toast.error("There was a problem processing your order. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          {/* Breadcrumb */}
+          <nav className="mb-6 flex text-sm">
+            <Link to="/" className="text-neutral-500 hover:text-neutral-900">Home</Link>
+            <ChevronRight className="mx-2 h-4 w-4 text-neutral-500" />
+            <Link to="/cart" className="text-neutral-500 hover:text-neutral-900">Cart</Link>
+            <ChevronRight className="mx-2 h-4 w-4 text-neutral-500" />
+            <span className="font-medium text-neutral-900">Checkout</span>
+          </nav>
+
+          <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
+
+          {/* Checkout progress */}
+          <div className="mb-12 pt-4">
+            <CheckoutProgress currentStep={currentStep} steps={checkoutSteps} />
+          </div>
+
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="grid gap-8 lg:grid-cols-12">
+              {/* Main content */}
+              <div className="lg:col-span-8">
+                <div className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
+                  {/* Information step */}
+                  {currentStep === "information" && (
+                    <div className="space-y-8">
+                      <AddressForm type="shipping" />
+                      
+                      <div className="flex items-center">
+                        <input
+                          id="sameAsBilling"
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                          checked={methods.watch("sameAsBilling")}
+                          onChange={(e) => methods.setValue("sameAsBilling", e.target.checked)}
+                        />
+                        <label 
+                          htmlFor="sameAsBilling" 
+                          className="ml-2 block text-sm text-neutral-700"
+                        >
+                          Billing address is the same as shipping address
+                        </label>
+                      </div>
+                      
+                      {!methods.watch("sameAsBilling") && (
+                        <AddressForm type="billing" />
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Shipping step */}
+                  {currentStep === "shipping" && (
+                    <div className="space-y-8">
+                      <ShippingMethodSelector shippingMethods={shippingMethods} />
+                    </div>
+                  )}
+                  
+                  {/* Payment step */}
+                  {currentStep === "payment" && (
+                    <Elements stripe={stripePromise}>
+                      <StripePaymentForm />
+                    </Elements>
+                  )}
+                  
+                  {/* Review step */}
+                  {currentStep === "review" && (
+                    <div className="space-y-8">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Review Your Order</h3>
+                        <Separator className="my-4" />
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="font-medium mb-2">Shipping Address</h4>
+                            <div className="bg-neutral-50 p-4 rounded-md text-sm">
+                              <p>{methods.getValues("shippingAddress.firstName")} {methods.getValues("shippingAddress.lastName")}</p>
+                              <p>{methods.getValues("shippingAddress.address1")}</p>
+                              {methods.getValues("shippingAddress.address2") && (
+                                <p>{methods.getValues("shippingAddress.address2")}</p>
+                              )}
+                              <p>
+                                {methods.getValues("shippingAddress.city")}, {methods.getValues("shippingAddress.state")} {methods.getValues("shippingAddress.zipCode")}
+                              </p>
+                              <p>{methods.getValues("shippingAddress.country")}</p>
+                              {methods.getValues("shippingAddress.phone") && (
+                                <p>Phone: {methods.getValues("shippingAddress.phone")}</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium mb-2">Billing Address</h4>
+                            <div className="bg-neutral-50 p-4 rounded-md text-sm">
+                              {methods.getValues("sameAsBilling") ? (
+                                <p>Same as shipping address</p>
+                              ) : (
+                                <>
+                                  <p>{methods.getValues("billingAddress.firstName")} {methods.getValues("billingAddress.lastName")}</p>
+                                  <p>{methods.getValues("billingAddress.address1")}</p>
+                                  {methods.getValues("billingAddress.address2") && (
+                                    <p>{methods.getValues("billingAddress.address2")}</p>
+                                  )}
+                                  <p>
+                                    {methods.getValues("billingAddress.city")}, {methods.getValues("billingAddress.state")} {methods.getValues("billingAddress.zipCode")}
+                                  </p>
+                                  <p>{methods.getValues("billingAddress.country")}</p>
+                                  {methods.getValues("billingAddress.phone") && (
+                                    <p>Phone: {methods.getValues("billingAddress.phone")}</p>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h4 className="font-medium mb-2">Shipping Method</h4>
+                          <div className="bg-neutral-50 p-4 rounded-md text-sm">
+                            {selectedShippingMethod ? (
+                              <>
+                                <p>{selectedShippingMethod.name} - ${selectedShippingMethod.price.toFixed(2)}</p>
+                                <p>Estimated delivery: {selectedShippingMethod.estimatedDays}</p>
+                              </>
+                            ) : (
+                              <p>No shipping method selected</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6">
+                          <h4 className="font-medium mb-2">Payment Method</h4>
+                          <div className="bg-neutral-50 p-4 rounded-md text-sm">
+                            <p>Credit Card</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Navigation buttons */}
+                  <div className="mt-8 flex justify-between">
+                    {currentStep !== "information" ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevStep}
+                        className="flex items-center"
+                      >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate("/cart")}
+                        className="flex items-center"
+                      >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Return to Cart
+                      </Button>
+                    )}
+                    
+                    {currentStep !== "review" ? (
+                      <Button
+                        type="button"
+                        onClick={nextStep}
+                        className="flex items-center"
+                      >
+                        Continue
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        disabled={isProcessing}
+                        className="flex items-center"
+                      >
+                        {isProcessing ? "Processing..." : "Place Order"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Order summary */}
+              <div className="lg:col-span-4">
+                <OrderSummary
+                  selectedShippingMethod={selectedShippingMethod}
+                  isSticky={true}
+                />
+              </div>
+            </form>
+          </FormProvider>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default CheckoutPage;
