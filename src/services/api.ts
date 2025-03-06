@@ -3,6 +3,8 @@ import { useAuth } from "@clerk/clerk-react";
 import { mockProducts } from "@/data/mockProducts";
 import { ProductCardProps } from "@/components/ProductCard";
 import { Order } from "@/types/checkout";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { Product } from "@/utils/dataFetchers";
 
 // Base URL for API calls - replace with your actual API URL when available
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.example.com';
@@ -26,27 +28,145 @@ const getAuthHeaders = async () => {
   }
 };
 
+// Convert Supabase product to our Product interface
+const mapSupabaseProduct = (product: any): Product => {
+  return {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+    category: product.category,
+    brand: product.brand,
+    originalPrice: product.original_price,
+    rating: product.rating,
+    reviewCount: product.review_count,
+    stock: product.stock,
+    colors: product.colors,
+    description: product.description,
+    features: product.features,
+    specifications: product.specifications,
+  };
+};
+
 // API service functions
 export const apiService = {
   // Products
   async getProducts(): Promise<ProductCardProps[]> {
-    // Placeholder using mock data
-    // Replace with actual API call when backend is available
+    // Try to use Supabase if configured
+    if (isSupabaseConfigured()) {
+      try {
+        console.log("Fetching products from Supabase");
+        const { data, error } = await supabase
+          .from('products')
+          .select('*');
+        
+        if (error) {
+          console.error("Supabase error:", error);
+          return mockProducts;
+        }
+        
+        return data.map(mapSupabaseProduct);
+      } catch (error) {
+        console.error("Error fetching from Supabase:", error);
+        return mockProducts;
+      }
+    }
+    
+    // Fallback to mock data
     console.log("Fetching products from mock data");
     return Promise.resolve(mockProducts);
   },
   
-  async getProductById(id: number): Promise<ProductCardProps | null> {
-    // Placeholder using mock data
+  async getProductById(id: number): Promise<Product | null> {
+    // Try to use Supabase if configured
+    if (isSupabaseConfigured()) {
+      try {
+        console.log(`Fetching product ${id} from Supabase`);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          console.error("Supabase error:", error);
+          const mockProduct = mockProducts.find(p => p.id === id);
+          return mockProduct ? mapSupabaseProduct(mockProduct) : null;
+        }
+        
+        return mapSupabaseProduct(data);
+      } catch (error) {
+        console.error("Error fetching from Supabase:", error);
+        const mockProduct = mockProducts.find(p => p.id === id);
+        return mockProduct ? mapSupabaseProduct(mockProduct) : null;
+      }
+    }
+    
+    // Fallback to mock data
     console.log(`Fetching product ${id} from mock data`);
-    const product = mockProducts.find(p => p.id === id) || null;
-    return Promise.resolve(product);
+    const product = mockProducts.find(p => p.id === id);
+    return Promise.resolve(product ? mapSupabaseProduct(product) : null);
   },
   
   // Orders
   async createOrder(orderData: Partial<Order>): Promise<Order> {
-    // Placeholder - would be an actual API call
-    console.log("Creating order with data:", orderData);
+    // Try to use Supabase if configured
+    if (isSupabaseConfigured()) {
+      try {
+        console.log("Creating order in Supabase");
+        
+        // Prep the order data for Supabase
+        const newOrder = {
+          id: `ORD-${Date.now()}`,
+          user_id: orderData.userId || 'anonymous',
+          items: orderData.items || [],
+          shipping_address: orderData.shippingAddress,
+          billing_address: orderData.billingAddress,
+          shipping_method: orderData.shippingMethod,
+          payment_method: orderData.paymentMethod || 'card',
+          subtotal: orderData.subtotal || 0,
+          tax: orderData.tax || 0,
+          shipping: orderData.shipping || 0,
+          total: orderData.total || 0,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        };
+        
+        const { data, error } = await supabase
+          .from('orders')
+          .insert(newOrder)
+          .select()
+          .single();
+        
+        if (error) {
+          console.error("Supabase error:", error);
+          throw error;
+        }
+        
+        // Map back to our Order type
+        return {
+          id: data.id,
+          userId: data.user_id,
+          items: data.items,
+          shippingAddress: data.shipping_address,
+          billingAddress: data.billing_address,
+          shippingMethod: data.shipping_method,
+          paymentMethod: data.payment_method,
+          subtotal: data.subtotal,
+          tax: data.tax,
+          shipping: data.shipping,
+          total: data.total,
+          status: data.status,
+          createdAt: data.created_at,
+        } as Order;
+      } catch (error) {
+        console.error("Error creating order in Supabase:", error);
+        // Fall back to mock implementation
+      }
+    }
+    
+    // Fallback to mock implementation
+    console.log("Creating order with mock data:", orderData);
     
     // Simulate API call
     return new Promise((resolve) => {
@@ -242,6 +362,25 @@ export function useAuthenticatedApi() {
         return await response.json();
       } catch (error) {
         console.error("API request failed:", error);
+        throw error;
+      }
+    },
+    
+    // New method to get Supabase with auth
+    async getSupabaseWithAuth() {
+      if (!isSignedIn) {
+        throw new Error("User is not authenticated");
+      }
+      
+      try {
+        const token = await getToken();
+        // Set the auth token for Supabase
+        return supabase.auth.setSession({
+          access_token: token as string,
+          refresh_token: '',
+        });
+      } catch (error) {
+        console.error("Failed to set Supabase auth:", error);
         throw error;
       }
     }
