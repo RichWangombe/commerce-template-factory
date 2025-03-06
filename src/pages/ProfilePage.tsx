@@ -13,6 +13,24 @@ import { AuthWrapper } from "@/components/AuthWrapper";
 export const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
 
+  // Mock orders data for the OrdersTab
+  const mockOrders = [
+    {
+      id: "ORD-12345",
+      date: "2023-05-15",
+      status: "delivered",
+      total: 299.99,
+      items: 3
+    },
+    {
+      id: "ORD-12346",
+      date: "2023-06-20",
+      status: "shipped",
+      total: 149.50,
+      items: 2
+    }
+  ];
+
   return (
     <AuthWrapper requireAuth>
       <UserPreferencesProvider>
@@ -39,7 +57,7 @@ export const ProfilePage = () => {
                 </TabsContent>
                 
                 <TabsContent value="orders" className="space-y-6">
-                  <OrdersTab />
+                  <OrdersTab orders={mockOrders} />
                 </TabsContent>
                 
                 <TabsContent value="preferences" className="space-y-6">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
@@ -9,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 export const RecommendedProducts = () => {
-  const { getRecommendedProducts, trackRecommendationView } = useRecommendations();
+  const recommendations = useRecommendations();
   const { preferences } = useUserPreferences();
   const [products, setProducts] = useState<ProductRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,21 +36,26 @@ export const RecommendedProducts = () => {
       }
       
       try {
-        // Get recommendations with user's preferences
-        const count = preferences.recommendationCount || 4;
-        const recommendations = await getRecommendedProducts(count, filter);
-        setProducts(recommendations);
-        
-        // Track that these recommendations were viewed
-        recommendations.forEach(product => {
-          trackRecommendationView({
-            productId: product.id,
-            productName: product.name,
-            recommendationType: product.source.type,
-            confidence: product.source.confidence,
-            timestamp: new Date().toISOString()
+        // Check if these methods exist in the context
+        if (recommendations.getRecommendations && recommendations.trackView) {
+          // Get recommendations with user's preferences
+          const count = preferences.recommendationCount || 4;
+          const recommendedProducts = await recommendations.getRecommendations(count, filter);
+          setProducts(recommendedProducts);
+          
+          // Track that these recommendations were viewed
+          recommendedProducts.forEach(product => {
+            recommendations.trackView({
+              productId: product.id,
+              productName: product.name,
+              recommendationType: product.source.type,
+              confidence: product.source.confidence,
+              timestamp: new Date().toISOString()
+            });
           });
-        });
+        } else {
+          console.error("Required methods not found in RecommendationContext");
+        }
       } catch (error) {
         console.error("Failed to load recommendations:", error);
       } finally {
@@ -60,7 +64,7 @@ export const RecommendedProducts = () => {
     };
 
     loadRecommendations();
-  }, [getRecommendedProducts, trackRecommendationView, preferences]);
+  }, [recommendations, preferences]);
 
   // Helper function to get badge color based on recommendation type
   const getBadgeStyle = (type: string) => {

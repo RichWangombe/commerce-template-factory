@@ -22,7 +22,7 @@ export const PersonalizedSection = ({
   recommendationType,
   limit = 4
 }: PersonalizedSectionProps) => {
-  const { getRecommendedProducts, trackRecommendationView } = useRecommendations();
+  const recommendations = useRecommendations();
   const { preferences } = useUserPreferences();
   const { isSignedIn } = useUser();
   const [products, setProducts] = useState<ProductRecommendation[]>([]);
@@ -33,26 +33,31 @@ export const PersonalizedSection = ({
       setIsLoading(true);
       
       try {
-        // Get recommendations filtered by type
-        const recommendations = await getRecommendedProducts(limit, {
-          types: [recommendationType],
-          categories: preferences.favoriteCategories?.length 
-            ? preferences.favoriteCategories 
-            : undefined,
-        });
-        
-        setProducts(recommendations);
-        
-        // Track that these recommendations were viewed
-        recommendations.forEach(product => {
-          trackRecommendationView({
-            productId: product.id,
-            productName: product.name,
-            recommendationType: product.source.type,
-            confidence: product.source.confidence,
-            timestamp: new Date().toISOString()
+        // Check if these methods exist in the context
+        if (recommendations.getRecommendations && recommendations.trackView) {
+          // Get recommendations filtered by type
+          const recommendedProducts = await recommendations.getRecommendations(limit, {
+            types: [recommendationType],
+            categories: preferences.favoriteCategories?.length 
+              ? preferences.favoriteCategories 
+              : undefined,
           });
-        });
+          
+          setProducts(recommendedProducts);
+          
+          // Track that these recommendations were viewed
+          recommendedProducts.forEach(product => {
+            recommendations.trackView({
+              productId: product.id,
+              productName: product.name,
+              recommendationType: product.source.type,
+              confidence: product.source.confidence,
+              timestamp: new Date().toISOString()
+            });
+          });
+        } else {
+          console.error("Required methods not found in RecommendationContext");
+        }
       } catch (error) {
         console.error(`Failed to load ${recommendationType} recommendations:`, error);
       } finally {
@@ -61,7 +66,7 @@ export const PersonalizedSection = ({
     };
 
     loadRecommendations();
-  }, [getRecommendedProducts, trackRecommendationView, preferences, recommendationType, limit]);
+  }, [recommendations, preferences, recommendationType, limit]);
 
   // Don't show section if no products and user has disabled this recommendation type
   const shouldShowType = () => {
