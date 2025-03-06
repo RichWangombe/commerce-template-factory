@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
 import NotFound from "./pages/NotFound";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -52,6 +53,14 @@ const App = () => (
                   element={
                     <AuthWrapper requireAuth>
                       <ProfilePage />
+                    </AuthWrapper>
+                  } 
+                />
+                <Route 
+                  path="/order/:orderId" 
+                  element={
+                    <AuthWrapper requireAuth>
+                      <OrderDetailPage />
                     </AuthWrapper>
                   } 
                 />

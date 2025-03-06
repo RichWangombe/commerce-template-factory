@@ -11,6 +11,116 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { OrdersList } from "@/components/order/OrdersList";
+import { Order } from "@/types/checkout";
+
+// Mock data for orders - in a real app, this would come from an API
+const mockOrders: Order[] = [
+  {
+    id: "ORD123456789",
+    userId: "user123",
+    items: [
+      {
+        id: 1,
+        name: "Wireless Headphones",
+        price: 79.99,
+        quantity: 1,
+        image: "/placeholder.svg",
+        variant: "Black",
+      },
+      {
+        id: 2,
+        name: "Smart Watch",
+        price: 129.99,
+        quantity: 1,
+        image: "/placeholder.svg",
+      },
+    ],
+    shippingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    billingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    shippingMethod: {
+      id: "express",
+      name: "Express Shipping",
+      description: "Delivered in 2-3 business days",
+      price: 12.99,
+      estimatedDays: "2-3 business days",
+    },
+    paymentMethod: "card",
+    subtotal: 209.98,
+    tax: 17.85,
+    shipping: 12.99,
+    total: 240.82,
+    status: "shipped",
+    createdAt: "2023-09-15T10:30:00Z",
+    trackingNumber: "TRK9876543210",
+    estimatedDelivery: "September 18, 2023",
+  },
+  {
+    id: "ORD987654321",
+    userId: "user123",
+    items: [
+      {
+        id: 3,
+        name: "Bluetooth Speaker",
+        price: 49.99,
+        quantity: 1,
+        image: "/placeholder.svg",
+      },
+    ],
+    shippingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    billingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    shippingMethod: {
+      id: "standard",
+      name: "Standard Shipping",
+      description: "Delivered in 5-7 business days",
+      price: 4.99,
+      estimatedDays: "5-7 business days",
+    },
+    paymentMethod: "card",
+    subtotal: 49.99,
+    tax: 4.25,
+    shipping: 4.99,
+    total: 59.23,
+    status: "delivered",
+    createdAt: "2023-08-20T14:45:00Z",
+  },
+];
 
 export default function ProfilePage() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -157,18 +267,11 @@ export default function ProfilePage() {
                   <CardHeader>
                     <CardTitle>Order History</CardTitle>
                     <CardDescription>
-                      View your past orders and their status.
+                      View your past orders and track shipments.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="rounded-md border">
-                      <div className="p-8 text-center">
-                        <h3 className="text-lg font-medium">No orders yet</h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          When you place orders, they will appear here.
-                        </p>
-                      </div>
-                    </div>
+                    <OrdersList orders={mockOrders} />
                   </CardContent>
                 </Card>
               </TabsContent>

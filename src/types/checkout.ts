@@ -41,6 +41,16 @@ export interface Order {
   total: number;
   status: OrderStatus;
   createdAt: string;
+  trackingNumber?: string;
+  estimatedDelivery?: string;
+  statusHistory?: OrderStatusHistory[];
+}
+
+export interface OrderStatusHistory {
+  status: OrderStatus;
+  timestamp: string;
+  location?: string;
+  description?: string;
 }
 
 export interface OrderItem {
