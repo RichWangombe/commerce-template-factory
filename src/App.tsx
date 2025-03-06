@@ -28,7 +28,8 @@ import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminRecommendationsPage from '@/pages/admin/AdminRecommendationsPage';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+// Use a dummy key for development if the environment variable is not set
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dummy-key-for-development';
 
 function App() {
   return (
