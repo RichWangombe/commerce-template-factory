@@ -1,11 +1,22 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductDetails } from "./ProductDetails";
-import { ProductSpecifications } from "./ProductSpecifications";
 import { ReviewsList } from "@/components/ReviewsList";
 import { ReviewForm } from "@/components/ReviewForm";
 import { Review } from "@/types/review";
+
+interface ProductSpecificationsProps {
+  product: {
+    id: string;
+    brand: string;
+    sku: string;
+    category: string;
+    description: string;
+    features: string[];
+    colors: string[];
+  };
+  specs?: Record<string, string>;
+}
 
 interface ProductTabsProps {
   product: {
@@ -18,45 +29,77 @@ interface ProductTabsProps {
     colors: string[];
   };
   reviews: Review[];
-  specifications?: any;
-  productId?: string;
-  productName?: string;
+  productId: string;
+  specifications?: Record<string, string>;
 }
 
-export const ProductTabs = ({ product, reviews, specifications, productId, productName }: ProductTabsProps) => {
+export const ProductTabs = ({ 
+  product, 
+  reviews, 
+  productId,
+  specifications
+}: ProductTabsProps) => {
   const [activeTab, setActiveTab] = useState("description");
-  
+
   return (
-    <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className="w-full justify-start border-b pb-0 mb-6">
-        <TabsTrigger value="description" className="pb-3 rounded-none">Description & Features</TabsTrigger>
-        <TabsTrigger value="specs" className="pb-3 rounded-none">Specifications</TabsTrigger>
-        <TabsTrigger value="reviews" className="pb-3 rounded-none">
-          Reviews ({reviews.length})
-        </TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="description" className="pt-4">
-        <ProductDetails product={product} />
-      </TabsContent>
-      
-      <TabsContent value="specs" className="pt-4">
-        <ProductSpecifications 
-          product={product} 
-          specifications={specifications}
-        />
-      </TabsContent>
-      
-      <TabsContent value="reviews" className="pt-4">
-        <div className="space-y-12">
-          <ReviewsList 
-            reviews={reviews} 
-            productId={productId || product.id} 
-            productName={productName}
-          />
-          <ReviewForm productId={productId || product.id} />
-        </div>
-      </TabsContent>
-    </Tabs>
+    <div className="mt-16">
+      <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="description">Description</TabsTrigger>
+          <TabsTrigger value="specifications">Specifications</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
+        </TabsList>
+        <TabsContent value="description" className="mt-6">
+          <div className="prose max-w-none">
+            <p className="text-md text-gray-600">{product.description}</p>
+            
+            {product.features.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium">Key Features</h3>
+                <ul className="mt-2 list-disc pl-5 space-y-1">
+                  {product.features.map((feature, index) => (
+                    <li key={index} className="text-gray-600">{feature}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="specifications" className="mt-6">
+          <div className="bg-white rounded-lg divide-y">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4">
+                <p className="text-sm font-medium">Brand</p>
+                <p className="text-gray-600">{product.brand}</p>
+              </div>
+              <div className="p-4">
+                <p className="text-sm font-medium">SKU</p>
+                <p className="text-gray-600">{product.sku}</p>
+              </div>
+              <div className="p-4">
+                <p className="text-sm font-medium">Category</p>
+                <p className="text-gray-600">{product.category}</p>
+              </div>
+              
+              {specifications && Object.entries(specifications).map(([key, value]) => (
+                <div key={key} className="p-4">
+                  <p className="text-sm font-medium">{key}</p>
+                  <p className="text-gray-600">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="reviews" className="mt-6">
+          <ReviewsList reviews={reviews} productId={productId} />
+          <div className="mt-8">
+            <h3 className="text-lg font-medium mb-4">Write a Review</h3>
+            <ReviewForm productId={productId} />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };

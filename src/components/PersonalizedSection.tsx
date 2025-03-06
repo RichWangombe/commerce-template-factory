@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { useUser } from "@clerk/clerk-react";
 import { ProductRecommendation } from "@/types/recommendation";

@@ -10,7 +10,7 @@ import { ProductTabs } from "@/components/product/ProductTabs";
 import { Breadcrumb } from "@/components/product/Breadcrumb";
 import { ProductNotFound } from "@/components/product/ProductNotFound";
 import { mockProducts } from "@/data/mockProducts";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { useToast } from "@/hooks/use-toast";
 
@@ -90,13 +90,11 @@ const ProductDetailPage = () => {
           <Breadcrumb 
             category={product.category} 
             productName={product.name}
-            categoryId={product.categoryId}
           />
           
           <div className="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-2">
             <ProductImages 
               images={[product.image]} 
-              productName={product.name} 
             />
             
             <ProductInfo 
@@ -125,9 +123,8 @@ const ProductDetailPage = () => {
               colors: product.colors || ["Default"]
             }}
             reviews={[]}
-            specifications={product.specifications}
             productId={product.id.toString()}
-            productName={product.name}
+            specifications={product.specifications}
           />
           
           <RecommendationSection 

@@ -1,6 +1,7 @@
+
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 
 interface ProductViewTrackerProps {
   productId?: number;

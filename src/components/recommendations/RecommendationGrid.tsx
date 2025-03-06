@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ProductCard";
 import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 
 interface RecommendationGridProps {
   filteredProducts: ProductRecommendation[];

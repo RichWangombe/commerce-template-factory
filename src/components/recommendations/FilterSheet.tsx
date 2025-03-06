@@ -15,7 +15,7 @@ import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 
 export const FilterSheet: React.FC = () => {
   const { userPreferences, updateUserPreferences } = useRecommendations();

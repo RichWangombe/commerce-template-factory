@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";

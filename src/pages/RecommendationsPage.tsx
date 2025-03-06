@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useRecommendations } from "@/contexts/recommendation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { RecommendationFilter } from "@/types/recommendation";
