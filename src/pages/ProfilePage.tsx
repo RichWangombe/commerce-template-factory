@@ -3,15 +3,15 @@ import { useState } from "react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { OrdersList } from "@/components/order/OrdersList";
+import { Spinner } from "@/components/ui/spinner";
+import { ProfileTab } from "@/components/profile/ProfileTab";
+import { OrdersTab } from "@/components/profile/OrdersTab";
+import { SettingsTab } from "@/components/profile/SettingsTab";
 import { Order } from "@/types/checkout";
 
 // Mock data for orders - in a real app, this would come from an API
@@ -72,6 +72,7 @@ const mockOrders: Order[] = [
     createdAt: "2023-09-15T10:30:00Z",
     trackingNumber: "TRK9876543210",
     estimatedDelivery: "September 18, 2023",
+    notes: "Please leave package at the front door.",
   },
   {
     id: "ORD987654321",
@@ -119,6 +120,87 @@ const mockOrders: Order[] = [
     total: 59.23,
     status: "delivered",
     createdAt: "2023-08-20T14:45:00Z",
+    statusHistory: [
+      {
+        status: "pending",
+        timestamp: "2023-08-20T14:45:00Z",
+        description: "Order received",
+      },
+      {
+        status: "processing",
+        timestamp: "2023-08-20T15:30:00Z",
+        description: "Payment confirmed",
+      },
+      {
+        status: "shipped",
+        timestamp: "2023-08-21T09:15:00Z",
+        location: "Distribution Center",
+        description: "Package shipped",
+      },
+      {
+        status: "delivered",
+        timestamp: "2023-08-24T13:20:00Z",
+        location: "Delivery Address",
+        description: "Package delivered successfully",
+      },
+    ],
+  },
+  {
+    id: "ORD543219876",
+    userId: "user123",
+    items: [
+      {
+        id: 4,
+        name: "Coffee Maker",
+        price: 89.99,
+        quantity: 1,
+        image: "/placeholder.svg",
+      },
+      {
+        id: 5,
+        name: "Coffee Beans",
+        price: 14.99,
+        quantity: 2,
+        image: "/placeholder.svg",
+        variant: "Dark Roast",
+      },
+    ],
+    shippingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    billingAddress: {
+      firstName: "John",
+      lastName: "Doe",
+      address1: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "12345",
+      country: "United States",
+      phone: "555-123-4567",
+    },
+    shippingMethod: {
+      id: "standard",
+      name: "Standard Shipping",
+      description: "Delivered in 5-7 business days",
+      price: 4.99,
+      estimatedDays: "5-7 business days",
+    },
+    paymentMethod: "card",
+    subtotal: 119.97,
+    tax: 10.20,
+    shipping: 4.99,
+    total: 135.16,
+    status: "cancelled",
+    createdAt: "2023-07-05T09:22:00Z",
+    refundStatus: "full",
+    refundAmount: 135.16,
   },
 ];
 
@@ -126,46 +208,7 @@ export default function ProfilePage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useAuth();
   const { toast } = useToast();
-  const [isUpdating, setIsUpdating] = useState(false);
   
-  // Form state
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-
-  if (!isLoaded) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isSignedIn) {
-    return <Navigate to="/sign-in" replace />;
-  }
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      setIsUpdating(true);
-      
-      await user.update({
-        firstName,
-        lastName,
-      });
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -188,6 +231,18 @@ export default function ProfilePage() {
     const last = user?.lastName?.[0] || "";
     return (first + last).toUpperCase();
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -219,107 +274,15 @@ export default function ProfilePage() {
               </TabsList>
               
               <TabsContent value="profile" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>
-                      Update your account details here.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleUpdateProfile} className="space-y-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstName">First name</Label>
-                          <Input
-                            id="firstName"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastName">Last name</Label>
-                          <Input
-                            id="lastName"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          value={user.primaryEmailAddress?.emailAddress || ""}
-                          disabled
-                        />
-                      </div>
-                      <Button type="submit" disabled={isUpdating}>
-                        {isUpdating ? "Updating..." : "Update Profile"}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
+                <ProfileTab />
               </TabsContent>
               
               <TabsContent value="orders" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Order History</CardTitle>
-                    <CardDescription>
-                      View your past orders and track shipments.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <OrdersList orders={mockOrders} />
-                  </CardContent>
-                </Card>
+                <OrdersTab orders={mockOrders} />
               </TabsContent>
               
               <TabsContent value="settings" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Account Settings</CardTitle>
-                    <CardDescription>
-                      Manage your account settings and preferences.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="language">Language</Label>
-                      <select
-                        id="language"
-                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <option value="en">English</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                      </select>
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <h3 className="text-base font-medium">Marketing emails</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Receive emails about new products, features, and more.
-                        </p>
-                      </div>
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input
-                          type="checkbox"
-                          value=""
-                          className="peer sr-only"
-                          defaultChecked
-                        />
-                        <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none dark:border-gray-600 dark:bg-gray-700"></div>
-                      </label>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full text-destructive">
-                      Delete Account
-                    </Button>
-                  </CardFooter>
-                </Card>
+                <SettingsTab />
               </TabsContent>
             </Tabs>
           </div>

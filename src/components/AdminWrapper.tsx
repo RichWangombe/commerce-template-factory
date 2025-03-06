@@ -2,6 +2,8 @@
 import { useUser } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 // In a real app, you would check if the user has admin role
 // by fetching this information from your backend
@@ -18,15 +20,25 @@ interface AdminWrapperProps {
 export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
   const { isLoaded, isSignedIn, user } = useUser();
 
+  useEffect(() => {
+    if (isLoaded && isSignedIn && !isAdmin(user.id)) {
+      toast.error("You don't have permission to access the admin area.");
+    }
+  }, [isLoaded, isSignedIn, user?.id]);
+
   if (!isLoaded) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner size="lg" />
+      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Spinner size="lg" />
+          <p className="mt-4 text-muted-foreground">Loading admin panel...</p>
+        </div>
       </div>
     );
   }
 
   if (!isSignedIn) {
+    toast.error("Please sign in to access the admin area.");
     return <Navigate to="/sign-in" replace />;
   }
 

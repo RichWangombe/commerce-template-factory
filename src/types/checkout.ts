@@ -44,6 +44,10 @@ export interface Order {
   trackingNumber?: string;
   estimatedDelivery?: string;
   statusHistory?: OrderStatusHistory[];
+  notes?: string;
+  refundStatus?: 'none' | 'partial' | 'full';
+  refundAmount?: number;
+  invoiceUrl?: string;
 }
 
 export interface OrderStatusHistory {

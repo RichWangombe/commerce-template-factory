@@ -5,11 +5,12 @@ import { Order } from "@/types/checkout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Package } from "lucide-react";
+import { ArrowRight, Package, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrdersListProps {
   orders: Order[];
+  onViewDetails?: (order: Order) => void;
 }
 
 const getStatusColor = (status: Order["status"]) => {
@@ -29,7 +30,7 @@ const getStatusColor = (status: Order["status"]) => {
   }
 };
 
-export const OrdersList: React.FC<OrdersListProps> = ({ orders }) => {
+export const OrdersList: React.FC<OrdersListProps> = ({ orders, onViewDetails }) => {
   if (orders.length === 0) {
     return (
       <div className="rounded-md border p-8 text-center">
@@ -106,15 +107,26 @@ export const OrdersList: React.FC<OrdersListProps> = ({ orders }) => {
               )}
               
               <div className="mt-4 flex justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                >
-                  <Link to={`/order/${order.id}`}>
-                    View Order Details
-                  </Link>
-                </Button>
+                {onViewDetails ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewDetails(order)}
+                  >
+                    View Details
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <Link to={`/order/${order.id}`}>
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View Order
+                    </Link>
+                  </Button>
+                )}
                 
                 {order.status === "shipped" && (
                   <Button
