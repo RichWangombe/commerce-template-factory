@@ -139,7 +139,7 @@ export const RecommendationProvider: React.FC<{ children: React.ReactNode }> = (
       .map(p => ({
         ...p,
         source: {
-          type: 'similar',
+          type: 'similar' as const,
           confidence: 0.85,
         }
       }))
