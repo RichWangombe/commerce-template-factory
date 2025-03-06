@@ -17,11 +17,17 @@ import SearchPage from "./pages/SearchPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProfilePage from "./pages/ProfilePage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminProductFormPage from "./pages/admin/AdminProductFormPage";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ReviewProvider } from "./contexts/ReviewContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { AuthWrapper } from "./components/AuthWrapper";
+import { AdminWrapper } from "./components/AdminWrapper";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +77,56 @@ const App = () => (
                       <OrderConfirmationPage />
                     </AuthWrapper>
                   } 
+                />
+                
+                {/* Admin routes */}
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminWrapper>
+                      <AdminDashboardPage />
+                    </AdminWrapper>
+                  }
+                />
+                <Route
+                  path="/admin/products"
+                  element={
+                    <AdminWrapper>
+                      <AdminProductsPage />
+                    </AdminWrapper>
+                  }
+                />
+                <Route
+                  path="/admin/products/new"
+                  element={
+                    <AdminWrapper>
+                      <AdminProductFormPage />
+                    </AdminWrapper>
+                  }
+                />
+                <Route
+                  path="/admin/products/edit/:productId"
+                  element={
+                    <AdminWrapper>
+                      <AdminProductFormPage />
+                    </AdminWrapper>
+                  }
+                />
+                <Route
+                  path="/admin/orders"
+                  element={
+                    <AdminWrapper>
+                      <AdminOrdersPage />
+                    </AdminWrapper>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminWrapper>
+                      <AdminUsersPage />
+                    </AdminWrapper>
+                  }
                 />
                 
                 {/* Catch-all route */}
