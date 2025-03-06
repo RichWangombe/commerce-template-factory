@@ -15,7 +15,7 @@ import { ProductViewTracker } from "@/components/ProductViewTracker";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { trackProductView } = useRecommendations();
+  const { recordProductView } = useRecommendations();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +31,8 @@ const ProductDetailPage = () => {
       if (foundProduct) {
         setProduct(foundProduct);
         // Track product view for recommendation engine
-        if (trackProductView) {
-          trackProductView({
-            productId: foundProduct.id,
-            name: foundProduct.name,
-            price: foundProduct.price,
-            category: foundProduct.category || "",
-          });
+        if (recordProductView) {
+          recordProductView(foundProduct.id);
         }
       } else {
         setError("Product not found");
@@ -48,7 +43,7 @@ const ProductDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, trackProductView]);
+  }, [id, recordProductView]);
   
   // Show loading state
   if (loading) {
@@ -68,7 +63,7 @@ const ProductDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <ProductNotFound message={error || "Product not found"} />
+        <ProductNotFound />
         <Footer />
       </div>
     );
@@ -81,44 +76,51 @@ const ProductDetailPage = () => {
         <div className="container mx-auto px-4 py-8 md:px-6">
           <Breadcrumb 
             category={product.category} 
-            productName={product.name} 
-            categoryId={1}
+            productName={product.name}
           />
           
           <div className="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-2">
             <ProductImages 
               images={[product.image]} 
-              productName={product.name} 
+              name={product.name} 
             />
             
             <ProductInfo 
-              product={product}
-              productId={product.id} 
-              name={product.name}
-              price={product.price}
-              description={product.description || "No description available."}
-              inStock={true}
-              discountPercentage={product.discount}
-              isNew={product.isNew}
-              sku={`SKU-${product.id}`}
-              category={product.category || "Uncategorized"}
+              product={{
+                id: product.id.toString(),
+                name: product.name,
+                brand: product.brand || "Brand",
+                price: product.price,
+                originalPrice: product.originalPrice,
+                rating: product.rating || 4.5,
+                reviewCount: product.reviewCount || 0,
+                stock: product.stock || 10,
+                colors: product.colors || ["Default"]
+              }}
             />
           </div>
           
           <ProductTabs 
-            specifications={product.specifications || []}
-            productId={product.id}
-            productName={product.name}
+            product={{
+              id: product.id.toString(),
+              brand: product.brand || "Brand",
+              sku: `SKU-${product.id}`,
+              category: product.category || "Uncategorized",
+              description: product.description || "No description available.",
+              features: product.features || [],
+              colors: product.colors || ["Default"]
+            }}
+            reviews={[]}
           />
           
           <RecommendationSection 
-            productId={product.id} 
             title="You Might Also Like" 
+            productId={product.id}
             showViewAll={false}
           />
         </div>
       </main>
-      <ProductViewTracker productId={product.id} />
+      <ProductViewTracker />
       <Footer />
     </div>
   );
