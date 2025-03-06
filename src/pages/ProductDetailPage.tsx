@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -16,8 +15,9 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
-// Mock product data - in a real app this would come from an API
 const mockProducts = [
   {
     id: "1",
@@ -82,8 +82,9 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   
-  // Find the product by ID
   const product = mockProducts.find(product => product.id === id);
   
   if (!product) {
@@ -101,7 +102,6 @@ const ProductDetailPage = () => {
     );
   }
   
-  // Set default color if not already set
   if (selectedColor === "" && product.colors.length > 0) {
     setSelectedColor(product.colors[0]);
   }
@@ -119,15 +119,32 @@ const ProductDetailPage = () => {
   };
   
   const handleAddToCart = () => {
-    toast.success(`Added ${quantity} ${product.name} to cart`);
-    // In a real app, this would dispatch to your cart state manager or context
+    addItem({
+      id: Number(product.id),
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      quantity,
+    });
   };
   
-  const handleAddToWishlist = () => {
-    toast.success(`${product.name} added to wishlist`);
-    // In a real app, this would dispatch to your wishlist state manager or context
+  const handleToggleWishlist = () => {
+    const productId = Number(product.id);
+    
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
+    } else {
+      addToWishlist({
+        id: productId,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        category: product.category,
+      });
+    }
   };
   
+  const isFavorite = isInWishlist(Number(product.id));
   const discountPercentage = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   
   return (
@@ -136,7 +153,6 @@ const ProductDetailPage = () => {
       
       <main className="flex-1 py-8 md:py-12 animate-fade-in">
         <div className="container px-4 md:px-6">
-          {/* Breadcrumb */}
           <div className="mb-6">
             <div className="flex items-center text-sm text-neutral-500">
               <Link to="/" className="hover:text-neutral-900">Home</Link>
@@ -152,7 +168,6 @@ const ProductDetailPage = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Product Images */}
             <div className="space-y-4">
               <div className="aspect-square rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 relative">
                 <img
@@ -183,7 +198,6 @@ const ProductDetailPage = () => {
               </div>
             </div>
             
-            {/* Product Details */}
             <div className="space-y-6">
               <div>
                 <h1 className="text-3xl font-bold text-neutral-900">{product.name}</h1>
@@ -283,11 +297,11 @@ const ProductDetailPage = () => {
                   Add to Cart
                 </Button>
                 <Button 
-                  onClick={handleAddToWishlist}
+                  onClick={handleToggleWishlist}
                   variant="outline"
-                  className="button-press"
+                  className={`button-press ${isFavorite ? 'bg-red-50 text-red-600 border-red-200' : ''}`}
                 >
-                  <Heart className="h-4 w-4" />
+                  <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
                 <Button 
                   variant="outline"
@@ -309,7 +323,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
           
-          {/* Product Description and Features */}
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div>
@@ -356,7 +369,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
           
-          {/* Related Products */}
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -389,7 +401,6 @@ const ProductDetailPage = () => {
             </div>
           </div>
           
-          {/* Back to Category Button */}
           <div className="mt-12">
             <Link
               to={`/category/${product.category.toLowerCase()}`}

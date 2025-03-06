@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 export interface ProductCardProps {
   id: number;
@@ -25,8 +26,9 @@ export const ProductCard = ({
   discount = 0,
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const isFavorite = isInWishlist(id);
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -51,6 +53,23 @@ export const ProductCard = ({
       image,
       quantity: 1
     });
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isFavorite) {
+      removeFromWishlist(id);
+    } else {
+      addToWishlist({
+        id,
+        name,
+        price,
+        image,
+        category
+      });
+    }
   };
 
   return (
@@ -119,12 +138,14 @@ export const ProductCard = ({
       >
         <button 
           className="rounded-full p-2 transition-colors hover:bg-neutral-100"
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={handleToggleWishlist}
         >
           <Heart 
             className={cn("h-5 w-5", isFavorite ? "fill-red-500 text-red-500" : "text-neutral-500")} 
           />
-          <span className="sr-only">Add to favorites</span>
+          <span className="sr-only">
+            {isFavorite ? "Remove from favorites" : "Add to favorites"}
+          </span>
         </button>
         
         <button 

@@ -1,12 +1,14 @@
 
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, User, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { Badge } from "@/components/ui/badge";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 
 export const Navbar = () => {
   const { totalItems, toggleCart } = useCart();
+  const { state: wishlistState } = useWishlist();
 
   return (
     <header className="w-full border-b border-neutral-100">
@@ -48,6 +50,20 @@ export const Navbar = () => {
               <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </button>
+            
+            <Link 
+              to="/wishlist" 
+              className="relative rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistState.items.length > 0 && (
+                <Badge variant="destructive" className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs">
+                  {wishlistState.items.length}
+                </Badge>
+              )}
+              <span className="sr-only">Wishlist ({wishlistState.items.length} items)</span>
+            </Link>
+            
             <Link 
               to="/cart" 
               className="relative rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"

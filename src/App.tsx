@@ -10,10 +10,12 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import NotFound from "./pages/NotFound";
 import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProfilePage from "./pages/ProfilePage";
 import { CartProvider } from "./contexts/CartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { AuthWrapper } from "./components/AuthWrapper";
 
@@ -23,41 +25,44 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <CartDrawer />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/category/:categoryId" element={<CategoryPage />} />
-            <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/sign-in" element={<SignInPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/profile" 
-              element={
-                <AuthWrapper requireAuth>
-                  <ProfilePage />
-                </AuthWrapper>
-              } 
-            />
-            <Route 
-              path="/order-confirmation" 
-              element={
-                <AuthWrapper requireAuth>
-                  <OrderConfirmationPage />
-                </AuthWrapper>
-              } 
-            />
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <WishlistProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <CartDrawer />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/category/:categoryId" element={<CategoryPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/sign-in" element={<SignInPage />} />
+              <Route path="/sign-up" element={<SignUpPage />} />
+              
+              {/* Protected routes */}
+              <Route 
+                path="/profile" 
+                element={
+                  <AuthWrapper requireAuth>
+                    <ProfilePage />
+                  </AuthWrapper>
+                } 
+              />
+              <Route 
+                path="/order-confirmation" 
+                element={
+                  <AuthWrapper requireAuth>
+                    <OrderConfirmationPage />
+                  </AuthWrapper>
+                } 
+              />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </WishlistProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
