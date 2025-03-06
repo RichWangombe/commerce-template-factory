@@ -23,6 +23,7 @@ import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminProductFormPage from "./pages/admin/AdminProductFormPage";
+import AdminRecommendationsPage from "./pages/admin/AdminRecommendationsPage";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ReviewProvider } from "./contexts/ReviewContext";
@@ -126,6 +127,14 @@ const App = () => (
                     element={
                       <AdminWrapper>
                         <AdminUsersPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/recommendations"
+                    element={
+                      <AdminWrapper>
+                        <AdminRecommendationsPage />
                       </AdminWrapper>
                     }
                   />

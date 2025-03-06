@@ -8,7 +8,8 @@ import {
   Users, 
   Settings, 
   LogOut, 
-  ChevronRight
+  ChevronRight,
+  LineChart
 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +35,11 @@ const sidebarLinks = [
     icon: Users, 
     label: "Users", 
     href: "/admin/users" 
+  },
+  { 
+    icon: LineChart, 
+    label: "Recommendations", 
+    href: "/admin/recommendations" 
   },
   { 
     icon: Settings, 

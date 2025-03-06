@@ -18,8 +18,19 @@ export interface ProductRecommendation {
 
 export type RecommendationClickEvent = {
   productId: number;
+  productName?: string;
   recommendationType: string;
+  confidence?: number;
   timestamp: string;
+};
+
+export type RecommendationConversionEvent = {
+  productId: number;
+  productName?: string;
+  recommendationType: string;
+  confidence?: number;
+  timestamp: string;
+  orderValue?: number;
 };
 
 export type RecommendationFilter = {
@@ -32,4 +43,11 @@ export interface UserPreferences {
   favoriteCategories?: string[];
   preferredPriceRange?: [number, number];
   dislikedProductIds?: number[];
+}
+
+export interface RecommendationAnalytics {
+  clicks: RecommendationClickEvent[];
+  conversions: RecommendationConversionEvent[];
+  conversionRate: number;
+  mostEffectiveType: string;
 }
