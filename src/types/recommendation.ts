@@ -43,6 +43,11 @@ export interface UserPreferences {
   favoriteCategories?: string[];
   preferredPriceRange?: [number, number];
   dislikedProductIds?: number[];
+  showRecentlyViewed?: boolean;
+  showTrending?: boolean;
+  showSimilar?: boolean;
+  showSeasonalOffers?: boolean;
+  recommendationCount?: number;
 }
 
 export interface RecommendationAnalytics {

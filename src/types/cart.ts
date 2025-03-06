@@ -9,7 +9,7 @@ export type CartItem = {
   variant?: string;
 };
 
-export type UserPreferences = {
+export type CartPreferences = {
   darkMode?: boolean;
   currency?: string;
   notificationEnabled?: boolean;
@@ -19,7 +19,7 @@ export type UserPreferences = {
 export type CartState = {
   items: CartItem[];
   isOpen: boolean;
-  userPreferences: UserPreferences;
+  userPreferences: CartPreferences;
 };
 
 export type CartAction =
@@ -28,4 +28,4 @@ export type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART'; payload?: boolean }
-  | { type: 'UPDATE_PREFERENCES'; payload: Partial<UserPreferences> };
+  | { type: 'UPDATE_PREFERENCES'; payload: Partial<CartPreferences> };

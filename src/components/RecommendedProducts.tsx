@@ -1,99 +1,154 @@
 
-import { useRecommendations } from "@/contexts/RecommendationContext";
-import { ProductCard } from "@/components/ProductCard";
-import { useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { ProductCard } from "@/components/ProductCard";
+import { useRecommendations } from "@/contexts/RecommendationContext";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
+import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
-interface RecommendedProductsProps {
-  productId?: number;
-  title?: string;
-  showViewAll?: boolean;
-}
+export const RecommendedProducts = () => {
+  const { getRecommendedProducts, trackRecommendationView } = useRecommendations();
+  const { preferences } = useUserPreferences();
+  const [products, setProducts] = useState<ProductRecommendation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export const RecommendedProducts: React.FC<RecommendedProductsProps> = ({
-  productId,
-  title = "Recommended For You",
-  showViewAll = true,
-}) => {
-  const { 
-    getRecommendationsForProduct, 
-    recommendedProducts, 
-    getPersonalizedRecommendations,
-    trackRecommendationClick 
-  } = useRecommendations();
-
-  // Determine which recommendations to show based on props
-  const products = productId 
-    ? getRecommendationsForProduct(productId)
-    : recommendedProducts;
-
-  // If we have a specific product ID, re-run personalized recommendations
-  // once when the component mounts to ensure fresh data
   useEffect(() => {
-    if (!productId) {
-      getPersonalizedRecommendations();
-    }
-  }, [productId]);
+    const loadRecommendations = async () => {
+      setIsLoading(true);
+      
+      // Build filter based on user preferences
+      const filter: RecommendationFilter = {
+        categories: preferences.favoriteCategories?.length 
+          ? preferences.favoriteCategories 
+          : undefined,
+      };
+      
+      // Filter recommendation types based on preferences
+      const enabledTypes: string[] = [];
+      if (preferences.showRecentlyViewed) enabledTypes.push('viewed');
+      if (preferences.showSimilar) enabledTypes.push('similar');
+      if (preferences.showTrending) enabledTypes.push('trending');
+      if (preferences.showSeasonalOffers) enabledTypes.push('seasonal');
+      
+      if (enabledTypes.length) {
+        filter.types = enabledTypes;
+      }
+      
+      try {
+        // Get recommendations with user's preferences
+        const count = preferences.recommendationCount || 4;
+        const recommendations = await getRecommendedProducts(count, filter);
+        setProducts(recommendations);
+        
+        // Track that these recommendations were viewed
+        recommendations.forEach(product => {
+          trackRecommendationView({
+            productId: product.id,
+            productName: product.name,
+            recommendationType: product.source.type,
+            confidence: product.source.confidence,
+            timestamp: new Date().toISOString()
+          });
+        });
+      } catch (error) {
+        console.error("Failed to load recommendations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (products.length === 0) {
-    return null;
-  }
+    loadRecommendations();
+  }, [getRecommendedProducts, trackRecommendationView, preferences]);
 
-  // Generate a descriptive explanation for each recommendation type
-  const getRecommendationLabel = (type: string): string => {
+  // Helper function to get badge color based on recommendation type
+  const getBadgeStyle = (type: string) => {
     switch (type) {
       case 'viewed':
-        return 'Based on your history';
+        return 'bg-blue-100 text-blue-800';
       case 'purchased':
-        return 'Based on purchases';
+        return 'bg-green-100 text-green-800';
       case 'similar':
-        return 'Similar product';
+        return 'bg-purple-100 text-purple-800';
       case 'trending':
-        return 'Trending';
+        return 'bg-amber-100 text-amber-800';
       case 'collaborative':
-        return 'Others also bought';
+        return 'bg-indigo-100 text-indigo-800';
+      case 'seasonal':
+        return 'bg-red-100 text-red-800';
       default:
-        return '';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  return (
-    <section className="py-12 bg-white">
-      <div className="container px-4 md:px-6 mx-auto">
-        <div className="mb-10 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {showViewAll && (
-            <Link 
-              to="/recommendations" 
-              className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-            >
-              View all <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          )}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 fade-in-group">
-          {products.map((product) => (
-            <div key={product.id} className="relative">
-              {/* Enhanced labels for recommendation types */}
-              <div className="absolute right-2 top-2 z-10 bg-white/90 backdrop-blur-sm text-black text-xs rounded-full px-2 py-1 shadow-sm border">
-                {getRecommendationLabel(product.source.type)}
-              </div>
-              <div onClick={() => trackRecommendationClick(product)}>
-                <ProductCard
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  image={product.image}
-                  category={product.category}
-                  isNew={product.isNew}
-                  discount={product.discount}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+  const getRecommendationLabel = (type: string) => {
+    switch (type) {
+      case 'viewed':
+        return 'Recently Viewed';
+      case 'purchased':
+        return 'Based on Purchase History';
+      case 'similar':
+        return 'Similar to Viewed Items';
+      case 'trending':
+        return 'Trending Now';
+      case 'collaborative':
+        return 'Others Also Bought';
+      case 'seasonal':
+        return 'Seasonal Recommendation';
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+            <Skeleton className="aspect-square rounded-lg" />
+            <Skeleton className="mt-4 h-4 w-2/3" />
+            <Skeleton className="mt-2 h-4 w-1/2" />
+          </div>
+        ))}
       </div>
-    </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="rounded-lg border border-neutral-200 bg-white p-8 text-center">
+        <p className="text-neutral-500">No recommendations available. Continue browsing to get personalized recommendations.</p>
+        <Link to="/products" className="mt-4 inline-block rounded-full bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          Browse Products
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 fade-in-group">
+      {products.map((product) => (
+        <div key={product.id} className="relative">
+          <Badge 
+            variant="outline" 
+            className={`absolute left-2 top-2 z-10 ${getBadgeStyle(product.source.type)}`}
+          >
+            {getRecommendationLabel(product.source.type)}
+          </Badge>
+          <ProductCard
+            id={product.id}
+            name={product.name}
+            price={product.price}
+            image={product.image}
+            category={product.category}
+            isNew={product.isNew}
+            discount={product.discount}
+          />
+        </div>
+      ))}
+    </div>
   );
 };
+
+export default RecommendedProducts;

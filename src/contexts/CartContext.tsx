@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useReducer } from 'react';
 import { toast } from 'sonner';
-import { CartState, CartItem, UserPreferences } from '@/types/cart';
+import { CartState, CartItem, CartPreferences } from '@/types/cart';
 import { cartReducer, initialCartState } from '@/reducers/cartReducer';
 import { useCartStorage } from '@/hooks/useCartStorage';
 
@@ -12,7 +12,7 @@ type CartContextType = {
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
   toggleCart: (isOpen?: boolean) => void;
-  updatePreferences: (preferences: Partial<UserPreferences>) => void;
+  updatePreferences: (preferences: Partial<CartPreferences>) => void;
   totalItems: number;
   subtotal: number;
 };
@@ -48,7 +48,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'TOGGLE_CART', payload: isOpen });
   };
 
-  const updatePreferences = (preferences: Partial<UserPreferences>) => {
+  const updatePreferences = (preferences: Partial<CartPreferences>) => {
     dispatch({ type: 'UPDATE_PREFERENCES', payload: preferences });
     toast.success('Preferences updated');
   };

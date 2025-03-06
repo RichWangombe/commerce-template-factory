@@ -8,8 +8,11 @@ import { ProductCard } from "@/components/ProductCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { PromotionCard } from "@/components/PromotionCard";
 import { RecommendedProducts } from "@/components/RecommendedProducts";
+import { PersonalizedSection } from "@/components/PersonalizedSection";
+import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 
 export const HomePage = () => {
+  const { preferences } = useUserPreferences();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -19,7 +22,6 @@ export const HomePage = () => {
     }, 200);
   }, []);
 
-  // Sample data for the homepage
   const featuredProducts = [
     {
       id: 1,
@@ -128,6 +130,16 @@ export const HomePage = () => {
           </div>
         </section>
 
+        {/* Recently Viewed */}
+        {preferences.showRecentlyViewed && (
+          <PersonalizedSection
+            title="Recently Viewed"
+            subtitle="Products you've checked out recently"
+            recommendationType="viewed"
+            limit={4}
+          />
+        )}
+
         {/* Featured Products */}
         <section className="py-16 bg-neutral-50">
           <div className="container mx-auto px-6">
@@ -156,6 +168,34 @@ export const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* Collaborative Recommendations */}
+        <PersonalizedSection
+          title="Customers Also Bought"
+          subtitle="Products popular with customers like you"
+          recommendationType="collaborative"
+          limit={4}
+        />
+
+        {/* Trending Products */}
+        {preferences.showTrending && (
+          <PersonalizedSection
+            title="Trending Now"
+            subtitle="What's popular right now"
+            recommendationType="trending"
+            limit={4}
+          />
+        )}
+
+        {/* Seasonal Recommendations */}
+        {preferences.showSeasonalOffers && (
+          <PersonalizedSection
+            title="Seasonal Picks"
+            subtitle="Perfect for this time of year"
+            recommendationType="seasonal"
+            limit={4}
+          />
+        )}
 
         {/* Promotions */}
         <section className="py-16">
