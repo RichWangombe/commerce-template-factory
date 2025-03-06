@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useReviews } from "@/contexts/ReviewContext";
+import { ReviewsList } from "@/components/ReviewsList";
+import { ReviewForm } from "@/components/ReviewForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const mockProducts = [
   {
@@ -82,8 +86,10 @@ const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState("description");
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { getProductReviews } = useReviews();
   
   const product = mockProducts.find(product => product.id === id);
   
@@ -101,6 +107,8 @@ const ProductDetailPage = () => {
       </div>
     );
   }
+  
+  const reviews = getProductReviews(id || "");
   
   if (selectedColor === "" && product.colors.length > 0) {
     setSelectedColor(product.colors[0]);
@@ -323,50 +331,107 @@ const ProductDetailPage = () => {
             </div>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div>
-                <h2 className="text-xl font-bold mb-4">Description</h2>
-                <p className="text-neutral-600">{product.description}</p>
-              </div>
+          <div className="mt-12">
+            <Tabs defaultValue="description" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full justify-start border-b pb-0 mb-6">
+                <TabsTrigger value="description" className="pb-3 rounded-none">Description & Features</TabsTrigger>
+                <TabsTrigger value="specs" className="pb-3 rounded-none">Specifications</TabsTrigger>
+                <TabsTrigger value="reviews" className="pb-3 rounded-none">
+                  Reviews ({reviews.length})
+                </TabsTrigger>
+              </TabsList>
               
-              <div>
-                <h2 className="text-xl font-bold mb-4">Features</h2>
-                <ul className="space-y-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-neutral-300"></div>
-                      <span className="text-neutral-600">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            
-            <div className="space-y-6">
-              <div className="border rounded-xl p-6">
-                <h3 className="text-lg font-medium mb-4">Product Details</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Brand</span>
-                    <span className="font-medium">{product.brand}</span>
+              <TabsContent value="description" className="pt-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div>
+                      <h2 className="text-xl font-bold mb-4">Description</h2>
+                      <p className="text-neutral-600">{product.description}</p>
+                    </div>
+                    
+                    <div>
+                      <h2 className="text-xl font-bold mb-4">Features</h2>
+                      <ul className="space-y-2">
+                        {product.features.map((feature, index) => (
+                          <li key={index} className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-neutral-300"></div>
+                            <span className="text-neutral-600">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">SKU</span>
-                    <span className="font-medium">{product.sku}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Category</span>
-                    <Link 
-                      to={`/category/${product.category.toLowerCase()}`}
-                      className="font-medium hover:underline"
-                    >
-                      {product.category}
-                    </Link>
+                  
+                  <div className="space-y-6">
+                    <div className="border rounded-xl p-6">
+                      <h3 className="text-lg font-medium mb-4">Product Details</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Brand</span>
+                          <span className="font-medium">{product.brand}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">SKU</span>
+                          <span className="font-medium">{product.sku}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Category</span>
+                          <Link 
+                            to={`/category/${product.category.toLowerCase()}`}
+                            className="font-medium hover:underline"
+                          >
+                            {product.category}
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+              
+              <TabsContent value="specs" className="pt-4">
+                <div className="max-w-3xl">
+                  <h2 className="text-xl font-bold mb-4">Technical Specifications</h2>
+                  <div className="border rounded-xl overflow-hidden">
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Brand</td>
+                          <td className="py-3 px-4">{product.brand}</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Model</td>
+                          <td className="py-3 px-4">{product.sku}</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Color Options</td>
+                          <td className="py-3 px-4">{product.colors.join(", ")}</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Weight</td>
+                          <td className="py-3 px-4">Approx. 300g</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Warranty</td>
+                          <td className="py-3 px-4">1 Year Manufacturer Warranty</td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-4 font-medium bg-neutral-50">Package Contents</td>
+                          <td className="py-3 px-4">Main Product, User Manual, Warranty Card</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="reviews" className="pt-4">
+                <div className="space-y-12">
+                  <ReviewsList reviews={reviews} productId={id || ""} />
+                  <ReviewForm productId={id || ""} />
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div className="mt-16">
