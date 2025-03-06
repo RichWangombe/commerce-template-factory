@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import RecommendationContext from "./RecommendationContext";
 import { ProductRecommendation, RecommendationFilter, UserPreferences, RecommendationClickEvent } from "@/types/recommendation";
 import { useCart } from "@/contexts/CartContext";
-import { mockProducts } from "@/data/mockProducts";
 import { 
   VIEWED_PRODUCTS_KEY,
   getSimilarProductRecommendations,
@@ -59,36 +58,14 @@ export const RecommendationProvider: React.FC<{ children: React.ReactNode }> = (
     localStorage.setItem('recommendation_preferences', JSON.stringify(userPreferences));
   }, [userPreferences]);
 
-  // Update recommendations whenever viewed products or cart changes
-  useEffect(() => {
-    setRecommendedProducts(getPersonalizedRecommendations());
-  }, [viewedProducts, cartState.items, userPreferences]);
+  // Memoize the purchased product IDs from cart
+  const purchasedIds = useMemo(() => 
+    cartState.items.map(item => item.id), 
+    [cartState.items]
+  );
 
-  // Record when a user views a product
-  const recordProductView = (productId: number) => {
-    setViewedProducts(prev => {
-      // Move viewed product to the front of the list or add it if not present
-      const filtered = prev.filter(id => id !== productId);
-      return [productId, ...filtered].slice(0, 20); // Keep only the last 20 viewed products
-    });
-  };
-
-  // Update user preferences
-  const updateUserPreferences = (preferences: Partial<UserPreferences>) => {
-    setUserPreferences(prev => ({
-      ...prev,
-      ...preferences
-    }));
-  };
-
-  // Generate product recommendations based on a specific product
-  const getRecommendationsForProduct = (productId: number): ProductRecommendation[] => {
-    return getSimilarProductRecommendations(productId);
-  };
-
-  // Generate personalized recommendations based on viewed products, purchase history, and preferences
-  const getPersonalizedRecommendations = (filter?: RecommendationFilter): ProductRecommendation[] => {
-    const purchasedIds = cartState.items.map(item => item.id);
+  // Get personalized recommendations based on viewed products, purchase history, and preferences
+  const getPersonalizedRecommendations = useCallback((filter?: RecommendationFilter): ProductRecommendation[] => {
     let recommendations: ProductRecommendation[] = [];
     
     // Get recommendations based on viewed products
@@ -139,38 +116,77 @@ export const RecommendationProvider: React.FC<{ children: React.ReactNode }> = (
     );
     
     return recommendations.slice(0, 8); // Limit to 8 recommendations
-  };
+  }, [viewedProducts, cartState.items, purchasedIds, userPreferences]);
+
+  // Update recommendations whenever viewed products or cart changes
+  useEffect(() => {
+    setRecommendedProducts(getPersonalizedRecommendations());
+  }, [viewedProducts, cartState.items, userPreferences, getPersonalizedRecommendations]);
+
+  // Record when a user views a product
+  const recordProductView = useCallback((productId: number) => {
+    setViewedProducts(prev => {
+      // Move viewed product to the front of the list or add it if not present
+      const filtered = prev.filter(id => id !== productId);
+      return [productId, ...filtered].slice(0, 20); // Keep only the last 20 viewed products
+    });
+  }, []);
+
+  // Update user preferences
+  const updateUserPreferences = useCallback((preferences: Partial<UserPreferences>) => {
+    setUserPreferences(prev => ({
+      ...prev,
+      ...preferences
+    }));
+  }, []);
+
+  // Generate product recommendations based on a specific product
+  const getRecommendationsForProduct = useCallback((productId: number): ProductRecommendation[] => {
+    return getSimilarProductRecommendations(productId);
+  }, []);
 
   // Implementation of getRecommendations method (to match what components are using)
-  const getRecommendations = async (limit: number, filter?: RecommendationFilter): Promise<ProductRecommendation[]> => {
+  const getRecommendations = useCallback(async (limit: number, filter?: RecommendationFilter): Promise<ProductRecommendation[]> => {
     // Get personalized recommendations with filters
     const recommendations = getPersonalizedRecommendations(filter);
     
     // Simulate API call with delay
     return simulateRecommendationApiCall(recommendations, limit);
-  };
+  }, [getPersonalizedRecommendations]);
 
   // Implementation of trackView method (to match what components are using)
-  const trackView = (event: RecommendationClickEvent) => {
+  const trackView = useCallback((event: RecommendationClickEvent) => {
     logRecommendationViewEvent(event);
-  };
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    viewedProducts,
+    recommendedProducts,
+    recordProductView,
+    getRecommendationsForProduct,
+    getPersonalizedRecommendations,
+    userPreferences,
+    updateUserPreferences,
+    trackRecommendationClick,
+    // Add new methods to the context value
+    getRecommendations,
+    trackView
+  }), [
+    viewedProducts, 
+    recommendedProducts, 
+    recordProductView,
+    getRecommendationsForProduct,
+    getPersonalizedRecommendations,
+    userPreferences,
+    updateUserPreferences,
+    trackRecommendationClick,
+    getRecommendations,
+    trackView
+  ]);
 
   return (
-    <RecommendationContext.Provider
-      value={{
-        viewedProducts,
-        recommendedProducts,
-        recordProductView,
-        getRecommendationsForProduct,
-        getPersonalizedRecommendations,
-        userPreferences,
-        updateUserPreferences,
-        trackRecommendationClick,
-        // Add new methods to the context value
-        getRecommendations,
-        trackView
-      }}
-    >
+    <RecommendationContext.Provider value={contextValue}>
       {children}
     </RecommendationContext.Provider>
   );
