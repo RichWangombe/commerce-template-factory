@@ -21,6 +21,8 @@ import { useReviews } from "@/contexts/ReviewContext";
 import { ReviewsList } from "@/components/ReviewsList";
 import { ReviewForm } from "@/components/ReviewForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RecommendedProducts } from "@/components/RecommendedProducts";
+import { ProductViewTracker } from "@/components/ProductViewTracker";
 
 const mockProducts = [
   {
@@ -158,6 +160,7 @@ const ProductDetailPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
+      <ProductViewTracker />
       
       <main className="flex-1 py-8 md:py-12 animate-fade-in">
         <div className="container px-4 md:px-6">
@@ -435,44 +438,20 @@ const ProductDetailPage = () => {
           </div>
           
           <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {mockProducts
-                .filter(p => product.relatedProducts.includes(p.id))
-                .map(relatedProduct => (
-                  <div key={relatedProduct.id} className="product-card rounded-xl border border-neutral-200 overflow-hidden">
-                    <Link to={`/product/${relatedProduct.id}`}>
-                      <div className="aspect-square bg-neutral-100">
-                        <img 
-                          src={relatedProduct.images[0]} 
-                          alt={relatedProduct.name}
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-medium">{relatedProduct.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="font-bold">${relatedProduct.price.toFixed(2)}</span>
-                          {relatedProduct.originalPrice && (
-                            <span className="text-neutral-500 text-sm line-through">
-                              ${relatedProduct.originalPrice.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                ))}
-            </div>
+            <RecommendedProducts 
+              productId={Number(id)} 
+              title="You May Also Like" 
+              showViewAll={false} 
+            />
           </div>
           
           <div className="mt-12">
             <Link
-              to={`/category/${product.category.toLowerCase()}`}
+              to={`/category/${product?.category.toLowerCase()}`}
               className="inline-flex items-center gap-2 text-sm font-medium hover:text-neutral-600"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to {product.category}
+              Back to {product?.category}
             </Link>
           </div>
         </div>

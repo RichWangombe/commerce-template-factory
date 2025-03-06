@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +24,7 @@ import AdminProductFormPage from "./pages/admin/AdminProductFormPage";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ReviewProvider } from "./contexts/ReviewContext";
+import { RecommendationProvider } from "./contexts/RecommendationContext";
 import { CartDrawer } from "./components/CartDrawer";
 import { AuthWrapper } from "./components/AuthWrapper";
 import { AdminWrapper } from "./components/AdminWrapper";
@@ -37,102 +37,100 @@ const App = () => (
       <CartProvider>
         <WishlistProvider>
           <ReviewProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <CartDrawer />
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/category/:categoryId" element={<CategoryPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/sign-in" element={<SignInPage />} />
-                <Route path="/sign-up" element={<SignUpPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                
-                {/* Protected routes */}
-                <Route 
-                  path="/profile" 
-                  element={
-                    <AuthWrapper requireAuth>
-                      <ProfilePage />
-                    </AuthWrapper>
-                  } 
-                />
-                <Route 
-                  path="/order/:orderId" 
-                  element={
-                    <AuthWrapper requireAuth>
-                      <OrderDetailPage />
-                    </AuthWrapper>
-                  } 
-                />
-                <Route 
-                  path="/order-confirmation" 
-                  element={
-                    <AuthWrapper requireAuth>
-                      <OrderConfirmationPage />
-                    </AuthWrapper>
-                  } 
-                />
-                
-                {/* Admin routes */}
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminWrapper>
-                      <AdminDashboardPage />
-                    </AdminWrapper>
-                  }
-                />
-                <Route
-                  path="/admin/products"
-                  element={
-                    <AdminWrapper>
-                      <AdminProductsPage />
-                    </AdminWrapper>
-                  }
-                />
-                <Route
-                  path="/admin/products/new"
-                  element={
-                    <AdminWrapper>
-                      <AdminProductFormPage />
-                    </AdminWrapper>
-                  }
-                />
-                <Route
-                  path="/admin/products/edit/:productId"
-                  element={
-                    <AdminWrapper>
-                      <AdminProductFormPage />
-                    </AdminWrapper>
-                  }
-                />
-                <Route
-                  path="/admin/orders"
-                  element={
-                    <AdminWrapper>
-                      <AdminOrdersPage />
-                    </AdminWrapper>
-                  }
-                />
-                <Route
-                  path="/admin/users"
-                  element={
-                    <AdminWrapper>
-                      <AdminUsersPage />
-                    </AdminWrapper>
-                  }
-                />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <RecommendationProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <CartDrawer />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/category/:categoryId" element={<CategoryPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/wishlist" element={<WishlistPage />} />
+                  <Route path="/search" element={<SearchPage />} />
+                  <Route path="/sign-in" element={<SignInPage />} />
+                  <Route path="/sign-up" element={<SignUpPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <AuthWrapper requireAuth>
+                        <ProfilePage />
+                      </AuthWrapper>
+                    } 
+                  />
+                  <Route 
+                    path="/order/:orderId" 
+                    element={
+                      <AuthWrapper requireAuth>
+                        <OrderDetailPage />
+                      </AuthWrapper>
+                    } 
+                  />
+                  <Route 
+                    path="/order-confirmation" 
+                    element={
+                      <AuthWrapper requireAuth>
+                        <OrderConfirmationPage />
+                      </AuthWrapper>
+                    } 
+                  />
+                  
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminWrapper>
+                        <AdminDashboardPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/products"
+                    element={
+                      <AdminWrapper>
+                        <AdminProductsPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/products/new"
+                    element={
+                      <AdminWrapper>
+                        <AdminProductFormPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/products/edit/:productId"
+                    element={
+                      <AdminWrapper>
+                        <AdminProductFormPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/orders"
+                    element={
+                      <AdminWrapper>
+                        <AdminOrdersPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <AdminWrapper>
+                        <AdminUsersPage />
+                      </AdminWrapper>
+                    }
+                  />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </RecommendationProvider>
           </ReviewProvider>
         </WishlistProvider>
       </CartProvider>

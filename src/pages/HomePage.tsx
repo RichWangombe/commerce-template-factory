@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { PromotionCard } from "@/components/PromotionCard";
+import { RecommendedProducts } from "@/components/RecommendedProducts";
 
 export const HomePage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -111,6 +111,9 @@ export const HomePage = () => {
             </div>
           </div>
         </section>
+
+        {/* Personalized Recommendations */}
+        <RecommendedProducts />
 
         {/* Featured Products */}
         <section className="py-16 bg-neutral-50">
