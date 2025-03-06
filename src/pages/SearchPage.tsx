@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
@@ -12,7 +11,6 @@ import { Slider } from '@/components/ui/slider';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-// Mock data - this would be replaced with actual API calls in a real implementation
 const mockProducts = [
   {
     id: 1,
@@ -85,11 +83,9 @@ const SearchPage = () => {
     sort: 'relevance'
   });
 
-  // Categories derived from the products
   const categories = ['all', ...Array.from(new Set(mockProducts.map(product => product.category)))];
 
   useEffect(() => {
-    // Simulate API call with delay
     setLoading(true);
     const timer = setTimeout(() => {
       const filtered = mockProducts.filter(product => {
@@ -104,7 +100,6 @@ const SearchPage = () => {
         return matchesSearch && matchesCategory && matchesPrice;
       });
       
-      // Apply sorting
       let sortedResults = [...filtered];
       switch(filters.sort) {
         case 'price-low':
@@ -116,7 +111,6 @@ const SearchPage = () => {
         case 'rating':
           sortedResults.sort((a, b) => b.rating - a.rating);
           break;
-        // Default is relevance, which is the order returned from the search
         default:
           break;
       }
@@ -203,7 +197,6 @@ const SearchPage = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Desktop Filters */}
           <div className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24">
               <h2 className="text-lg font-semibold mb-4">Filters</h2>
@@ -211,7 +204,6 @@ const SearchPage = () => {
             </div>
           </div>
           
-          {/* Mobile Filters */}
           <div className="lg:hidden mb-4">
             <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
               <SheetTrigger asChild>
@@ -267,9 +259,9 @@ const SearchPage = () => {
                     id={product.id}
                     name={product.name}
                     price={product.price}
-                    originalPrice={product.originalPrice}
                     image={product.image}
-                    rating={product.rating}
+                    category={product.category}
+                    discount={product.originalPrice ? Math.round((1 - (product.price / product.originalPrice)) * 100) : 0}
                   />
                 ))}
               </div>
