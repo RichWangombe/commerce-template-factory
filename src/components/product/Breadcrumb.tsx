@@ -5,15 +5,20 @@ import { ChevronRight } from "lucide-react";
 interface BreadcrumbProps {
   category: string;
   productName: string;
+  categoryId?: number;
 }
 
-export const Breadcrumb = ({ category, productName }: BreadcrumbProps) => {
+export const Breadcrumb = ({ category, productName, categoryId }: BreadcrumbProps) => {
+  const categoryPath = categoryId 
+    ? `/category/${categoryId}` 
+    : `/category/${category.toLowerCase()}`;
+
   return (
     <div className="flex items-center text-sm text-neutral-500">
       <Link to="/" className="hover:text-neutral-900">Home</Link>
       <ChevronRight className="mx-2 h-4 w-4" />
       <Link 
-        to={`/category/${category.toLowerCase()}`} 
+        to={categoryPath}
         className="hover:text-neutral-900"
       >
         {category}

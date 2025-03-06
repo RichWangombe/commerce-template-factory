@@ -3,18 +3,20 @@ import { useState } from "react";
 
 interface ProductImagesProps {
   images: string[];
-  name: string;
+  name?: string;
+  productName?: string;
 }
 
-export const ProductImages = ({ images, name }: ProductImagesProps) => {
+export const ProductImages = ({ images, name, productName }: ProductImagesProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
+  const displayName = productName || name || "Product";
 
   return (
     <div className="space-y-4">
       <div className="aspect-square rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 relative">
         <img
           src={images[selectedImage]}
-          alt={name}
+          alt={displayName}
           className="object-cover w-full h-full"
         />
       </div>
@@ -32,7 +34,7 @@ export const ProductImages = ({ images, name }: ProductImagesProps) => {
           >
             <img 
               src={image} 
-              alt={`${name} view ${index + 1}`}
+              alt={`${displayName} view ${index + 1}`}
               className="object-cover w-full h-full" 
             />
           </button>

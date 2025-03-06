@@ -1,20 +1,30 @@
-
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useRecommendations } from "@/contexts/RecommendationContext";
 
-export const ProductViewTracker: React.FC = () => {
+interface ProductViewTrackerProps {
+  productId?: number;
+}
+
+export const ProductViewTracker: React.FC<ProductViewTrackerProps> = ({ productId }) => {
   const { id } = useParams<{ id: string }>();
   const { recordProductView } = useRecommendations();
   
   useEffect(() => {
+    // If a specific productId is provided, use that
+    if (productId) {
+      recordProductView(productId);
+      return;
+    }
+    
+    // Otherwise try to get it from URL params
     if (id) {
-      const productId = Number(id);
-      if (!isNaN(productId)) {
-        recordProductView(productId);
+      const parsedId = Number(id);
+      if (!isNaN(parsedId)) {
+        recordProductView(parsedId);
       }
     }
-  }, [id, recordProductView]);
+  }, [id, productId, recordProductView]);
   
   return null;
 };

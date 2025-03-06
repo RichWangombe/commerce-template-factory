@@ -12,6 +12,7 @@ import { ProductNotFound } from "@/components/product/ProductNotFound";
 import { mockProducts } from "@/data/mockProducts";
 import { useRecommendations } from "@/contexts/RecommendationContext";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
+import { useToast } from "@/hooks/use-toast";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   useEffect(() => {
     // Simulate fetching product data
@@ -44,6 +46,14 @@ const ProductDetailPage = () => {
       setLoading(false);
     }
   }, [id, recordProductView]);
+
+  // Handle adding product to cart or wishlist
+  const handleAddToCart = () => {
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
   
   // Show loading state
   if (loading) {
@@ -63,7 +73,10 @@ const ProductDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <ProductNotFound />
+        <ProductNotFound 
+          title="Product Not Found" 
+          message="Sorry, we couldn't find the product you're looking for."
+        />
         <Footer />
       </div>
     );
@@ -77,12 +90,13 @@ const ProductDetailPage = () => {
           <Breadcrumb 
             category={product.category} 
             productName={product.name}
+            categoryId={product.categoryId}
           />
           
           <div className="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-2">
             <ProductImages 
               images={[product.image]} 
-              name={product.name} 
+              productName={product.name} 
             />
             
             <ProductInfo 
@@ -111,6 +125,9 @@ const ProductDetailPage = () => {
               colors: product.colors || ["Default"]
             }}
             reviews={[]}
+            specifications={product.specifications}
+            productId={product.id.toString()}
+            productName={product.name}
           />
           
           <RecommendationSection 
@@ -120,7 +137,7 @@ const ProductDetailPage = () => {
           />
         </div>
       </main>
-      <ProductViewTracker />
+      <ProductViewTracker productId={product.id} />
       <Footer />
     </div>
   );

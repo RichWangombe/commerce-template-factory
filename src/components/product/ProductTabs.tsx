@@ -18,9 +18,12 @@ interface ProductTabsProps {
     colors: string[];
   };
   reviews: Review[];
+  specifications?: any;
+  productId?: string;
+  productName?: string;
 }
 
-export const ProductTabs = ({ product, reviews }: ProductTabsProps) => {
+export const ProductTabs = ({ product, reviews, specifications, productId, productName }: ProductTabsProps) => {
   const [activeTab, setActiveTab] = useState("description");
   
   return (
@@ -38,13 +41,20 @@ export const ProductTabs = ({ product, reviews }: ProductTabsProps) => {
       </TabsContent>
       
       <TabsContent value="specs" className="pt-4">
-        <ProductSpecifications product={product} />
+        <ProductSpecifications 
+          product={product} 
+          specifications={specifications}
+        />
       </TabsContent>
       
       <TabsContent value="reviews" className="pt-4">
         <div className="space-y-12">
-          <ReviewsList reviews={reviews} productId={product.id} />
-          <ReviewForm productId={product.id} />
+          <ReviewsList 
+            reviews={reviews} 
+            productId={productId || product.id} 
+            productName={productName}
+          />
+          <ReviewForm productId={productId || product.id} />
         </div>
       </TabsContent>
     </Tabs>
