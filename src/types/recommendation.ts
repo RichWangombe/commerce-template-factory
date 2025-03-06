@@ -1,7 +1,8 @@
 
 export interface RecommendationSource {
-  type: 'viewed' | 'purchased' | 'similar' | 'trending';
+  type: 'viewed' | 'purchased' | 'similar' | 'trending' | 'collaborative' | 'seasonal';
   confidence: number;
+  timestamp?: string; // When the recommendation was generated
 }
 
 export interface ProductRecommendation {
@@ -13,4 +14,22 @@ export interface ProductRecommendation {
   discount?: number;
   isNew?: boolean;
   source: RecommendationSource;
+}
+
+export type RecommendationClickEvent = {
+  productId: number;
+  recommendationType: string;
+  timestamp: string;
+};
+
+export type RecommendationFilter = {
+  types?: string[];
+  categories?: string[];
+  minConfidence?: number;
+};
+
+export interface UserPreferences {
+  favoriteCategories?: string[];
+  preferredPriceRange?: [number, number];
+  dislikedProductIds?: number[];
 }
