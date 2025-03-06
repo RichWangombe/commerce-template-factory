@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
-import { RecommendationProvider } from '@/contexts/RecommendationContext';
+import { RecommendationProvider } from '@/contexts/recommendation';
 import { CartDrawer } from '@/components/CartDrawer';
 import Index from '@/pages/Index';
 import { HomePage } from '@/pages/HomePage';
