@@ -11,6 +11,7 @@ import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import NotFound from "./pages/NotFound";
 import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
+import SearchPage from "./pages/SearchPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/sign-in" element={<SignInPage />} />
               <Route path="/sign-up" element={<SignUpPage />} />
               
