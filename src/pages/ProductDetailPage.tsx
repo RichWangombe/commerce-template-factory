@@ -12,7 +12,7 @@ import { ProductNotFound } from "@/components/product/ProductNotFound";
 import { useRecommendations } from "@/contexts/recommendation";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { useToast } from "@/hooks/use-toast";
-import { useProduct } from "@/utils/dataFetchers";
+import { useProduct, Product } from "@/utils/dataFetchers";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();

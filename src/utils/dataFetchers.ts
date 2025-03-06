@@ -4,6 +4,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductCardProps } from "@/components/ProductCard";
 import { Order } from "@/types/checkout";
 
+// Extended Product interface with all the fields we need
+export interface Product extends ProductCardProps {
+  brand?: string;
+  originalPrice?: number;
+  rating?: number;
+  reviewCount?: number;
+  stock?: number;
+  colors?: string[];
+  description?: string;
+  features?: string[];
+  specifications?: Record<string, string>;
+}
+
 // Product queries
 export const useProducts = () => {
   return useQuery({
@@ -13,7 +26,7 @@ export const useProducts = () => {
 };
 
 export const useProduct = (productId: number) => {
-  return useQuery({
+  return useQuery<Product, Error>({
     queryKey: ['product', productId],
     queryFn: () => apiService.getProductById(productId),
     enabled: !!productId, // Only run the query if productId is provided
