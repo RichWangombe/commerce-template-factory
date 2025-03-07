@@ -30,14 +30,6 @@ const ProductDetailPage = () => {
     }
   }, [product, recordProductView]);
 
-  // Handle adding product to cart or wishlist
-  const handleAddToCart = () => {
-    toast({
-      title: "Added to cart",
-      description: `${product?.name} has been added to your cart.`,
-    });
-  };
-  
   // Show loading state
   if (isLoading) {
     return (
