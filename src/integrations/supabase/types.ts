@@ -9,7 +9,182 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          billing_address: Json
+          created_at: string | null
+          id: string
+          items: Json
+          payment_method: string
+          shipping: number
+          shipping_address: Json
+          shipping_method: Json
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          billing_address: Json
+          created_at?: string | null
+          id: string
+          items: Json
+          payment_method: string
+          shipping: number
+          shipping_address: Json
+          shipping_method: Json
+          status?: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          billing_address?: Json
+          created_at?: string | null
+          id?: string
+          items?: Json
+          payment_method?: string
+          shipping?: number
+          shipping_address?: Json
+          shipping_method?: Json
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      product_reviews: {
+        Row: {
+          created_at: string | null
+          id: number
+          product_id: number | null
+          rating: number
+          review_text: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          product_id?: number | null
+          rating: number
+          review_text?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          product_id?: number | null
+          rating?: number
+          review_text?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string | null
+          category: string
+          colors: string[] | null
+          created_at: string | null
+          description: string
+          features: string[] | null
+          id: number
+          image: string
+          name: string
+          original_price: number | null
+          price: number
+          rating: number | null
+          review_count: number | null
+          specifications: Json | null
+          stock: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          colors?: string[] | null
+          created_at?: string | null
+          description: string
+          features?: string[] | null
+          id?: number
+          image: string
+          name: string
+          original_price?: number | null
+          price: number
+          rating?: number | null
+          review_count?: number | null
+          specifications?: Json | null
+          stock?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          colors?: string[] | null
+          created_at?: string | null
+          description?: string
+          features?: string[] | null
+          id?: number
+          image?: string
+          name?: string
+          original_price?: number | null
+          price?: number
+          rating?: number | null
+          review_count?: number | null
+          specifications?: Json | null
+          stock?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: Json | null
+          avatar_url: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: Json | null
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: Json | null
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
