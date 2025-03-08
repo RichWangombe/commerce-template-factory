@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useSignIn } from "@clerk/clerk-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
 export default function SignInPage() {
-  const { isLoaded, signIn, setActive } = useSignIn();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -22,56 +20,18 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isLoaded) {
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
-
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        toast({
-          title: "Success!",
-          description: "You have been signed in.",
-        });
-        navigate("/");
-      } else {
-        console.log("Sign-in result:", result);
-        // Handle additional verification steps if needed
-        if (result.status === "needs_second_factor") {
-          toast({
-            description: "Please enter your second factor authentication code.",
-          });
-          // Handle 2FA flow here if implemented
-        } else if (result.status === "needs_new_password") {
-          toast({
-            description: "Please update your password.",
-          });
-          // Handle password reset flow here if implemented
-        } else {
-          toast({
-            title: "Error",
-            description: "Something went wrong. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }
-    } catch (err: any) {
-      console.error("Sign-in error:", err);
+    // Currently using mock auth for demonstration
+    setIsLoading(true);
+    
+    // Mock auth flow
+    setTimeout(() => {
       toast({
-        title: "Error",
-        description: err.errors?.[0]?.message || "Something went wrong. Please try again.",
-        variant: "destructive",
+        title: "Demo Mode",
+        description: "Authentication is currently in demo mode. You would be signed in now.",
       });
-    } finally {
       setIsLoading(false);
-    }
+      navigate("/");
+    }, 1000);
   };
 
   return (

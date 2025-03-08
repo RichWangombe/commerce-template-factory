@@ -1,13 +1,11 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/clerk-react';
 import { Toaster } from 'sonner';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import { RecommendationProvider } from '@/contexts/recommendation';
 import { QueryProvider } from '@/providers/QueryProvider';
 import { CartDrawer } from '@/components/CartDrawer';
-import { AuthWrapper } from '@/components/AuthWrapper';
 import Index from '@/pages/Index';
 import { HomePage } from '@/pages/HomePage';
 import ProductDetailPage from '@/pages/ProductDetailPage';
@@ -30,9 +28,6 @@ import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminRecommendationsPage from '@/pages/admin/AdminRecommendationsPage';
 
-// Use a dummy key for development if the environment variable is not set
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_dummy-key-for-development';
-
 function App() {
   return (
     <QueryProvider>
@@ -47,19 +42,18 @@ function App() {
                 <Route path="/category/:id" element={<CategoryPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 
-                {/* Protected routes */}
+                {/* Auth routes (now available to anyone) */}
+                <Route path="/sign-in/*" element={<SignInPage />} />
+                <Route path="/sign-up/*" element={<SignUpPage />} />
+                
+                {/* Routes that would normally be protected */}
                 <Route path="/wishlist" element={<WishlistPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/order/confirmation" element={<OrderConfirmationPage />} />
                 <Route path="/order/:id" element={<OrderDetailPage />} />
-                
+                <Route path="/profile/*" element={<ProfilePage />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/recommendations" element={<RecommendationsPage />} />
-                
-                {/* Auth routes */}
-                <Route path="/sign-in/*" element={<SignInPage />} />
-                <Route path="/sign-up/*" element={<SignUpPage />} />
-                <Route path="/profile/*" element={<ProfilePage />} />
                 
                 {/* Admin routes */}
                 <Route path="/admin" element={<AdminDashboardPage />} />
