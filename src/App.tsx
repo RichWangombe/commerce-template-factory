@@ -31,9 +31,9 @@ import AdminRecommendationsPage from '@/pages/admin/AdminRecommendationsPage';
 function App() {
   return (
     <QueryProvider>
-      <RecommendationProvider>
-        <CartProvider>
-          <WishlistProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <RecommendationProvider>
             <Router>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -71,9 +71,9 @@ function App() {
             
             <CartDrawer />
             <Toaster position="top-right" richColors />
-          </WishlistProvider>
-        </CartProvider>
-      </RecommendationProvider>
+          </RecommendationProvider>
+        </WishlistProvider>
+      </CartProvider>
     </QueryProvider>
   );
 }

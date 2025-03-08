@@ -13,6 +13,7 @@ import { useRecommendations } from "@/contexts/recommendation";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { useToast } from "@/hooks/use-toast";
 import { useProduct, Product } from "@/utils/dataFetchers";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,15 +21,20 @@ const ProductDetailPage = () => {
   const productId = parseInt(id || "0");
   const { toast } = useToast();
   
+  console.log("ProductDetailPage: Rendering with ID:", id);
+  
   // Use React Query to fetch product data
   const { data: product, isLoading, error } = useProduct(productId);
   
   useEffect(() => {
+    console.log("ProductDetailPage: Product data:", product);
+    console.log("ProductDetailPage: Error:", error);
+    
     // Track product view for recommendation engine when product data is available
     if (product && recordProductView) {
       recordProductView(product.id);
     }
-  }, [product, recordProductView]);
+  }, [product, recordProductView, error]);
 
   // Show loading state
   if (isLoading) {
@@ -45,12 +51,13 @@ const ProductDetailPage = () => {
   
   // Show error state
   if (error || !product) {
+    console.error("Product fetch error:", error);
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <ProductNotFound 
           title="Product Not Found" 
-          message="Sorry, we couldn't find the product you're looking for."
+          message={`Sorry, we couldn't find the product you're looking for. Error: ${error?.message}`}
         />
         <Footer />
       </div>
@@ -68,45 +75,53 @@ const ProductDetailPage = () => {
           />
           
           <div className="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-2">
-            <ProductImages 
-              images={[product.image]} 
-            />
+            <ErrorBoundary fallback={<div>Error loading product images</div>}>
+              <ProductImages 
+                images={[product.image]} 
+              />
+            </ErrorBoundary>
             
-            <ProductInfo 
-              product={{
-                id: product.id.toString(),
-                name: product.name,
-                brand: product.brand || "Brand",
-                price: product.price,
-                originalPrice: product.originalPrice,
-                rating: product.rating || 4.5,
-                reviewCount: product.reviewCount || 0,
-                stock: product.stock || 10,
-                colors: product.colors || ["Default"]
-              }}
-            />
+            <ErrorBoundary fallback={<div>Error loading product information</div>}>
+              <ProductInfo 
+                product={{
+                  id: product.id.toString(),
+                  name: product.name,
+                  brand: product.brand || "Brand",
+                  price: product.price,
+                  originalPrice: product.originalPrice,
+                  rating: product.rating || 4.5,
+                  reviewCount: product.reviewCount || 0,
+                  stock: product.stock || 10,
+                  colors: product.colors || ["Default"]
+                }}
+              />
+            </ErrorBoundary>
           </div>
           
-          <ProductTabs 
-            product={{
-              id: product.id.toString(),
-              brand: product.brand || "Brand",
-              sku: `SKU-${product.id}`,
-              category: product.category || "Uncategorized",
-              description: product.description || "No description available.",
-              features: product.features || [],
-              colors: product.colors || ["Default"]
-            }}
-            reviews={[]}
-            productId={product.id.toString()}
-            specifications={product.specifications}
-          />
+          <ErrorBoundary fallback={<div>Error loading product details</div>}>
+            <ProductTabs 
+              product={{
+                id: product.id.toString(),
+                brand: product.brand || "Brand",
+                sku: `SKU-${product.id}`,
+                category: product.category || "Uncategorized",
+                description: product.description || "No description available.",
+                features: product.features || [],
+                colors: product.colors || ["Default"]
+              }}
+              reviews={[]}
+              productId={product.id.toString()}
+              specifications={product.specifications}
+            />
+          </ErrorBoundary>
           
-          <RecommendationSection 
-            title="You Might Also Like" 
-            productId={product.id}
-            showViewAll={false}
-          />
+          <ErrorBoundary fallback={<div>Error loading recommendations</div>}>
+            <RecommendationSection 
+              title="You Might Also Like" 
+              productId={product.id}
+              showViewAll={false}
+            />
+          </ErrorBoundary>
         </div>
       </main>
       <ProductViewTracker productId={product.id} />
