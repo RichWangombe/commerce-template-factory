@@ -5,6 +5,8 @@ import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import { RecommendationProvider } from '@/contexts/recommendation';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { UserPreferencesProvider } from '@/contexts/UserPreferencesContext';
 import { CartDrawer } from '@/components/CartDrawer';
 import Index from '@/pages/Index';
 import { HomePage } from '@/pages/HomePage';
@@ -31,49 +33,53 @@ import AdminRecommendationsPage from '@/pages/admin/AdminRecommendationsPage';
 function App() {
   return (
     <QueryProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <RecommendationProvider>
-            <Router>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/home" element={<HomePage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/category/:id" element={<CategoryPage />} />
-                <Route path="/cart" element={<CartPage />} />
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <RecommendationProvider>
+              <UserPreferencesProvider>
+                <Router>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/product/:id" element={<ProductDetailPage />} />
+                    <Route path="/category/:id" element={<CategoryPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    
+                    {/* Auth routes (now available to anyone) */}
+                    <Route path="/sign-in/*" element={<SignInPage />} />
+                    <Route path="/sign-up/*" element={<SignUpPage />} />
+                    
+                    {/* Routes that would normally be protected */}
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order/confirmation" element={<OrderConfirmationPage />} />
+                    <Route path="/order/:id" element={<OrderDetailPage />} />
+                    <Route path="/profile/*" element={<ProfilePage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/recommendations" element={<RecommendationsPage />} />
+                    
+                    {/* Admin routes */}
+                    <Route path="/admin" element={<AdminDashboardPage />} />
+                    <Route path="/admin/products" element={<AdminProductsPage />} />
+                    <Route path="/admin/products/new" element={<AdminProductFormPage />} />
+                    <Route path="/admin/products/edit/:id" element={<AdminProductFormPage />} />
+                    <Route path="/admin/orders" element={<AdminOrdersPage />} />
+                    <Route path="/admin/users" element={<AdminUsersPage />} />
+                    <Route path="/admin/recommendations" element={<AdminRecommendationsPage />} />
+                    
+                    {/* 404 */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Router>
                 
-                {/* Auth routes (now available to anyone) */}
-                <Route path="/sign-in/*" element={<SignInPage />} />
-                <Route path="/sign-up/*" element={<SignUpPage />} />
-                
-                {/* Routes that would normally be protected */}
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/order/confirmation" element={<OrderConfirmationPage />} />
-                <Route path="/order/:id" element={<OrderDetailPage />} />
-                <Route path="/profile/*" element={<ProfilePage />} />
-                <Route path="/search" element={<SearchPage />} />
-                <Route path="/recommendations" element={<RecommendationsPage />} />
-                
-                {/* Admin routes */}
-                <Route path="/admin" element={<AdminDashboardPage />} />
-                <Route path="/admin/products" element={<AdminProductsPage />} />
-                <Route path="/admin/products/new" element={<AdminProductFormPage />} />
-                <Route path="/admin/products/edit/:id" element={<AdminProductFormPage />} />
-                <Route path="/admin/orders" element={<AdminOrdersPage />} />
-                <Route path="/admin/users" element={<AdminUsersPage />} />
-                <Route path="/admin/recommendations" element={<AdminRecommendationsPage />} />
-                
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Router>
-            
-            <CartDrawer />
-            <Toaster position="top-right" richColors />
-          </RecommendationProvider>
-        </WishlistProvider>
-      </CartProvider>
+                <CartDrawer />
+                <Toaster position="top-right" richColors />
+              </UserPreferencesProvider>
+            </RecommendationProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
     </QueryProvider>
   );
 }

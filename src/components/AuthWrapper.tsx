@@ -1,8 +1,9 @@
 
 import { PropsWithChildren, useEffect } from "react";
-import { useUser, useAuth } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthFunctions } from "@/utils/auth";
 
 type AuthWrapperProps = PropsWithChildren<{
   requireAuth?: boolean;
@@ -10,8 +11,8 @@ type AuthWrapperProps = PropsWithChildren<{
 }>;
 
 export function AuthWrapper({ children, requireAuth = false, adminOnly = false }: AuthWrapperProps) {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { getToken } = useAuth();
+  const { isLoaded, isSignedIn, user } = useAuth();
+  const { getToken } = useAuthFunctions();
   const location = useLocation();
   const { toast } = useToast();
 
