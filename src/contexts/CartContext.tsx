@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { toast } from 'sonner';
 import { CartState, CartItem, CartPreferences } from '@/types/cart';
 import { cartReducer, initialCartState } from '@/reducers/cartReducer';
@@ -23,7 +23,23 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
   
   // Use the custom hook for storage management
-  useCartStorage(state, dispatch);
+  const { loadCart, saveCart } = useCartStorage();
+  
+  // Load cart from storage when component mounts
+  useEffect(() => {
+    const savedCart = loadCart();
+    if (savedCart.length > 0) {
+      // Initialize cart with saved items
+      savedCart.forEach(item => {
+        dispatch({ type: 'ADD_ITEM', payload: item });
+      });
+    }
+  }, []);
+  
+  // Save cart to storage whenever it changes
+  useEffect(() => {
+    saveCart(state.items);
+  }, [state.items]);
 
   const addItem = (item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
