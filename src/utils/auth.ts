@@ -37,24 +37,10 @@ export const useAuthFunctions = () => {
   
   return {
     getToken: mockMode ? mockGetToken : async () => {
-      try {
-        // This would normally call Clerk's getToken
-        // But we're just handling the mock case for now
-        return mockGetToken();
-      } catch (error) {
-        console.error("Error getting token:", error);
-        return mockGetToken();
-      }
+      return mockGetToken();
     },
     signOut: mockMode ? mockSignOut : async () => {
-      try {
-        // This would normally call Clerk's signOut
-        // But we're just handling the mock case for now
-        return mockSignOut();
-      } catch (error) {
-        console.error("Error signing out:", error);
-        return mockSignOut();
-      }
+      return mockSignOut();
     },
   };
 };

@@ -38,25 +38,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Only try to use Clerk if we actually have a publishable key
     if (clerkAvailable) {
-      // Import Clerk's useUser hook dynamically to prevent errors when not wrapped in ClerkProvider
-      import('@clerk/clerk-react').then(({ useUser }) => {
+      // Instead of trying to use Clerk hooks directly, we'll check if Clerk is
+      // properly initialized in the global window object
+      if (window.Clerk && window.Clerk.user) {
         try {
-          // This will throw an error if not inside ClerkProvider
-          const { isLoaded, isSignedIn, user } = useUser();
+          const isSignedIn = !!window.Clerk.user;
+          const user = window.Clerk.user;
           
           setAuthValues({
-            isLoaded,
+            isLoaded: true,
             isSignedIn,
             user,
             mockMode: false
           });
         } catch (error) {
-          console.warn('Error using Clerk authentication:', error);
+          console.warn('Error accessing Clerk user:', error);
           enableMockMode();
         }
-      }).catch(() => {
+      } else {
+        console.warn('Clerk is not properly initialized');
         enableMockMode();
-      });
+      }
     } else {
       // No Clerk key available, use mock mode
       enableMockMode();
