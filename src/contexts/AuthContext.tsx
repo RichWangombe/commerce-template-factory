@@ -32,34 +32,44 @@ const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [authValues, setAuthValues] = useState<AuthContextType>(defaultAuthContext);
   const [hasShownMockNotice, setHasShownMockNotice] = useState(false);
+  const clerkAvailable = typeof window !== 'undefined' && 
+                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
+                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.length > 0;
   
   useEffect(() => {
-    // Try to use the real Clerk auth if available
-    try {
-      const { isLoaded, isSignedIn, user } = useUser();
-      
-      setAuthValues({
-        isLoaded,
-        isSignedIn,
-        user,
-        mockMode: false
-      });
-    } catch (error) {
-      // If Clerk isn't properly set up, use mock values
-      console.warn('Using mock authentication because Clerk is not available:', error);
-      
-      // Only show the mock mode toast once
-      if (!hasShownMockNotice) {
-        toast.info('Authentication is in demo mode', {
-          description: 'Set VITE_CLERK_PUBLISHABLE_KEY in your environment to enable real authentication.'
+    // Only try to use Clerk if we actually have a publishable key
+    if (clerkAvailable) {
+      try {
+        const { isLoaded, isSignedIn, user } = useUser();
+        
+        setAuthValues({
+          isLoaded,
+          isSignedIn,
+          user,
+          mockMode: false
         });
-        setHasShownMockNotice(true);
+      } catch (error) {
+        console.warn('Error using Clerk authentication:', error);
+        enableMockMode();
       }
-      
-      // Use the default mock values
-      setAuthValues(defaultAuthContext);
+    } else {
+      // No Clerk key available, use mock mode
+      enableMockMode();
     }
-  }, [hasShownMockNotice]);
+  }, [clerkAvailable, hasShownMockNotice]);
+
+  const enableMockMode = () => {
+    // Only show the mock mode toast once
+    if (!hasShownMockNotice) {
+      toast.info('Authentication is in demo mode', {
+        description: 'Set VITE_CLERK_PUBLISHABLE_KEY in your environment to enable real authentication.'
+      });
+      setHasShownMockNotice(true);
+    }
+    
+    // Use the default mock values
+    setAuthValues(defaultAuthContext);
+  };
 
   return (
     <AuthContext.Provider value={authValues}>

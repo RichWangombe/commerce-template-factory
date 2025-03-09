@@ -12,8 +12,13 @@ const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
 // Create a simple root renderer with error boundary and Clerk provider
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+    {CLERK_PUBLISHABLE_KEY ? (
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+        <App />
+      </ClerkProvider>
+    ) : (
+      // When no publishable key is available, skip the Clerk provider entirely
       <App />
-    </ClerkProvider>
+    )}
   </ErrorBoundary>
 );
