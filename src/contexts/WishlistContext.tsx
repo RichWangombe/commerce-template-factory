@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type WishlistItem = {
   id: number;
@@ -62,7 +62,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 
 export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(wishlistReducer, initialState);
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useAuth();
 
   useEffect(() => {
     const loadWishlist = () => {
