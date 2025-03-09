@@ -7,7 +7,7 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 // Check if Supabase credentials are configured
 export const isSupabaseConfigured = () => {
-  return supabaseUrl && supabaseAnonKey && supabaseUrl !== 'https://your-supabase-url.supabase.co';
+  return supabaseUrl && supabaseAnonKey && supabaseUrl !== '';
 };
 
 // Create Supabase client
