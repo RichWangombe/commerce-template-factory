@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { toast } from 'sonner';
 
 // Create a context that will provide fallback values when Clerk isn't available
@@ -39,19 +38,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Only try to use Clerk if we actually have a publishable key
     if (clerkAvailable) {
-      try {
-        const { isLoaded, isSignedIn, user } = useUser();
-        
-        setAuthValues({
-          isLoaded,
-          isSignedIn,
-          user,
-          mockMode: false
-        });
-      } catch (error) {
-        console.warn('Error using Clerk authentication:', error);
+      // Import Clerk's useUser hook dynamically to prevent errors when not wrapped in ClerkProvider
+      import('@clerk/clerk-react').then(({ useUser }) => {
+        try {
+          // This will throw an error if not inside ClerkProvider
+          const { isLoaded, isSignedIn, user } = useUser();
+          
+          setAuthValues({
+            isLoaded,
+            isSignedIn,
+            user,
+            mockMode: false
+          });
+        } catch (error) {
+          console.warn('Error using Clerk authentication:', error);
+          enableMockMode();
+        }
+      }).catch(() => {
         enableMockMode();
-      }
+      });
     } else {
       // No Clerk key available, use mock mode
       enableMockMode();

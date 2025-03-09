@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
 import { UserPreferences } from '@/types/recommendation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface UserPreferencesContextType {
   preferences: UserPreferences;
@@ -24,7 +24,7 @@ const defaultPreferences: UserPreferences = {
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
 export const UserPreferencesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useAuth();
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
 

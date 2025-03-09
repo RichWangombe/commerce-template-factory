@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import { 
   Menu, 
   Bell, 
@@ -21,21 +20,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AdminSidebar } from "./AdminSidebar";
+import { useUserData } from "@/utils/auth";
 
 interface AdminHeaderProps {
   title: string;
 }
 
 export const AdminHeader = ({ title }: AdminHeaderProps) => {
-  const { user } = useUser();
+  const { user, getUserInitials } = useUserData();
   const [search, setSearch] = useState("");
-
-  // Get initials for avatar fallback
-  const getInitials = () => {
-    const first = user?.firstName?.[0] || "";
-    const last = user?.lastName?.[0] || "";
-    return (first + last).toUpperCase();
-  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-background px-4 md:px-6">
@@ -82,7 +75,7 @@ export const AdminHeader = ({ title }: AdminHeaderProps) => {
             <Button variant="ghost" className="flex items-center gap-2 md:gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.imageUrl} alt={user?.fullName || "User"} />
-                <AvatarFallback>{getInitials()}</AvatarFallback>
+                <AvatarFallback>{getUserInitials()}</AvatarFallback>
               </Avatar>
               <div className="hidden flex-col items-start md:flex">
                 <span className="text-sm font-medium">{user?.fullName}</span>
