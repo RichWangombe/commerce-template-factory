@@ -1,15 +1,15 @@
 
 import React, { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
+import { useUserData } from "@/utils/auth";
 
 export const ProfileTab: React.FC = () => {
-  const { user } = useUser();
+  const { user } = useUserData();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   
@@ -24,23 +24,20 @@ export const ProfileTab: React.FC = () => {
     try {
       setIsUpdating(true);
       
-      await user?.update({
-        firstName,
-        lastName,
-        username,
-      });
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
-      });
+      // In mock mode, just simulate a successful update
+      setTimeout(() => {
+        toast({
+          title: "Profile updated",
+          description: "Your profile information has been updated successfully.",
+        });
+        setIsUpdating(false);
+      }, 1000);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update profile.",
         variant: "destructive",
       });
-    } finally {
       setIsUpdating(false);
     }
   };
