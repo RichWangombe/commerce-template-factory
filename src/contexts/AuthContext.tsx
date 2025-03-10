@@ -2,6 +2,15 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+// Define type for the Clerk global object
+declare global {
+  interface Window {
+    Clerk?: {
+      user: any;
+    };
+  }
+}
+
 // Create a context that will provide fallback values when Clerk isn't available
 // This is useful for development and testing
 interface AuthContextType {
