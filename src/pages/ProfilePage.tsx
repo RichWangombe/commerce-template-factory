@@ -9,27 +9,14 @@ import { SettingsTab } from "@/components/profile/SettingsTab";
 import { PreferencesTab } from "@/components/profile/PreferencesTab";
 import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { AuthWrapper } from "@/components/AuthWrapper";
+import { Order, OrderStatus } from "@/types/checkout";
+import { useOrders } from "@/utils/dataFetchers";
 
 export const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
-
-  // Mock orders data for the OrdersTab
-  const mockOrders = [
-    {
-      id: "ORD-12345",
-      date: "2023-05-15",
-      status: "delivered",
-      total: 299.99,
-      items: 3
-    },
-    {
-      id: "ORD-12346",
-      date: "2023-06-20",
-      status: "shipped",
-      total: 149.50,
-      items: 2
-    }
-  ];
+  
+  // Use the orders query hook instead of hard-coded mock data
+  const { data: orders, isLoading: ordersLoading } = useOrders();
 
   return (
     <AuthWrapper requireAuth>
@@ -57,7 +44,7 @@ export const ProfilePage = () => {
                 </TabsContent>
                 
                 <TabsContent value="orders" className="space-y-6">
-                  <OrdersTab orders={mockOrders} />
+                  <OrdersTab orders={orders} />
                 </TabsContent>
                 
                 <TabsContent value="preferences" className="space-y-6">
