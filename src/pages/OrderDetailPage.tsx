@@ -1,98 +1,78 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { OrderTracker } from "@/components/order/OrderTracker";
 import { Order } from "@/types/checkout";
-
-// Mock data for a sample order - in a real app, this would come from an API
-const mockOrder: Order = {
-  id: "ORD123456789",
-  userId: "user123",
-  items: [
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      price: 79.99,
-      quantity: 1,
-      image: "/placeholder.svg",
-      variant: "Black",
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      price: 129.99,
-      quantity: 1,
-      image: "/placeholder.svg",
-    },
-  ],
-  shippingAddress: {
-    firstName: "John",
-    lastName: "Doe",
-    address1: "123 Main St",
-    city: "Anytown",
-    state: "CA",
-    zipCode: "12345",
-    country: "United States",
-    phone: "555-123-4567",
-  },
-  billingAddress: {
-    firstName: "John",
-    lastName: "Doe",
-    address1: "123 Main St",
-    city: "Anytown",
-    state: "CA",
-    zipCode: "12345",
-    country: "United States",
-    phone: "555-123-4567",
-  },
-  shippingMethod: {
-    id: "express",
-    name: "Express Shipping",
-    description: "Delivered in 2-3 business days",
-    price: 12.99,
-    estimatedDays: "2-3 business days",
-  },
-  paymentMethod: "card",
-  subtotal: 209.98,
-  tax: 17.85,
-  shipping: 12.99,
-  total: 240.82,
-  status: "shipped",
-  createdAt: "2023-09-15T10:30:00Z",
-  trackingNumber: "TRK9876543210",
-  estimatedDelivery: "September 18, 2023",
-  statusHistory: [
-    {
-      status: "pending",
-      timestamp: "2023-09-15T10:30:00Z",
-      description: "Order received",
-    },
-    {
-      status: "processing",
-      timestamp: "2023-09-15T14:20:00Z",
-      description: "Payment confirmed, preparing your order",
-    },
-    {
-      status: "shipped",
-      timestamp: "2023-09-16T09:15:00Z",
-      location: "Distribution Center, Los Angeles, CA",
-      description: "Your order has been shipped",
-    },
-  ],
-};
+import { apiService } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  
-  // In a real app, we would fetch the order data based on the orderId
-  // const { data: order, isLoading, error } = useQuery(['order', orderId], fetchOrderById);
-  
-  // For this example, we're using mock data
-  const order = mockOrder;
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!orderId) return;
+      
+      try {
+        setIsLoading(true);
+        const fetchedOrder = await apiService.getOrderById(orderId);
+        setOrder(fetchedOrder);
+      } catch (error) {
+        console.error("Error fetching order:", error);
+        toast({
+          title: "Error",
+          description: "Could not load order details. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchOrder();
+  }, [orderId, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading order details...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1 py-12">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <h1 className="text-2xl font-bold mb-4">Order Not Found</h1>
+              <p className="mb-6">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+              <Button asChild>
+                <Link to="/profile">Back to My Account</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

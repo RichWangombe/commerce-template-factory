@@ -3,6 +3,7 @@ import { apiService } from "@/services/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductCardProps } from "@/components/ProductCard";
 import { Order } from "@/types/checkout";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Extended Product interface with all the fields we need
 export interface Product extends ProductCardProps {
@@ -35,9 +36,12 @@ export const useProduct = (productId: number) => {
 
 // Order queries
 export const useOrders = () => {
+  const { user } = useAuth();
+  
   return useQuery({
-    queryKey: ['orders'],
-    queryFn: () => apiService.getUserOrders(),
+    queryKey: ['orders', user?.id],
+    queryFn: () => apiService.getUserOrders(user?.id || ''),
+    enabled: !!user?.id, // Only fetch orders if user is authenticated
   });
 };
 
@@ -52,12 +56,38 @@ export const useOrder = (orderId: string) => {
 // Order mutations
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   
   return useMutation({
-    mutationFn: (orderData: Partial<Order>) => apiService.createOrder(orderData),
+    mutationFn: (orderData: Partial<Order>) => {
+      // Ensure userId is set to the current user
+      const orderWithUserId = {
+        ...orderData,
+        userId: user?.id
+      };
+      
+      return apiService.createOrder(orderWithUserId);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate and refetch orders queries when a new order is created
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ['orders', user.id] });
+      }
+    },
+  });
+};
+
+// Profile queries and mutations
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (profileData: any) => {
+      const { updateProfile } = await import('@/utils/auth').then(m => m.useProfile());
+      return updateProfile(profileData);
+    },
     onSuccess: () => {
-      // Invalidate and refetch orders queries
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 };

@@ -1,5 +1,6 @@
 
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
 // Utility hook to get user data
 export const useUserData = () => {
@@ -44,7 +45,14 @@ export const useUserData = () => {
       return (user.email?.[0] || 'G').toUpperCase();
     },
     getImageUrl: () => user?.user_metadata?.avatar_url || '',
-    isAdmin: () => user?.user_metadata?.role === 'admin' || false,
+    isAdmin: () => {
+      // First check if the user has admin role in user_metadata (from Supabase auth)
+      if (user?.user_metadata?.role === 'admin') return true;
+      
+      // For checking profiles table role, we'd ideally do this as a separate hook
+      // or database query, but returning false for now as a fallback
+      return false;
+    },
   };
 };
 
@@ -52,7 +60,11 @@ export const useAuthFunctions = () => {
   const { signIn, signUp, signOut } = useAuth();
   
   const getToken = async (): Promise<string> => {
-    // This would be a real token when using Supabase
+    if (supabase) {
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token || "";
+    }
+    // Fallback for mock mode
     return "auth-token";
   };
   
@@ -61,5 +73,47 @@ export const useAuthFunctions = () => {
     signUp,
     signOut,
     getToken,
+  };
+};
+
+// New hook to manage profile data
+export const useProfile = () => {
+  const { user } = useAuth();
+  
+  const fetchProfile = async () => {
+    if (!user) return null;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+    
+    return data;
+  };
+  
+  const updateProfile = async (profileData: any) => {
+    if (!user) throw new Error('User not authenticated');
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('id', user.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return data;
+  };
+  
+  return {
+    fetchProfile,
+    updateProfile,
   };
 };

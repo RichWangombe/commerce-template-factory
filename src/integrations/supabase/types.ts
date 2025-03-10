@@ -161,7 +161,9 @@ export type Database = {
           id: string
           last_name: string | null
           phone: string | null
+          role: string | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           address?: Json | null
@@ -171,7 +173,9 @@ export type Database = {
           id: string
           last_name?: string | null
           phone?: string | null
+          role?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           address?: Json | null
@@ -181,7 +185,9 @@ export type Database = {
           id?: string
           last_name?: string | null
           phone?: string | null
+          role?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
