@@ -7,7 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Get Clerk publishable key from environment variable
 // In development or when not properly configured, we'll use a fallback mock mode
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_dummy-key-for-development";
 
 // Create a simple root renderer with error boundary and Clerk provider
 createRoot(document.getElementById("root")!).render(

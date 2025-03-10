@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { Badge } from "@/components/ui/badge";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Navbar = () => {
   const { totalItems, toggleCart } = useCart();
   const { state: wishlistState } = useWishlist();
+  const { isSignedIn, user } = useAuth();
 
   return (
     <header className="w-full border-b border-neutral-100">
@@ -83,15 +84,24 @@ export const Navbar = () => {
             </Link>
             
             {/* Authentication UI */}
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
+            {isSignedIn ? (
+              <div className="relative rounded-full p-2 overflow-hidden bg-neutral-200">
+                {user?.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt={user.fullName || "User"} 
+                    className="h-5 w-5 rounded-full"
+                  />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+              </div>
+            ) : (
               <Link to="/sign-in" className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Sign In</span>
               </Link>
-            </SignedOut>
+            )}
           </div>
         </div>
       </div>
