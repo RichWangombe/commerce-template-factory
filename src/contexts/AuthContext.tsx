@@ -1,99 +1,205 @@
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
+import { Session } from '@supabase/supabase-js';
 
-// Define type for the Clerk global object
-declare global {
-  interface Window {
-    Clerk?: {
-      user: any;
-    };
-  }
-}
-
-// Create a context that will provide fallback values when Clerk isn't available
-// This is useful for development and testing
+// Auth context type definition
 interface AuthContextType {
   isLoaded: boolean;
-  isSignedIn: boolean | undefined;
+  isSignedIn: boolean;
   user: any | null;
+  session: Session | null;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
   mockMode: boolean;
 }
 
+// Default mock values for development
 const defaultAuthContext: AuthContextType = {
   isLoaded: true,
-  isSignedIn: true, // Default to signed in for demo purposes
-  user: {
-    id: 'mock-user-id',
-    firstName: 'Demo',
-    lastName: 'User',
-    fullName: 'Demo User',
-    imageUrl: '',
-    primaryEmailAddress: { emailAddress: 'demo@example.com' },
-    publicMetadata: { role: 'user' }
-  },
+  isSignedIn: false,
+  user: null,
+  session: null,
+  signIn: async () => ({ error: null }),
+  signUp: async () => ({ error: null }),
+  signOut: async () => {},
   mockMode: true
 };
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [authValues, setAuthValues] = useState<AuthContextType>(defaultAuthContext);
+  const [authState, setAuthState] = useState<Omit<AuthContextType, 'signIn' | 'signUp' | 'signOut'>>({
+    isLoaded: false,
+    isSignedIn: false,
+    user: null,
+    session: null,
+    mockMode: false
+  });
   const [hasShownMockNotice, setHasShownMockNotice] = useState(false);
-  const clerkAvailable = typeof window !== 'undefined' && 
-                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY !== 'pk_test_dummy-key-for-development';
   
+  // Check if Supabase is properly configured
+  const supabaseConfigured = supabase && supabaseStatus.isConfigured;
+
   useEffect(() => {
-    // Only try to use Clerk if we actually have a valid publishable key
-    if (clerkAvailable) {
-      // Instead of trying to use Clerk hooks directly, we'll check if Clerk is
-      // properly initialized in the global window object
-      if (window.Clerk && window.Clerk.user) {
-        try {
-          const isSignedIn = !!window.Clerk.user;
-          const user = window.Clerk.user;
+    if (supabaseConfigured) {
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          const isSignedIn = !!session;
+          const user = session?.user || null;
           
-          setAuthValues({
+          setAuthState({
             isLoaded: true,
             isSignedIn,
             user,
+            session,
             mockMode: false
           });
-        } catch (error) {
-          console.warn('Error accessing Clerk user:', error);
-          enableMockMode();
+          
+          // Log auth events for debugging
+          console.log('Auth state change:', event, isSignedIn ? 'signed in' : 'signed out');
         }
-      } else {
-        console.warn('Clerk is not properly initialized');
-        enableMockMode();
-      }
+      );
+
+      // Initial session check
+      const initializeAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setAuthState({
+            isLoaded: true,
+            isSignedIn: true,
+            user: session.user,
+            session,
+            mockMode: false
+          });
+        } else {
+          setAuthState({
+            isLoaded: true,
+            isSignedIn: false,
+            user: null,
+            session: null,
+            mockMode: false
+          });
+        }
+      };
+      
+      initializeAuth();
+
+      // Cleanup subscription on unmount
+      return () => {
+        subscription.unsubscribe();
+      };
     } else {
-      // No valid Clerk key available, use mock mode
+      // Supabase not configured, use mock mode
       enableMockMode();
     }
-  }, [clerkAvailable, hasShownMockNotice]);
+  }, [supabaseConfigured]);
 
   const enableMockMode = () => {
     // Only show the mock mode toast once
     if (!hasShownMockNotice) {
       toast.info('Authentication is in demo mode', {
-        description: 'Set VITE_CLERK_PUBLISHABLE_KEY in your environment to enable real authentication.'
+        description: 'Set up Supabase properly to enable real authentication.'
       });
       setHasShownMockNotice(true);
     }
     
-    // Use the default mock values
-    setAuthValues(defaultAuthContext);
+    // Set mock values
+    setAuthState({
+      isLoaded: true,
+      isSignedIn: true,
+      user: {
+        id: 'mock-user-id',
+        email: 'demo@example.com',
+        user_metadata: {
+          first_name: 'Demo',
+          last_name: 'User',
+        }
+      },
+      session: null,
+      mockMode: true
+    });
+  };
+
+  // Auth functions
+  const signIn = async (email: string, password: string) => {
+    if (supabaseConfigured) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    }
+    
+    // Mock signIn when Supabase isn't configured
+    console.log('Mock sign in:', email);
+    toast.success('Signed in as Demo User');
+    
+    // Use mock data
+    enableMockMode();
+    return { error: null };
+  };
+
+  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+    if (supabaseConfigured) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          }
+        }
+      });
+      return { error };
+    }
+    
+    // Mock signUp when Supabase isn't configured
+    console.log('Mock sign up:', email);
+    toast.success('Account created successfully');
+    
+    // Use mock data
+    enableMockMode();
+    return { error: null };
+  };
+
+  const signOut = async () => {
+    if (supabaseConfigured) {
+      await supabase.auth.signOut();
+    } else {
+      // Mock signOut
+      console.log('Mock sign out');
+      setAuthState({
+        ...authState,
+        isSignedIn: false,
+        user: null,
+        session: null
+      });
+      
+      toast.info('Signed out');
+    }
+  };
+
+  // Combine state and functions for the full context value
+  const contextValue: AuthContextType = {
+    ...authState,
+    signIn,
+    signUp,
+    signOut
   };
 
   return (
-    <AuthContext.Provider value={authValues}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+// Hook for easy access to auth context
+export const useAuth = () => {
   return useContext(AuthContext);
 };
+
+// Import supabase status
+import { supabaseStatus } from '@/lib/supabase';

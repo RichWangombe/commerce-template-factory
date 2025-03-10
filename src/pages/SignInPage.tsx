@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -16,22 +17,44 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn, mockMode } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Currently using mock auth for demonstration
     setIsLoading(true);
     
-    // Mock auth flow
-    setTimeout(() => {
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message || "Please check your credentials and try again",
+          variant: "destructive",
+        });
+      } else {
+        if (mockMode) {
+          toast({
+            title: "Demo Mode",
+            description: "You are signed in using demo mode.",
+          });
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in",
+          });
+        }
+        navigate("/");
+      }
+    } catch (err: any) {
       toast({
-        title: "Demo Mode",
-        description: "Authentication is currently in demo mode. You would be signed in now.",
+        title: "An error occurred",
+        description: err.message || "Could not process your request",
+        variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
-      navigate("/");
-    }, 1000);
+    }
   };
 
   return (

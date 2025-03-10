@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignUpPage() {
   const [firstName, setFirstName] = useState("");
@@ -18,22 +19,44 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signUp, mockMode } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Currently using mock auth for demonstration
     setIsLoading(true);
     
-    // Mock sign-up flow
-    setTimeout(() => {
+    try {
+      const { error } = await signUp(email, password, firstName, lastName);
+      
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message || "Please check your information and try again",
+          variant: "destructive",
+        });
+      } else {
+        if (mockMode) {
+          toast({
+            title: "Demo Mode",
+            description: "Account would be created in a real environment. You are now signed in.",
+          });
+        } else {
+          toast({
+            title: "Account created",
+            description: "Please check your email to verify your account",
+          });
+        }
+        navigate("/");
+      }
+    } catch (err: any) {
       toast({
-        title: "Demo Mode",
-        description: "Registration is currently in demo mode. Account would be created now.",
+        title: "An error occurred",
+        description: err.message || "Could not process your request",
+        variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
-      navigate("/");
-    }, 1000);
+    }
   };
 
   return (
