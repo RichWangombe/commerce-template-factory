@@ -3,7 +3,7 @@ import { PropsWithChildren, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAuthFunctions } from "@/utils/auth";
+import { useAuthFunctions, useUserData } from "@/utils/auth";
 
 type AuthWrapperProps = PropsWithChildren<{
   requireAuth?: boolean;
@@ -11,13 +11,11 @@ type AuthWrapperProps = PropsWithChildren<{
 }>;
 
 export function AuthWrapper({ children, requireAuth = false, adminOnly = false }: AuthWrapperProps) {
-  const { isLoaded, isSignedIn, user } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { isAdmin } = useUserData();
   const { getToken } = useAuthFunctions();
   const location = useLocation();
   const { toast } = useToast();
-
-  // Check if user has admin role (for admin routes)
-  const isAdmin = user?.publicMetadata?.role === "admin";
 
   useEffect(() => {
     // Example of how to get the auth token when needed
@@ -51,7 +49,7 @@ export function AuthWrapper({ children, requireAuth = false, adminOnly = false }
     return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
-  if (adminOnly && (!isSignedIn || !isAdmin)) {
+  if (adminOnly && (!isSignedIn || !isAdmin())) {
     // Redirect to home page if admin access is required but user is not an admin
     toast({
       title: "Access denied",

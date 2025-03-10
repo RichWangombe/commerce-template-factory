@@ -9,13 +9,18 @@ import { Loader } from "lucide-react";
 import { useUserData } from "@/utils/auth";
 
 export const ProfileTab: React.FC = () => {
-  const { user } = useUserData();
+  const { user, getUserName, getUserEmail } = useUserData();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
   
+  // Extract first and last name from user metadata
+  const firstName = user?.user_metadata?.first_name || "";
+  const lastName = user?.user_metadata?.last_name || "";
+  const email = getUserEmail();
+  
   // Form state
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [formFirstName, setFormFirstName] = useState(firstName);
+  const [formLastName, setFormLastName] = useState(lastName);
   const [username, setUsername] = useState(user?.username || "");
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -57,16 +62,16 @@ export const ProfileTab: React.FC = () => {
               <Label htmlFor="firstName">First name</Label>
               <Input
                 id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                value={formFirstName}
+                onChange={(e) => setFormFirstName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last name</Label>
               <Input
                 id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                value={formLastName}
+                onChange={(e) => setFormLastName(e.target.value)}
               />
             </div>
           </div>
@@ -85,7 +90,7 @@ export const ProfileTab: React.FC = () => {
             <Input
               id="email"
               type="email"
-              value={user?.primaryEmailAddress?.emailAddress || ""}
+              value={email}
               disabled
             />
             <p className="text-xs text-muted-foreground">

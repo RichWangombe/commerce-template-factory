@@ -52,8 +52,7 @@ export const useAuthFunctions = () => {
   const { signIn, signUp, signOut } = useAuth();
   
   const getToken = async (): Promise<string> => {
-    // Using Supabase this would typically be handled automatically
-    // This is just for compatibility with any code expecting a token
+    // This would be a real token when using Supabase
     return "auth-token";
   };
   
