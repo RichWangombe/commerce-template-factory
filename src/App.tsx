@@ -34,11 +34,11 @@ function App() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <RecommendationProvider>
-              <UserPreferencesProvider>
-                <Router>
+        <Router>
+          <CartProvider>
+            <WishlistProvider>
+              <RecommendationProvider>
+                <UserPreferencesProvider>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
@@ -71,14 +71,14 @@ function App() {
                     {/* 404 */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
-                </Router>
-                
-                <CartDrawer />
-                <Toaster position="top-right" richColors />
-              </UserPreferencesProvider>
-            </RecommendationProvider>
-          </WishlistProvider>
-        </CartProvider>
+                  
+                  <CartDrawer />
+                  <Toaster position="top-right" richColors />
+                </UserPreferencesProvider>
+              </RecommendationProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </Router>
       </AuthProvider>
     </QueryProvider>
   );
