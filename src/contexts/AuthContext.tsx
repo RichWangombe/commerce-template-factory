@@ -42,10 +42,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [hasShownMockNotice, setHasShownMockNotice] = useState(false);
   const clerkAvailable = typeof window !== 'undefined' && 
                         import.meta.env.VITE_CLERK_PUBLISHABLE_KEY && 
-                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.length > 0;
+                        import.meta.env.VITE_CLERK_PUBLISHABLE_KEY !== 'pk_test_dummy-key-for-development';
   
   useEffect(() => {
-    // Only try to use Clerk if we actually have a publishable key
+    // Only try to use Clerk if we actually have a valid publishable key
     if (clerkAvailable) {
       // Instead of trying to use Clerk hooks directly, we'll check if Clerk is
       // properly initialized in the global window object
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         enableMockMode();
       }
     } else {
-      // No Clerk key available, use mock mode
+      // No valid Clerk key available, use mock mode
       enableMockMode();
     }
   }, [clerkAvailable, hasShownMockNotice]);
