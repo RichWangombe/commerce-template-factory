@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useRecommendations } from "@/contexts/recommendation";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { ProductRecommendation } from "@/types/recommendation";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,7 @@ export const PersonalizedSection = ({
 }: PersonalizedSectionProps) => {
   const recommendations = useRecommendations();
   const { preferences } = useUserPreferences();
-  const { isSignedIn } = useUser();
+  const { isSignedIn } = useAuth(); // Use our AuthContext instead of Clerk's useUser
   const [products, setProducts] = useState<ProductRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

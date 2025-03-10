@@ -1,36 +1,30 @@
 
-import { useUser } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
-import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { useEffect } from "react";
-
-// In a real app, you would check if the user has admin role
-// by fetching this information from your backend
-const isAdmin = (userId: string | undefined) => {
-  // For demo purposes, we'll consider a specific user ID as admin
-  // Replace this with actual logic in a real application
-  return userId === "user123"; // Just an example, modify as needed
-};
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdminWrapperProps {
   children: React.ReactNode;
 }
 
 export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn, user } = useAuth();
+  
+  // Check if user has admin role
+  const isAdmin = user?.publicMetadata?.role === 'admin';
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && !isAdmin(user.id)) {
+    if (isLoaded && isSignedIn && !isAdmin) {
       toast.error("You don't have permission to access the admin area.");
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, isAdmin]);
 
   if (!isLoaded) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-50">
         <div className="text-center">
-          <Spinner size="lg" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           <p className="mt-4 text-muted-foreground">Loading admin panel...</p>
         </div>
       </div>
@@ -42,7 +36,7 @@ export const AdminWrapper: React.FC<AdminWrapperProps> = ({ children }) => {
     return <Navigate to="/sign-in" replace />;
   }
 
-  if (!isAdmin(user.id)) {
+  if (!isAdmin) {
     return <Navigate to="/" replace />;
   }
 
