@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { Loader } from "lucide-react";
 
 export default function UpdatePasswordPage() {
@@ -16,7 +16,7 @@ export default function UpdatePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValidResetLink, setIsValidResetLink] = useState(true);
-  const { toast } = useToast();
+  const { updatePassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function UpdatePasswordPage() {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,9 +56,7 @@ export default function UpdatePasswordPage() {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password
-      });
+      const { error } = await updatePassword(password);
       
       if (error) {
         toast({

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -13,6 +12,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
   mockMode: boolean;
 }
 
@@ -25,13 +26,15 @@ const defaultAuthContext: AuthContextType = {
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null }),
   signOut: async () => {},
+  resetPassword: async () => ({ error: null }),
+  updatePassword: async () => ({ error: null }),
   mockMode: true
 };
 
 const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [authState, setAuthState] = useState<Omit<AuthContextType, 'signIn' | 'signUp' | 'signOut'>>({
+  const [authState, setAuthState] = useState<Omit<AuthContextType, 'signIn' | 'signUp' | 'signOut' | 'resetPassword' | 'updatePassword'>>({
     isLoaded: false,
     isSignedIn: false,
     user: null,
@@ -189,12 +192,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // Password reset request
+  const resetPassword = async (email: string) => {
+    if (supabaseConfigured) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      return { error };
+    }
+    
+    // Mock resetPassword when Supabase isn't configured
+    console.log('Mock password reset for:', email);
+    toast.success('Password reset email sent');
+    
+    return { error: null };
+  };
+
+  // Update password (after reset)
+  const updatePassword = async (password: string) => {
+    if (supabaseConfigured) {
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+      return { error };
+    }
+    
+    // Mock updatePassword when Supabase isn't configured
+    console.log('Mock password update');
+    toast.success('Password updated successfully');
+    
+    return { error: null };
+  };
+
   // Combine state and functions for the full context value
   const contextValue: AuthContextType = {
     ...authState,
     signIn,
     signUp,
-    signOut
+    signOut,
+    resetPassword,
+    updatePassword
   };
 
   return (
