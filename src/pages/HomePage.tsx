@@ -1,7 +1,5 @@
 
-import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
+import { MainLayout } from "@/components/layouts/MainLayout";
 import { Hero } from "@/components/Hero";
 import { PersonalizedSection } from "@/components/PersonalizedSection";
 import { useUserPreferences } from "@/contexts/UserPreferencesContext";
@@ -14,28 +12,15 @@ import { categories, featuredProducts, promotions } from "@/data/homePageData";
 
 export const HomePage = () => {
   const { preferences } = useUserPreferences();
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      setIsLoaded(true);
-    }, 200);
-  }, []);
 
   return (
-    <div className={`flex min-h-screen flex-col bg-white ${isLoaded ? 'animate-fade-in' : 'opacity-0'}`}>
-      <Navbar />
-      <main className="flex-1">
-        <Hero />
-        
-        {/* Categories */}
+    <MainLayout className="p-0">
+      <Hero />
+      
+      <div className="space-y-16 mb-16">
         <CategoriesSection categories={categories} />
-        
-        {/* Personalized Recommendations with link to full page */}
         <RecommendationSection />
         
-        {/* Recently Viewed */}
         {preferences.showRecentlyViewed && (
           <PersonalizedSection
             title="Recently Viewed"
@@ -45,10 +30,8 @@ export const HomePage = () => {
           />
         )}
         
-        {/* Featured Products */}
         <FeaturedProductsSection products={featuredProducts} />
         
-        {/* Collaborative Recommendations */}
         <PersonalizedSection
           title="Customers Also Bought"
           subtitle="Products popular with customers like you"
@@ -56,7 +39,6 @@ export const HomePage = () => {
           limit={4}
         />
         
-        {/* Trending Products */}
         {preferences.showTrending && (
           <PersonalizedSection
             title="Trending Now"
@@ -66,7 +48,6 @@ export const HomePage = () => {
           />
         )}
         
-        {/* Seasonal Recommendations */}
         {preferences.showSeasonalOffers && (
           <PersonalizedSection
             title="Seasonal Picks"
@@ -76,14 +57,10 @@ export const HomePage = () => {
           />
         )}
         
-        {/* Promotions */}
         <PromotionsSection promotions={promotions} />
-        
-        {/* Newsletter */}
         <NewsletterSection />
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </MainLayout>
   );
 };
 

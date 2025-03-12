@@ -1,94 +1,83 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShoppingCart, User, Heart } from "lucide-react";
 import { NavbarSearch } from "@/components/NavbarSearch";
 import ThemeToggle from "@/components/ui/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export const Navbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const NavLinks = () => (
+    <>
+      <Link to="/categories" className="text-sm font-medium hover:text-primary transition-colors">
+        Categories
+      </Link>
+      <Link to="/new-arrivals" className="text-sm font-medium hover:text-primary transition-colors">
+        New Arrivals
+      </Link>
+      <Link to="/products" className="text-sm font-medium hover:text-primary transition-colors">
+        All Products
+      </Link>
+    </>
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 md:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 md:gap-4">
-            <Link to="/" className="hidden md:block text-xl font-bold">
-              E-Commerce
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <Sheet>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className="-ml-2">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <nav className="flex flex-col gap-4 mt-8">
+                  <NavLinks />
+                </nav>
+              </SheetContent>
+            </Sheet>
+            
+            <Link to="/" className="font-semibold text-xl">
+              Store
             </Link>
-            <button
-              onClick={toggleMobileMenu}
-              className="md:hidden text-gray-500 focus:outline-none focus:text-gray-700"
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
-          </div>
 
-          <div className="hidden md:flex items-center gap-4">
-            <NavbarSearch />
-            <Link to="/categories" className="text-sm font-medium hover:text-gray-600">
-              Categories
-            </Link>
-            <Link to="/new-arrivals" className="text-sm font-medium hover:text-gray-600">
-              New Arrivals
-            </Link>
-            <Link to="/products" className="text-sm font-medium hover:text-gray-600">
-              All Products
-            </Link>
+            <nav className="hidden md:flex items-center gap-6 ml-6">
+              <NavLinks />
+            </nav>
           </div>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link to="/cart" className="text-gray-500 hover:text-gray-700">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-6 w-6"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M7.5 6v1.5M12 6v1.5m-3 0h.75m0 0h-.75M15 6v1.5m-3 0h.75M6 18.75h12a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H6a1.5 1.5 0 00-1.5 1.5v12a1.5 1.5 0 001.5 1.5zm0 0h12.75c.515 0 .939.426.939.939v.753a2.25 2.25 0 01-2.25 2.25H5.25a2.25 2.25 0 01-2.25-2.25v-.753c0-.514.424-.939.939-.939H6z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </Link>
-            <Link to="/profile" className="text-gray-500 hover:text-gray-700">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-6 w-6"
-              >
-                <path d="M12 12a4.5 4.5 0 100-9 4.5 4.5 0 000 9zm0 3a7.5 7.5 0 00-7.5 7.5V21h15v-1.5a7.5 7.5 0 00-7.5-7.5z" />
-              </svg>
-            </Link>
+            <NavbarSearch isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
+            
+            <div className="flex items-center gap-1">
+              <ThemeToggle />
+              
+              <Link to="/wishlist">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Heart className="h-5 w-5" />
+                </Button>
+              </Link>
+              
+              <Link to="/cart">
+                <Button variant="ghost" size="icon">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </Link>
+              
+              <Link to="/profile">
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-      {isMobileMenuOpen && (
-        <div className="md:hidden p-4">
-          <NavbarSearch />
-          <div className="flex flex-col gap-2 mt-4">
-            <Link to="/categories" className="block text-sm font-medium hover:text-gray-600">
-              Categories
-            </Link>
-            <Link to="/new-arrivals" className="block text-sm font-medium hover:text-gray-600">
-              New Arrivals
-            </Link>
-            <Link to="/products" className="block text-sm font-medium hover:text-gray-600">
-              All Products
-            </Link>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
