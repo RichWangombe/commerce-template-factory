@@ -24,10 +24,8 @@ export default function UpdatePasswordPage() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (!hashParams.get("access_token")) {
       setIsValidResetLink(false);
-      toast({
-        title: "Invalid link",
+      toast.error("Invalid link", {
         description: "This password reset link is invalid or has expired.",
-        variant: "destructive",
       });
     }
   }, []);
@@ -36,19 +34,15 @@ export default function UpdatePasswordPage() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
+      toast.error("Passwords don't match", {
         description: "Please ensure both passwords match.",
-        variant: "destructive",
       });
       return;
     }
     
     if (password.length < 6) {
-      toast({
-        title: "Password too short",
+      toast.error("Password too short", {
         description: "Password must be at least 6 characters long.",
-        variant: "destructive",
       });
       return;
     }
@@ -59,14 +53,11 @@ export default function UpdatePasswordPage() {
       const { error } = await updatePassword(password);
       
       if (error) {
-        toast({
-          title: "Error updating password",
+        toast.error("Error updating password", {
           description: error.message,
-          variant: "destructive",
         });
       } else {
-        toast({
-          title: "Password updated",
+        toast.success("Password updated", {
           description: "Your password has been successfully updated.",
         });
         
@@ -76,10 +67,8 @@ export default function UpdatePasswordPage() {
         }, 2000);
       }
     } catch (err: any) {
-      toast({
-        title: "An error occurred",
+      toast.error("An error occurred", {
         description: err.message || "Could not update your password",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

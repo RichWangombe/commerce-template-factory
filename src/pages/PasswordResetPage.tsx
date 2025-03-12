@@ -26,23 +26,18 @@ export default function PasswordResetPage() {
       const { error } = await resetPassword(email);
       
       if (error) {
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: error.message || "Failed to send password reset email",
-          variant: "destructive",
         });
       } else {
         setIsSuccess(true);
-        toast({
-          title: "Success",
+        toast.success("Success", {
           description: "Password reset email sent. Please check your inbox.",
         });
       }
     } catch (err: any) {
-      toast({
-        title: "An error occurred",
+      toast.error("An error occurred", {
         description: err.message || "Could not process your request",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
