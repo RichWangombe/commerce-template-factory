@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
@@ -110,6 +111,16 @@ const App = () => {
                         <AdminRecommendationsPage />
                       </AdminWrapper>
                     } />
-                    
+                  </Routes>
+                </RecommendationProvider>
+              </UserPreferencesProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </QueryProvider>
+    </ThemeProvider>
+  );
+};
 
+export default App;
 
