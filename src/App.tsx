@@ -36,88 +36,80 @@ import { SupabaseStatusChecker } from "@/components/SupabaseStatusChecker";
 import { RecommendationProvider } from "@/contexts/recommendation";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
-function App() {
+const App = () => {
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <UserPreferencesProvider>
-              <RecommendationProvider>
-                <SupabaseStatusChecker />
-                <Toaster position="top-right" />
-                
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/product/:id" element={<ProductDetailPage />} />
-                  <Route path="/category/:category" element={<CategoryPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
-                  <Route path="/order/:id" element={
-                    <AuthWrapper requireAuth>
-                      <OrderDetailPage />
-                    </AuthWrapper>
-                  } />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/sign-in" element={<SignInPage />} />
-                  <Route path="/sign-up" element={<SignUpPage />} />
-                  <Route path="/reset-password" element={<PasswordResetPage />} />
-                  <Route path="/update-password" element={<UpdatePasswordPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/search" element={<SearchPage />} />
-                  <Route path="/recommendations" element={<RecommendationsPage />} />
+    <ThemeProvider defaultTheme="system" storageKey="e-commerce-theme">
+      <QueryProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <UserPreferencesProvider>
+                <RecommendationProvider>
+                  <SupabaseStatusChecker />
+                  <Toaster position="top-right" />
                   
-                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
-                  
-                  {/* Admin routes */}
-                  <Route path="/admin" element={
-                    <AdminWrapper>
-                      <AdminDashboardPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/products" element={
-                    <AdminWrapper>
-                      <AdminProductsPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/products/new" element={
-                    <AdminWrapper>
-                      <AdminProductFormPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/products/:id" element={
-                    <AdminWrapper>
-                      <AdminProductFormPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/orders" element={
-                    <AdminWrapper>
-                      <AdminOrdersPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/users" element={
-                    <AdminWrapper>
-                      <AdminUsersPage />
-                    </AdminWrapper>
-                  } />
-                  <Route path="/admin/recommendations" element={
-                    <AdminWrapper>
-                      <AdminRecommendationsPage />
-                    </AdminWrapper>
-                  } />
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </RecommendationProvider>
-            </UserPreferencesProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
-    </QueryProvider>
-  );
-}
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/home" element={<HomePage />} />
+                    <Route path="/product/:id" element={<ProductDetailPage />} />
+                    <Route path="/category/:category" element={<CategoryPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />
+                    <Route path="/order/:id" element={
+                      <AuthWrapper requireAuth>
+                        <OrderDetailPage />
+                      </AuthWrapper>
+                    } />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/sign-in" element={<SignInPage />} />
+                    <Route path="/sign-up" element={<SignUpPage />} />
+                    <Route path="/reset-password" element={<PasswordResetPage />} />
+                    <Route path="/update-password" element={<UpdatePasswordPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/recommendations" element={<RecommendationsPage />} />
+                    
+                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                    
+                    {/* Admin routes */}
+                    <Route path="/admin" element={
+                      <AdminWrapper>
+                        <AdminDashboardPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/products" element={
+                      <AdminWrapper>
+                        <AdminProductsPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/products/new" element={
+                      <AdminWrapper>
+                        <AdminProductFormPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/products/:id" element={
+                      <AdminWrapper>
+                        <AdminProductFormPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/orders" element={
+                      <AdminWrapper>
+                        <AdminOrdersPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/users" element={
+                      <AdminWrapper>
+                        <AdminUsersPage />
+                      </AdminWrapper>
+                    } />
+                    <Route path="/admin/recommendations" element={
+                      <AdminWrapper>
+                        <AdminRecommendationsPage />
+                      </AdminWrapper>
+                    } />
+                    
 
-export default App;
+

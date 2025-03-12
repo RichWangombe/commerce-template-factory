@@ -58,7 +58,7 @@ export const getViewedBasedRecommendations = (
           ...p,
           source: {
             type: 'viewed' as const,
-            confidence: 0.75,
+            confidence: calculateSimilarityConfidence(p, viewedProduct),
           }
         }))
         .slice(0, 2); // Limit to 2 recommendations per viewed product
@@ -68,6 +68,31 @@ export const getViewedBasedRecommendations = (
   }
   
   return recommendations;
+};
+
+/**
+ * Calculates similarity confidence between two products
+ * This is a more sophisticated algorithm that takes into account
+ * category, price range, and other factors
+ */
+const calculateSimilarityConfidence = (product1: any, product2: any): number => {
+  let score = 0.75; // Base confidence
+  
+  // Boost score if same category
+  if (product1.category === product2.category) {
+    score += 0.1;
+  }
+  
+  // Adjust based on price similarity (products with similar prices get higher confidence)
+  const priceDiff = Math.abs(product1.price - product2.price);
+  const priceRange = Math.max(product1.price, product2.price) * 0.2; // 20% of the higher price
+  
+  if (priceDiff < priceRange) {
+    score += 0.05;
+  }
+  
+  // Cap at 0.95 maximum
+  return Math.min(score, 0.95);
 };
 
 /**
@@ -121,17 +146,24 @@ export const getRandomRecommendations = (
 
 /**
  * Collaborative filtering based on user purchase history
+ * Enhanced version with more sophisticated matching
  */
 export const getCollaborativeRecommendations = (
   purchasedItems: CartItem[],
   viewedProducts: number[]
 ): ProductRecommendation[] => {
   // In a real app, this would use actual collaborative filtering algorithms
-  // For now, we'll use a simplified approach based on purchase patterns
+  // For now, we'll use a more sophisticated approach based on purchase patterns
   
-  // Get categories of purchased items
-  const purchasedCategories = new Set<string>();
   const purchasedIds = purchasedItems.map(item => item.id);
+  
+  // No purchase history
+  if (purchasedIds.length === 0) {
+    return [];
+  }
+  
+  // Find categories of purchased items
+  const purchasedCategories = new Set<string>();
   
   // Find categories of purchased items
   purchasedItems.forEach(item => {
@@ -156,7 +188,7 @@ export const getCollaborativeRecommendations = (
       .map(p => ({
         ...p,
         source: {
-          type: 'purchased' as const,
+          type: 'collaborative' as const,
           confidence: 0.8,
         }
       }))
@@ -165,5 +197,68 @@ export const getCollaborativeRecommendations = (
     recommendations.push(...categoryProducts);
   });
   
+  // Add "purchased together" recommendations
+  const purchasedTogetherRecommendations = mockProducts
+    .filter(p => 
+      !purchasedIds.includes(p.id) &&
+      !viewedProducts.includes(p.id) &&
+      !recommendations.some(r => r.id === p.id) &&
+      // Simple algorithm to determine "purchased together" - in a real app this would be more sophisticated
+      Math.random() > 0.7 // Randomly select some products for demo purposes
+    )
+    .map(p => ({
+      ...p,
+      source: {
+        type: 'purchased' as const,
+        confidence: 0.75,
+      }
+    }))
+    .slice(0, 2);
+  
+  recommendations.push(...purchasedTogetherRecommendations);
+  
   return recommendations.slice(0, 4); // Limit to 4 total
+};
+
+/**
+ * Gets seasonal recommendations
+ */
+export const getSeasonalRecommendations = (
+  viewedProducts: number[],
+  existingRecommendations: ProductRecommendation[],
+  purchasedIds: number[],
+  limit: number
+): ProductRecommendation[] => {
+  const existingIds = existingRecommendations.map(r => r.id);
+  const usedIds = [...viewedProducts, ...purchasedIds, ...existingIds];
+  
+  // Determine current season
+  const now = new Date();
+  const month = now.getMonth(); // 0-11
+  
+  let seasonalCategory: string;
+  
+  // Simple season detection
+  if (month >= 2 && month <= 4) {
+    seasonalCategory = "Spring"; // Spring
+  } else if (month >= 5 && month <= 7) {
+    seasonalCategory = "Summer"; // Summer
+  } else if (month >= 8 && month <= 10) {
+    seasonalCategory = "Fall"; // Fall/Autumn
+  } else {
+    seasonalCategory = "Winter"; // Winter
+  }
+  
+  // For demo purposes, just return some products and label them as seasonal
+  return mockProducts
+    .filter(p => !usedIds.includes(p.id))
+    .sort(() => Math.random() - 0.5) // Shuffle
+    .map(p => ({
+      ...p,
+      source: {
+        type: 'seasonal' as const,
+        confidence: 0.7,
+      }
+    }))
+    .slice(0, limit);
 };
