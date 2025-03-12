@@ -41,7 +41,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 
 const App = () => {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="e-commerce-theme">
+    <ThemeProvider defaultTheme="light" storageKey="e-commerce-theme">
       <QueryProvider>
         <AuthProvider>
           <CartProvider>
@@ -123,4 +123,3 @@ const App = () => {
 };
 
 export default App;
-

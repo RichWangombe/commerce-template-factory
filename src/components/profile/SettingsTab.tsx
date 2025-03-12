@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useTheme } from "@/providers/ThemeProvider";
 
 export const SettingsTab: React.FC = () => {
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [marketingEmails, setMarketingEmails] = React.useState(true);
   const [orderUpdates, setOrderUpdates] = React.useState(true);
   const [productUpdates, setProductUpdates] = React.useState(false);
-  const [darkMode, setDarkMode] = React.useState(false);
   
   const handleSavePreferences = () => {
     // In a real app, this would be an API call to save user preferences
@@ -98,17 +99,28 @@ export const SettingsTab: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="dark-mode" className="flex flex-col space-y-1">
-              <span>Dark mode</span>
+            <Label htmlFor="theme-mode" className="flex flex-col space-y-1">
+              <span>Theme mode</span>
               <span className="text-xs font-normal text-muted-foreground">
-                Switch between light and dark themes.
+                Choose between light and dark theme.
               </span>
             </Label>
-            <Switch
-              id="dark-mode"
-              checked={darkMode}
-              onCheckedChange={setDarkMode}
-            />
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant={theme === "light" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTheme("light")}
+              >
+                Light
+              </Button>
+              <Button 
+                variant={theme === "dark" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTheme("dark")}
+              >
+                Dark
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
