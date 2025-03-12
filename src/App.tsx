@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
@@ -17,6 +16,7 @@ import WishlistPage from "@/pages/WishlistPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import SearchPage from "@/pages/SearchPage";
 import RecommendationsPage from "@/pages/RecommendationsPage";
+import AuthCallbackPage from "@/pages/AuthCallbackPage";
 
 // Admin routes
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
@@ -69,6 +69,8 @@ function App() {
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/recommendations" element={<RecommendationsPage />} />
+                  
+                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   
                   {/* Admin routes */}
                   <Route path="/admin" element={
