@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SearchInput } from './SearchInput';
 
 interface NavbarSearchProps {
@@ -9,7 +9,7 @@ interface NavbarSearchProps {
 
 export const NavbarSearch = ({ isOpen, setIsOpen }: NavbarSearchProps) => {
   return (
-    <div className="hidden md:block flex-1 max-w-md">
+    <div className="w-full max-w-md">
       <SearchInput minimal />
     </div>
   );

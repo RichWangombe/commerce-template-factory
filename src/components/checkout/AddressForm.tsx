@@ -23,7 +23,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="First name" {...field} />
+                <Input 
+                  placeholder="First name" 
+                  {...field} 
+                  className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -37,7 +41,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
-                <Input placeholder="Last name" {...field} />
+                <Input 
+                  placeholder="Last name" 
+                  {...field} 
+                  className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -52,7 +60,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
           <FormItem>
             <FormLabel>Address Line 1</FormLabel>
             <FormControl>
-              <Input placeholder="Street address" {...field} />
+              <Input 
+                placeholder="Street address" 
+                {...field} 
+                className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -66,7 +78,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
           <FormItem>
             <FormLabel>Address Line 2 (Optional)</FormLabel>
             <FormControl>
-              <Input placeholder="Apartment, suite, unit, etc." {...field} />
+              <Input 
+                placeholder="Apartment, suite, unit, etc." 
+                {...field} 
+                className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -81,7 +97,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="City" {...field} />
+                <Input 
+                  placeholder="City" 
+                  {...field} 
+                  className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,7 +115,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
             <FormItem>
               <FormLabel>State</FormLabel>
               <FormControl>
-                <Input placeholder="State/Province" {...field} />
+                <Input 
+                  placeholder="State/Province" 
+                  {...field} 
+                  className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -109,7 +133,13 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
             <FormItem>
               <FormLabel>ZIP Code</FormLabel>
               <FormControl>
-                <Input placeholder="ZIP / Postal code" {...field} />
+                <Input 
+                  placeholder="ZIP / Postal code" 
+                  {...field} 
+                  className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+                  inputMode="numeric" 
+                  pattern="[0-9]*"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,7 +154,11 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
           <FormItem>
             <FormLabel>Country</FormLabel>
             <FormControl>
-              <Input placeholder="Country" {...field} />
+              <Input 
+                placeholder="Country" 
+                {...field} 
+                className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -138,7 +172,13 @@ export const AddressForm = ({ type }: { type: "shipping" | "billing" }) => {
           <FormItem>
             <FormLabel>Phone (Optional)</FormLabel>
             <FormControl>
-              <Input placeholder="Phone number" type="tel" {...field} />
+              <Input 
+                placeholder="Phone number" 
+                type="tel" 
+                {...field} 
+                className="focus:ring-2 focus:ring-ring focus:ring-offset-1 transition-all"
+                inputMode="tel" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
