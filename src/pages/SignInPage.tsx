@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,18 +11,40 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn, mockMode } = useAuth();
+
+  // Get the return URL from location state or default to home page
+  const from = location.state?.from?.pathname || "/";
+
+  // Check for remembered email
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Save or remove email from localStorage based on rememberMe
+    if (rememberMe) {
+      localStorage.setItem("rememberedEmail", email);
+    } else {
+      localStorage.removeItem("rememberedEmail");
+    }
     
     try {
       const { error } = await signIn(email, password);
@@ -45,7 +67,8 @@ export default function SignInPage() {
             description: "You have successfully signed in",
           });
         }
-        navigate("/");
+        // Navigate to the page the user was trying to access, or home
+        navigate(from, { replace: true });
       }
     } catch (err: any) {
       toast({
@@ -86,6 +109,8 @@ export default function SignInPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      autoComplete="email"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -101,7 +126,19 @@ export default function SignInPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete="current-password"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                     />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="rememberMe" 
+                      checked={rememberMe} 
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                      Remember me
+                    </Label>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (

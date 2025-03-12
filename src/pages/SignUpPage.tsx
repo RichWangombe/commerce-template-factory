@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader, CheckCircle, XCircle } from "lucide-react";
 
 export default function SignUpPage() {
   const [firstName, setFirstName] = useState("");
@@ -17,12 +18,42 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    number: false,
+    letter: false
+  });
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signUp, mockMode } = useAuth();
 
+  // Check password requirements when password changes
+  useEffect(() => {
+    setPasswordRequirements({
+      length: password.length >= 8,
+      number: /\d/.test(password),
+      letter: /[a-zA-Z]/.test(password)
+    });
+  }, [password]);
+
+  const isPasswordValid = () => {
+    return passwordRequirements.length && 
+      passwordRequirements.number && 
+      passwordRequirements.letter;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isPasswordValid()) {
+      toast({
+        title: "Invalid password",
+        description: "Please make sure your password meets all requirements",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -90,6 +121,8 @@ export default function SignUpPage() {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
+                        autoComplete="given-name"
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                     <div className="space-y-2">
@@ -100,6 +133,8 @@ export default function SignUpPage() {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
+                        autoComplete="family-name"
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                   </div>
@@ -112,6 +147,8 @@ export default function SignUpPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      autoComplete="email"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -122,10 +159,54 @@ export default function SignUpPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      autoComplete="new-password"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                     />
+                    <div className="space-y-1 mt-2 text-sm">
+                      <p className="text-muted-foreground font-medium">Password requirements:</p>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.length ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className={passwordRequirements.length ? "text-green-700" : "text-red-700"}>
+                          At least 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.number ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className={passwordRequirements.number ? "text-green-700" : "text-red-700"}>
+                          At least one number
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs">
+                        {passwordRequirements.letter ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className={passwordRequirements.letter ? "text-green-700" : "text-red-700"}>
+                          At least one letter
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Sign Up"}
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isLoading || !isPasswordValid()}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : "Sign Up"}
                   </Button>
                 </form>
               </CardContent>
