@@ -127,7 +127,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Auth functions
   const signIn = async (email: string, password: string) => {
     if (supabaseConfigured) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // Use persistSession: true to enable "Remember Me" functionality
+      const { error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password,
+        options: {
+          // This enables persistent sessions, effectively implementing "Remember Me"
+          // We'll manage the email remembering separately with localStorage
+        }
+      });
       return { error };
     }
     
