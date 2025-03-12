@@ -3,13 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SearchInput } from '@/components/SearchInput';
-import { ProductCard } from '@/components/ProductCard';
-import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { SlidersHorizontal, X } from 'lucide-react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SearchFilters } from '@/components/search/SearchFilters';
+import { SearchResults } from '@/components/search/SearchResults';
 
 const mockProducts = [
   {
@@ -122,14 +117,6 @@ const SearchPage = () => {
     return () => clearTimeout(timer);
   }, [query, filters]);
 
-  const handlePriceChange = (value: number[]) => {
-    setFilters(prev => ({ ...prev, priceRange: [value[0], value[1]] }));
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setFilters(prev => ({ ...prev, category: value }));
-  };
-
   const handleSortChange = (value: string) => {
     setFilters(prev => ({ ...prev, sort: value }));
   };
@@ -142,50 +129,6 @@ const SearchPage = () => {
     });
   };
 
-  const FiltersContent = () => (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Price Range</h3>
-          <span className="text-xs text-gray-500">
-            ${filters.priceRange[0]} - ${filters.priceRange[1]}
-          </span>
-        </div>
-        <Slider
-          defaultValue={[0, 1000]}
-          min={0}
-          max={1000}
-          step={10}
-          value={[filters.priceRange[0], filters.priceRange[1]]}
-          onValueChange={handlePriceChange}
-          className="mt-2"
-        />
-      </div>
-      
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium">Category</h3>
-        <Select value={filters.category} onValueChange={handleCategoryChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map(category => (
-              <SelectItem key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="pt-2">
-        <Button variant="outline" size="sm" onClick={resetFilters} className="w-full">
-          Reset Filters
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -197,82 +140,34 @@ const SearchPage = () => {
         </div>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-24">
-              <h2 className="text-lg font-semibold mb-4">Filters</h2>
-              <FiltersContent />
-            </div>
-          </div>
+          <SearchFilters 
+            filters={filters}
+            categories={categories}
+            setFilters={setFilters}
+            isMobile={true}
+            mobileFiltersOpen={mobileFiltersOpen}
+            setMobileFiltersOpen={setMobileFiltersOpen}
+          />
           
           <div className="lg:hidden mb-4">
-            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>Narrow down your search results</SheetDescription>
-                </SheetHeader>
-                <div className="mt-6">
-                  <FiltersContent />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <SearchFilters 
+              filters={filters}
+              categories={categories}
+              setFilters={setFilters}
+              isMobile={true}
+              mobileFiltersOpen={mobileFiltersOpen}
+              setMobileFiltersOpen={setMobileFiltersOpen}
+            />
           </div>
           
-          <div className="flex-1">
-            <div className="flex justify-between items-center mb-6">
-              <p className="text-sm text-muted-foreground">
-                {loading ? 'Searching...' : `${results.length} results for "${query}"`}
-              </p>
-              
-              <div className="flex items-center gap-2">
-                <Select value={filters.sort} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-[180px] text-sm">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="rating">Rating</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="h-80 bg-gray-100 animate-pulse rounded-lg"></div>
-                ))}
-              </div>
-            ) : results.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {results.map(product => (
-                  <ProductCard 
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    image={product.image}
-                    category={product.category}
-                    discount={product.originalPrice ? Math.round((1 - (product.price / product.originalPrice)) * 100) : 0}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <h3 className="text-lg font-medium mb-2">No results found</h3>
-                <p className="text-muted-foreground mb-6">Try adjusting your search or filters</p>
-                <Button variant="outline" onClick={resetFilters}>Clear Filters</Button>
-              </div>
-            )}
-          </div>
+          <SearchResults 
+            loading={loading}
+            results={results}
+            query={query}
+            filters={filters}
+            onSortChange={handleSortChange}
+            resetFilters={resetFilters}
+          />
         </div>
       </main>
 
