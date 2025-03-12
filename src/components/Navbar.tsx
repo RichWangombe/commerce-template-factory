@@ -52,7 +52,7 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <NavbarSearch isOpen={isSearchOpen} setIsOpen={setIsSearchOpen} />
+            <NavbarSearch />
             
             <div className="flex items-center gap-1">
               <ThemeToggle />
