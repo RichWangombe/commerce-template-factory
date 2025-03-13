@@ -14,6 +14,7 @@ export interface ProductCardProps {
   category?: string;
   isNew?: boolean;
   discount?: number;
+  rating?: number;
 }
 
 export const ProductCard = ({
@@ -24,6 +25,7 @@ export const ProductCard = ({
   category,
   isNew = false,
   discount = 0,
+  rating,
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { addItem } = useCart();
