@@ -1,7 +1,7 @@
 
-import { ProductCard } from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ProductGrid } from '@/components/ProductGrid';
 
 interface Product {
   id: number;
@@ -55,26 +55,13 @@ export const SearchResults = ({
         </div>
       </div>
       
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-80 bg-gray-100 animate-pulse rounded-lg"></div>
-          ))}
-        </div>
-      ) : results.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {results.map(product => (
-            <ProductCard 
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              image={product.image}
-              category={product.category}
-              discount={product.originalPrice ? Math.round((1 - (product.price / product.originalPrice)) * 100) : 0}
-            />
-          ))}
-        </div>
+      {results.length > 0 || loading ? (
+        <ProductGrid 
+          products={results} 
+          loading={loading} 
+          columns={3}
+          skeletonCount={6}
+        />
       ) : (
         <div className="text-center py-12">
           <h3 className="text-lg font-medium mb-2">No results found</h3>
