@@ -4,12 +4,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Star } from 'lucide-react';
 
 interface FilterState {
   priceRange: [number, number];
   category: string;
   sort: string;
+  rating: number;
 }
 
 interface SearchFiltersProps {
@@ -33,6 +34,10 @@ const FiltersContent = ({ filters, categories, setFilters, resetFilters }: {
 
   const handleCategoryChange = (value: string) => {
     setFilters(prev => ({ ...prev, category: value }));
+  };
+  
+  const handleRatingChange = (value: string) => {
+    setFilters(prev => ({ ...prev, rating: parseInt(value) }));
   };
 
   return (
@@ -71,6 +76,58 @@ const FiltersContent = ({ filters, categories, setFilters, resetFilters }: {
         </Select>
       </div>
       
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium">Minimum Rating</h3>
+        <Select value={filters.rating.toString()} onValueChange={handleRatingChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select minimum rating" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">Any Rating</SelectItem>
+            <SelectItem value="1">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="ml-1">& up</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="2">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="ml-1">& up</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="3">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="ml-1">& up</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="4">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="ml-1">& up</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="5">
+              <div className="flex items-center">
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
+                <span className="ml-1">Only</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
       <div className="pt-2">
         <Button variant="outline" size="sm" onClick={resetFilters} className="w-full">
           Reset Filters
@@ -92,7 +149,8 @@ export const SearchFilters = ({
     setFilters({
       priceRange: [0, 1000],
       category: 'all',
-      sort: 'relevance'
+      sort: 'relevance',
+      rating: 0
     });
   };
 

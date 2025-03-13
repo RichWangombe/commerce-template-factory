@@ -19,6 +19,7 @@ export interface FilterState {
   priceRange: [number, number];
   category: string;
   sort: string;
+  rating: number;
 }
 
 export interface PaginationState {
@@ -27,18 +28,28 @@ export interface PaginationState {
   pageSize: number;
 }
 
+export interface SearchAnalytics {
+  query: string;
+  timestamp: string;
+  resultsCount: number;
+  filters: FilterState;
+}
+
 export const useProductSearch = (query: string) => {
   const { preferences, updatePreferences } = useUserPreferences();
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [filteredResults, setFilteredResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchAnalytics, setSearchAnalytics] = useState<SearchAnalytics[]>([]);
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
   
   // Load saved filters from user preferences if available
   const [filters, setFilters] = useState<FilterState>({
     priceRange: preferences.preferredPriceRange || [0, 1000],
     category: 'all',
-    sort: 'relevance'
+    sort: 'relevance',
+    rating: 0
   });
   
   const [pagination, setPagination] = useState<PaginationState>({
@@ -56,7 +67,31 @@ export const useProductSearch = (query: string) => {
     if (savedSearches) {
       setRecentSearches(JSON.parse(savedSearches));
     }
+    
+    // Load search analytics from localStorage
+    const savedAnalytics = localStorage.getItem('searchAnalytics');
+    if (savedAnalytics) {
+      setSearchAnalytics(JSON.parse(savedAnalytics));
+    }
   }, []);
+
+  // Generate autocomplete suggestions based on product names and categories
+  useEffect(() => {
+    if (query && query.length > 1) {
+      const productNames = mockProducts.map(product => product.name);
+      const productCategories = categories.filter(cat => cat !== 'all');
+      
+      const allTerms = [...productNames, ...productCategories];
+      const suggestions = allTerms
+        .filter(term => term.toLowerCase().includes(query.toLowerCase()))
+        .filter((term, index, self) => self.indexOf(term) === index) // Remove duplicates
+        .slice(0, 5); // Limit to 5 suggestions
+      
+      setAutocompleteSuggestions(suggestions);
+    } else {
+      setAutocompleteSuggestions([]);
+    }
+  }, [query, categories]);
 
   // Save the current search query to recent searches
   useEffect(() => {
@@ -77,6 +112,28 @@ export const useProductSearch = (query: string) => {
     });
   }, [filters.priceRange, updatePreferences]);
 
+  // Track search analytics
+  useEffect(() => {
+    if (query) {
+      const analytics: SearchAnalytics = {
+        query,
+        timestamp: new Date().toISOString(),
+        resultsCount: results.length,
+        filters
+      };
+      
+      // Add to analytics array
+      const updatedAnalytics = [analytics, ...searchAnalytics].slice(0, 20); // Keep only 20 most recent
+      setSearchAnalytics(updatedAnalytics);
+      
+      // Save to localStorage
+      localStorage.setItem('searchAnalytics', JSON.stringify(updatedAnalytics));
+      
+      // In a real application, you would send this to your analytics service
+      console.log('Search analytics:', analytics);
+    }
+  }, [query, results.length, filters]);
+
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(() => {
@@ -88,7 +145,12 @@ export const useProductSearch = (query: string) => {
         const matchesCategory = filters.category === 'all' || product.category === filters.category;
         const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
         
-        return matchesSearch && matchesCategory && matchesPrice;
+        // Add rating filter - assume all products have a rating between 0-5
+        // For mock data, generate a random rating if not present
+        const productRating = product.rating !== undefined ? product.rating : Math.floor(Math.random() * 5) + 1;
+        const matchesRating = productRating >= filters.rating;
+        
+        return matchesSearch && matchesCategory && matchesPrice && matchesRating;
       });
       
       // Convert ProductCardProps to SearchProduct with default values for missing fields
@@ -100,7 +162,7 @@ export const useProductSearch = (query: string) => {
         image: product.image,
         category: product.category || '',
         description: '', // Default empty description
-        rating: 0 // Default rating
+        rating: product.rating !== undefined ? product.rating : Math.floor(Math.random() * 5) + 1 // Random rating if not present
       }));
       
       let sortedResults = [...searchProducts];
@@ -147,7 +209,8 @@ export const useProductSearch = (query: string) => {
     setFilters({
       priceRange: [0, 1000],
       category: 'all',
-      sort: 'relevance'
+      sort: 'relevance',
+      rating: 0
     });
   };
   
@@ -175,6 +238,8 @@ export const useProductSearch = (query: string) => {
     pagination,
     handlePageChange,
     recentSearches,
-    clearRecentSearches
+    clearRecentSearches,
+    searchAnalytics,
+    autocompleteSuggestions
   };
 };
