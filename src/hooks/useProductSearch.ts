@@ -1,48 +1,30 @@
 
 import { useState, useEffect } from 'react';
-import { mockProducts } from '@/data/mockProducts';
-import { ProductCardProps } from '@/components/ProductCard';
 import { useUserPreferences } from '@/contexts/UserPreferencesContext';
-
-export interface SearchProduct {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  category: string;
-  description: string;
-  rating: number;
-}
-
-export interface FilterState {
-  priceRange: [number, number];
-  category: string;
-  sort: string;
-  rating: number;
-}
-
-export interface PaginationState {
-  currentPage: number;
-  totalPages: number;
-  pageSize: number;
-}
-
-export interface SearchAnalytics {
-  query: string;
-  timestamp: string;
-  resultsCount: number;
-  filters: FilterState;
-}
+import { FilterState, PaginationState, SearchProduct } from '@/types/search';
+import { useRecentSearches } from './useRecentSearches';
+import { useSearchAnalytics } from './useSearchAnalytics';
+import { 
+  getUniqueCategories, 
+  filterProducts, 
+  sortProducts,
+  generateAutocompleteSuggestions,
+  paginateProducts,
+  calculateTotalPages
+} from '@/utils/searchUtils';
 
 export const useProductSearch = (query: string) => {
   const { preferences, updatePreferences } = useUserPreferences();
+  const { recentSearches, addRecentSearch, clearRecentSearches } = useRecentSearches();
+  const { searchAnalytics, trackSearch } = useSearchAnalytics();
+  
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [filteredResults, setFilteredResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [searchAnalytics, setSearchAnalytics] = useState<SearchAnalytics[]>([]);
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<string[]>([]);
+  
+  // Get unique categories
+  const categories = getUniqueCategories();
   
   // Load saved filters from user preferences if available
   const [filters, setFilters] = useState<FilterState>({
@@ -58,52 +40,18 @@ export const useProductSearch = (query: string) => {
     pageSize: 6 // Show 6 items per page
   });
 
-  // Extract unique categories from mock products
-  const categories = ['all', ...Array.from(new Set(mockProducts.map(product => product.category || '')))];
-
-  // Load recent searches from localStorage
+  // Add the current search to recent searches
   useEffect(() => {
-    const savedSearches = localStorage.getItem('recentSearches');
-    if (savedSearches) {
-      setRecentSearches(JSON.parse(savedSearches));
+    if (query) {
+      addRecentSearch(query);
     }
-    
-    // Load search analytics from localStorage
-    const savedAnalytics = localStorage.getItem('searchAnalytics');
-    if (savedAnalytics) {
-      setSearchAnalytics(JSON.parse(savedAnalytics));
-    }
-  }, []);
+  }, [query]);
 
-  // Generate autocomplete suggestions based on product names and categories
+  // Generate autocomplete suggestions
   useEffect(() => {
-    if (query && query.length > 1) {
-      const productNames = mockProducts.map(product => product.name);
-      const productCategories = categories.filter(cat => cat !== 'all');
-      
-      const allTerms = [...productNames, ...productCategories];
-      const suggestions = allTerms
-        .filter(term => term.toLowerCase().includes(query.toLowerCase()))
-        .filter((term, index, self) => self.indexOf(term) === index) // Remove duplicates
-        .slice(0, 5); // Limit to 5 suggestions
-      
-      setAutocompleteSuggestions(suggestions);
-    } else {
-      setAutocompleteSuggestions([]);
-    }
+    const suggestions = generateAutocompleteSuggestions(query, categories);
+    setAutocompleteSuggestions(suggestions);
   }, [query, categories]);
-
-  // Save the current search query to recent searches
-  useEffect(() => {
-    if (query && query.trim() !== '') {
-      // Skip if the query is already the most recent search
-      if (recentSearches[0] !== query) {
-        const updatedSearches = [query, ...recentSearches.filter(search => search !== query)].slice(0, 5);
-        setRecentSearches(updatedSearches);
-        localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
-      }
-    }
-  }, [query, recentSearches]);
 
   // Save filter state to user preferences
   useEffect(() => {
@@ -112,90 +60,41 @@ export const useProductSearch = (query: string) => {
     });
   }, [filters.priceRange, updatePreferences]);
 
-  // Track search analytics
-  useEffect(() => {
-    if (query) {
-      const analytics: SearchAnalytics = {
-        query,
-        timestamp: new Date().toISOString(),
-        resultsCount: results.length,
-        filters
-      };
-      
-      // Add to analytics array
-      const updatedAnalytics = [analytics, ...searchAnalytics].slice(0, 20); // Keep only 20 most recent
-      setSearchAnalytics(updatedAnalytics);
-      
-      // Save to localStorage
-      localStorage.setItem('searchAnalytics', JSON.stringify(updatedAnalytics));
-      
-      // In a real application, you would send this to your analytics service
-      console.log('Search analytics:', analytics);
-    }
-  }, [query, results.length, filters]);
-
+  // Perform search and apply filters
   useEffect(() => {
     setLoading(true);
+    
     const timer = setTimeout(() => {
-      const filtered = mockProducts.filter(product => {
-        const matchesSearch = 
-          product.name.toLowerCase().includes(query.toLowerCase()) || 
-          (product.category && product.category.toLowerCase().includes(query.toLowerCase()));
-          
-        const matchesCategory = filters.category === 'all' || product.category === filters.category;
-        const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1];
-        
-        // Add rating filter - assume all products have a rating between 0-5
-        // For mock data, generate a random rating if not present
-        const productRating = product.rating !== undefined ? product.rating : Math.floor(Math.random() * 5) + 1;
-        const matchesRating = productRating >= filters.rating;
-        
-        return matchesSearch && matchesCategory && matchesPrice && matchesRating;
-      });
+      // Filter products based on query and filters
+      const filteredProducts = filterProducts(query, filters);
       
-      // Convert ProductCardProps to SearchProduct with default values for missing fields
-      const searchProducts: SearchProduct[] = filtered.map(product => ({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        originalPrice: product.discount ? product.price * (1 + product.discount / 100) : undefined,
-        image: product.image,
-        category: product.category || '',
-        description: '', // Default empty description
-        rating: product.rating !== undefined ? product.rating : Math.floor(Math.random() * 5) + 1 // Random rating if not present
-      }));
+      // Sort results
+      const sortedProducts = sortProducts(filteredProducts, filters.sort);
       
-      let sortedResults = [...searchProducts];
-      switch(filters.sort) {
-        case 'price-low':
-          sortedResults.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          sortedResults.sort((a, b) => b.price - a.price);
-          break;
-        case 'rating':
-          sortedResults.sort((a, b) => b.rating - a.rating);
-          break;
-        default:
-          break;
-      }
-      
-      setResults(sortedResults);
+      setResults(sortedProducts);
       
       // Calculate pagination
-      const totalPages = Math.ceil(sortedResults.length / pagination.pageSize);
+      const totalPages = calculateTotalPages(sortedProducts.length, pagination.pageSize);
       setPagination(prev => ({
         ...prev,
-        totalPages: Math.max(1, totalPages),
+        totalPages,
         currentPage: prev.currentPage > totalPages ? 1 : prev.currentPage
       }));
       
       // Get paginated results
-      const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
-      const endIndex = startIndex + pagination.pageSize;
-      setFilteredResults(sortedResults.slice(startIndex, endIndex));
+      const paginatedProducts = paginateProducts(
+        sortedProducts, 
+        pagination.currentPage, 
+        pagination.pageSize
+      );
+      setFilteredResults(paginatedProducts);
       
       setLoading(false);
+      
+      // Track search analytics
+      if (query) {
+        trackSearch(query, sortedProducts.length, filters);
+      }
     }, 500);
     
     return () => clearTimeout(timer);
@@ -220,11 +119,6 @@ export const useProductSearch = (query: string) => {
       currentPage: Math.max(1, Math.min(page, prev.totalPages))
     }));
   };
-  
-  const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem('recentSearches');
-  };
 
   return {
     results: filteredResults,
@@ -243,3 +137,6 @@ export const useProductSearch = (query: string) => {
     autocompleteSuggestions
   };
 };
+
+// Re-export types for convenience
+export type { SearchProduct, FilterState, PaginationState, SearchAnalytics } from '@/types/search';
