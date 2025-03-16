@@ -17,6 +17,7 @@ import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { AddressForm } from "@/components/checkout/AddressForm";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import { StripePaymentForm } from "@/components/checkout/StripePaymentForm";
+import { MpesaPaymentForm } from "@/components/checkout/MpesaPaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { CheckoutStep, ShippingMethod } from "@/types/checkout";
 import { toast } from "sonner";
@@ -75,9 +76,10 @@ const checkoutSchema = z.object({
     phone: z.string().optional(),
   }).optional(),
   shippingMethodId: z.string().min(1, "Please select a shipping method"),
-  paymentMethod: z.string().default("card"),
+  paymentMethod: z.string().default("mpesa"),
   savePaymentInfo: z.boolean().default(false),
   paymentValid: z.boolean().optional(),
+  mpesaCheckoutRequestID: z.string().optional(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -111,7 +113,7 @@ const CheckoutPage = () => {
         city: "",
         state: "",
         zipCode: "",
-        country: "United States",
+        country: "Kenya", // Default to Kenya
         phone: "",
       },
       sameAsBilling: true,
@@ -123,11 +125,11 @@ const CheckoutPage = () => {
         city: "",
         state: "",
         zipCode: "",
-        country: "United States",
+        country: "Kenya", // Default to Kenya
         phone: "",
       },
       shippingMethodId: "",
-      paymentMethod: "card",
+      paymentMethod: "mpesa", // Default to M-Pesa
       savePaymentInfo: false,
     },
   });
@@ -168,11 +170,23 @@ const CheckoutPage = () => {
       } else if (currentStep === "shipping") {
         isValid = await methods.trigger("shippingMethodId");
       } else if (currentStep === "payment") {
-        // Stripe validation happens within the component
-        isValid = methods.getValues("paymentValid") === true;
-        if (!isValid) {
-          toast.error("Please complete your payment information");
-          return;
+        // Check which payment method is selected
+        const paymentMethod = methods.getValues("paymentMethod");
+        
+        if (paymentMethod === "card") {
+          // Stripe validation happens within the component
+          isValid = methods.getValues("paymentValid") === true;
+          if (!isValid) {
+            toast.error("Please complete your card payment information");
+            return;
+          }
+        } else if (paymentMethod === "mpesa") {
+          // M-Pesa validation happens within the component
+          isValid = methods.getValues("paymentValid") === true;
+          if (!isValid) {
+            toast.error("Please complete your M-Pesa payment");
+            return;
+          }
         }
       }
       
@@ -282,9 +296,78 @@ const CheckoutPage = () => {
                   
                   {/* Payment step */}
                   {currentStep === "payment" && (
-                    <Elements stripe={stripePromise}>
-                      <StripePaymentForm />
-                    </Elements>
+                    <div className="space-y-8">
+                      {/* Payment method selection */}
+                      <div className="space-y-4">
+                        <h3 className="text-base font-medium">Payment Method</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div
+                            className={`cursor-pointer rounded-lg border p-4 transition-colors ${
+                              methods.watch("paymentMethod") === "mpesa"
+                                ? "border-primary bg-primary/5"
+                                : "border-neutral-200 hover:border-neutral-300"
+                            }`}
+                            onClick={() => methods.setValue("paymentMethod", "mpesa")}
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                id="payment-mpesa"
+                                name="paymentMethod"
+                                value="mpesa"
+                                checked={methods.watch("paymentMethod") === "mpesa"}
+                                onChange={() => methods.setValue("paymentMethod", "mpesa")}
+                                className="h-4 w-4 text-primary"
+                              />
+                              <label
+                                htmlFor="payment-mpesa"
+                                className="flex flex-1 cursor-pointer items-center gap-2 font-medium"
+                              >
+                                M-Pesa
+                              </label>
+                            </div>
+                          </div>
+
+                          <div
+                            className={`cursor-pointer rounded-lg border p-4 transition-colors ${
+                              methods.watch("paymentMethod") === "card"
+                                ? "border-primary bg-primary/5"
+                                : "border-neutral-200 hover:border-neutral-300"
+                            }`}
+                            onClick={() => methods.setValue("paymentMethod", "card")}
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                id="payment-card"
+                                name="paymentMethod"
+                                value="card"
+                                checked={methods.watch("paymentMethod") === "card"}
+                                onChange={() => methods.setValue("paymentMethod", "card")}
+                                className="h-4 w-4 text-primary"
+                              />
+                              <label
+                                htmlFor="payment-card"
+                                className="flex flex-1 cursor-pointer items-center gap-2 font-medium"
+                              >
+                                Credit Card
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Show the appropriate payment form based on selection */}
+                      {methods.watch("paymentMethod") === "mpesa" ? (
+                        <MpesaPaymentForm />
+                      ) : (
+                        <Elements stripe={stripePromise}>
+                          <StripePaymentForm />
+                        </Elements>
+                      )}
+                    </div>
                   )}
                   
                   {/* Review step */}
@@ -355,7 +438,7 @@ const CheckoutPage = () => {
                         <div className="mt-6">
                           <h4 className="font-medium mb-2">Payment Method</h4>
                           <div className="bg-neutral-50 p-4 rounded-md text-sm">
-                            <p>Credit Card</p>
+                            <p>{methods.getValues("paymentMethod") === "mpesa" ? "M-Pesa" : "Credit Card"}</p>
                           </div>
                         </div>
                       </div>
