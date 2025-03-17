@@ -1,121 +1,121 @@
 
 import { useState } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
-import { useToast } from "@/hooks/use-toast";
-import { Order } from "@/types/checkout";
-
-interface PaymentResult {
-  success: boolean;
-  error?: string;
-  paymentId?: string;
-}
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export function useStripePayment() {
   const stripe = useStripe();
   const elements = useElements();
-  const { toast } = useToast();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
 
-  const processPayment = async (
-    amount: number,
-    orderData: Partial<Order>
-  ): Promise<PaymentResult> => {
+  const initiatePayment = async ({
+    amount,
+    currency = "usd",
+    description = "Payment for order"
+  }) => {
     if (!stripe || !elements) {
-      return { 
-        success: false, 
-        error: "Stripe has not been initialized" 
-      };
+      toast.error("Stripe has not been properly initialized");
+      return { success: false, error: "Stripe not initialized" };
     }
 
-    setIsProcessing(true);
-
+    setIsLoading(true);
+    
     try {
-      // This would normally come from your backend
-      const paymentIntentClientSecret = await createPaymentIntent(amount);
-      
+      // Create payment intent via our Supabase function
+      const { data: paymentIntentData, error: intentError } = await supabase.functions.invoke(
+        'stripe-payment',
+        {
+          body: { 
+            amount: Math.round(amount * 100), // Stripe uses cents
+            currency,
+            description
+          }
+        }
+      );
+
+      if (intentError || !paymentIntentData?.clientSecret) {
+        throw new Error(intentError?.message || "Failed to create payment intent");
+      }
+
       const cardElement = elements.getElement(CardElement);
-      
       if (!cardElement) {
         throw new Error("Card element not found");
       }
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(
-        paymentIntentClientSecret,
+      // Confirm the payment with Stripe.js
+      const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(
+        paymentIntentData.clientSecret,
         {
           payment_method: {
             card: cardElement,
-            billing_details: {
-              name: `${orderData.billingAddress?.firstName} ${orderData.billingAddress?.lastName}`,
-              address: {
-                line1: orderData.billingAddress?.address1,
-                line2: orderData.billingAddress?.address2,
-                city: orderData.billingAddress?.city,
-                state: orderData.billingAddress?.state,
-                postal_code: orderData.billingAddress?.zipCode,
-                country: orderData.billingAddress?.country,
-              },
-            },
           },
         }
       );
 
-      if (error) {
-        toast({
-          title: "Payment failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return {
-          success: false,
-          error: error.message,
-        };
+      if (paymentError) {
+        throw new Error(paymentError.message || "Payment failed");
       }
 
       if (paymentIntent.status === "succeeded") {
-        toast({
-          title: "Payment successful",
-          description: "Your payment has been processed successfully",
-        });
+        setPaymentId(paymentIntent.id);
+        toast.success("Payment completed successfully");
         return {
           success: true,
-          paymentId: paymentIntent.id,
+          paymentId: paymentIntent.id
         };
       } else {
-        return {
-          success: false,
-          error: `Payment status: ${paymentIntent.status}`,
-        };
+        throw new Error(`Payment status: ${paymentIntent.status}`);
       }
-    } catch (error: any) {
-      toast({
-        title: "Payment error",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+    } catch (error) {
+      toast.error(error.message || "Payment failed");
       return {
         success: false,
-        error: error.message,
+        error: error.message || "Payment failed"
       };
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  // This is a mock function - in a real app, you'd call your backend API
-  // to create a payment intent and return the client secret
-  const createPaymentIntent = async (amount: number): Promise<string> => {
-    // Mock implementation - in reality, this would be an API call to your backend
-    console.log(`Creating payment intent for amount: $${amount}`);
-    
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    // This is a mock client secret - not a real one
-    return "pi_mock_secret_" + Math.random().toString(36).substring(2, 15);
+  const checkPaymentStatus = async ({ paymentId }) => {
+    if (!paymentId) {
+      return { success: false, error: "No payment ID provided" };
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'stripe-payment',
+        {
+          body: { 
+            action: 'check',
+            paymentId
+          }
+        }
+      );
+
+      if (error) {
+        throw new Error(error.message || "Failed to check payment status");
+      }
+
+      return { 
+        success: true, 
+        data: data 
+      };
+    } catch (error) {
+      toast.error(error.message || "Failed to check payment status");
+      return { 
+        success: false, 
+        error: error.message || "Failed to check payment status"
+      };
+    }
   };
 
   return {
-    processPayment,
-    isProcessing,
+    initiateStripePayment: initiatePayment,
+    checkPaymentStatus,
+    isLoading,
+    paymentId
   };
 }

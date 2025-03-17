@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
@@ -17,15 +16,12 @@ import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { AddressForm } from "@/components/checkout/AddressForm";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
 import { StripePaymentForm } from "@/components/checkout/StripePaymentForm";
-import { MpesaPaymentForm } from "@/components/checkout/MpesaPaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { CheckoutStep, ShippingMethod } from "@/types/checkout";
 import { toast } from "sonner";
 
-// Mock Stripe publishable key - in production this would come from an environment variable
 const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
 
-// Available shipping methods
 const shippingMethods: ShippingMethod[] = [
   {
     id: "standard",
@@ -50,7 +46,6 @@ const shippingMethods: ShippingMethod[] = [
   },
 ];
 
-// Form validation schema
 const checkoutSchema = z.object({
   shippingAddress: z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -76,10 +71,10 @@ const checkoutSchema = z.object({
     phone: z.string().optional(),
   }).optional(),
   shippingMethodId: z.string().min(1, "Please select a shipping method"),
-  paymentMethod: z.string().default("mpesa"),
+  paymentMethod: z.string().default("card"),
   savePaymentInfo: z.boolean().default(false),
   paymentValid: z.boolean().optional(),
-  mpesaCheckoutRequestID: z.string().optional(),
+  orderTotal: z.number().optional(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -101,7 +96,6 @@ const CheckoutPage = () => {
     { id: "review" as const, label: "Review" },
   ];
 
-  // Initialize form
   const methods = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -113,7 +107,7 @@ const CheckoutPage = () => {
         city: "",
         state: "",
         zipCode: "",
-        country: "Kenya", // Default to Kenya
+        country: "United States",
         phone: "",
       },
       sameAsBilling: true,
@@ -125,27 +119,24 @@ const CheckoutPage = () => {
         city: "",
         state: "",
         zipCode: "",
-        country: "Kenya", // Default to Kenya
+        country: "United States",
         phone: "",
       },
       shippingMethodId: "",
-      paymentMethod: "mpesa", // Default to M-Pesa
+      paymentMethod: "card",
       savePaymentInfo: false,
     },
   });
 
-  // Handle redirection if cart is empty
   useEffect(() => {
     if (items.length === 0) {
       toast.info("Your cart is empty. Add some items before checking out.");
       navigate("/");
     }
 
-    // Scroll to top
     window.scrollTo(0, 0);
   }, [items.length, navigate]);
 
-  // Update selected shipping method
   useEffect(() => {
     const methodId = methods.watch("shippingMethodId");
     if (methodId) {
@@ -154,12 +145,17 @@ const CheckoutPage = () => {
     }
   }, [methods.watch("shippingMethodId")]);
 
-  // Handle step navigation
+  useEffect(() => {
+    if (selectedShippingMethod) {
+      const total = subtotal + selectedShippingMethod.price;
+      methods.setValue("orderTotal", total);
+    }
+  }, [subtotal, selectedShippingMethod, methods]);
+
   const nextStep = async () => {
     const currentIndex = checkoutSteps.findIndex(step => step.id === currentStep);
     if (currentIndex < checkoutSteps.length - 1) {
       
-      // Validate current step
       let isValid = false;
       
       if (currentStep === "information") {
@@ -170,23 +166,10 @@ const CheckoutPage = () => {
       } else if (currentStep === "shipping") {
         isValid = await methods.trigger("shippingMethodId");
       } else if (currentStep === "payment") {
-        // Check which payment method is selected
-        const paymentMethod = methods.getValues("paymentMethod");
-        
-        if (paymentMethod === "card") {
-          // Stripe validation happens within the component
-          isValid = methods.getValues("paymentValid") === true;
-          if (!isValid) {
-            toast.error("Please complete your card payment information");
-            return;
-          }
-        } else if (paymentMethod === "mpesa") {
-          // M-Pesa validation happens within the component
-          isValid = methods.getValues("paymentValid") === true;
-          if (!isValid) {
-            toast.error("Please complete your M-Pesa payment");
-            return;
-          }
+        isValid = methods.getValues("paymentValid") === true;
+        if (!isValid) {
+          toast.error("Please complete your payment");
+          return;
         }
       }
       
@@ -203,7 +186,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Handle form submission
   const onSubmit = async (data: CheckoutFormValues) => {
     if (!isSignedIn) {
       toast.error("Please sign in to complete your purchase");
@@ -214,17 +196,13 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     
     try {
-      // In a real app, this would be an API call to process payment and create order
       console.log("Processing order:", data);
       console.log("Cart items:", items);
       
-      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Clear cart
       clearCart();
       
-      // Navigate to confirmation page
       navigate("/order-confirmation");
     } catch (error) {
       console.error("Error processing order:", error);
@@ -239,7 +217,6 @@ const CheckoutPage = () => {
       <Navbar />
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          {/* Breadcrumb */}
           <nav className="mb-6 flex text-sm">
             <Link to="/" className="text-neutral-500 hover:text-neutral-900">Home</Link>
             <ChevronRight className="mx-2 h-4 w-4 text-neutral-500" />
@@ -250,17 +227,14 @@ const CheckoutPage = () => {
 
           <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
 
-          {/* Checkout progress */}
           <div className="mb-12 pt-4">
             <CheckoutProgress currentStep={currentStep} steps={checkoutSteps} />
           </div>
 
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(onSubmit)} className="grid gap-8 lg:grid-cols-12">
-              {/* Main content */}
               <div className="lg:col-span-8">
                 <div className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-                  {/* Information step */}
                   {currentStep === "information" && (
                     <div className="space-y-8">
                       <AddressForm type="shipping" />
@@ -287,90 +261,23 @@ const CheckoutPage = () => {
                     </div>
                   )}
                   
-                  {/* Shipping step */}
                   {currentStep === "shipping" && (
                     <div className="space-y-8">
                       <ShippingMethodSelector shippingMethods={shippingMethods} />
                     </div>
                   )}
                   
-                  {/* Payment step */}
                   {currentStep === "payment" && (
                     <div className="space-y-8">
-                      {/* Payment method selection */}
-                      <div className="space-y-4">
-                        <h3 className="text-base font-medium">Payment Method</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div
-                            className={`cursor-pointer rounded-lg border p-4 transition-colors ${
-                              methods.watch("paymentMethod") === "mpesa"
-                                ? "border-primary bg-primary/5"
-                                : "border-neutral-200 hover:border-neutral-300"
-                            }`}
-                            onClick={() => methods.setValue("paymentMethod", "mpesa")}
-                          >
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                id="payment-mpesa"
-                                name="paymentMethod"
-                                value="mpesa"
-                                checked={methods.watch("paymentMethod") === "mpesa"}
-                                onChange={() => methods.setValue("paymentMethod", "mpesa")}
-                                className="h-4 w-4 text-primary"
-                              />
-                              <label
-                                htmlFor="payment-mpesa"
-                                className="flex flex-1 cursor-pointer items-center gap-2 font-medium"
-                              >
-                                M-Pesa
-                              </label>
-                            </div>
-                          </div>
-
-                          <div
-                            className={`cursor-pointer rounded-lg border p-4 transition-colors ${
-                              methods.watch("paymentMethod") === "card"
-                                ? "border-primary bg-primary/5"
-                                : "border-neutral-200 hover:border-neutral-300"
-                            }`}
-                            onClick={() => methods.setValue("paymentMethod", "card")}
-                          >
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                id="payment-card"
-                                name="paymentMethod"
-                                value="card"
-                                checked={methods.watch("paymentMethod") === "card"}
-                                onChange={() => methods.setValue("paymentMethod", "card")}
-                                className="h-4 w-4 text-primary"
-                              />
-                              <label
-                                htmlFor="payment-card"
-                                className="flex flex-1 cursor-pointer items-center gap-2 font-medium"
-                              >
-                                Credit Card
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Separator />
-
-                      {/* Show the appropriate payment form based on selection */}
-                      {methods.watch("paymentMethod") === "mpesa" ? (
-                        <MpesaPaymentForm />
-                      ) : (
-                        <Elements stripe={stripePromise}>
-                          <StripePaymentForm />
-                        </Elements>
-                      )}
+                      <h3 className="text-base font-medium">Payment Method</h3>
+                      <Separator className="my-4" />
+                      
+                      <Elements stripe={stripePromise}>
+                        <StripePaymentForm />
+                      </Elements>
                     </div>
                   )}
                   
-                  {/* Review step */}
                   {currentStep === "review" && (
                     <div className="space-y-8">
                       <div>
@@ -445,7 +352,6 @@ const CheckoutPage = () => {
                     </div>
                   )}
                   
-                  {/* Navigation buttons */}
                   <div className="mt-8 flex justify-between">
                     {currentStep !== "information" ? (
                       <Button
@@ -491,7 +397,6 @@ const CheckoutPage = () => {
                 </div>
               </div>
               
-              {/* Order summary */}
               <div className="lg:col-span-4">
                 <OrderSummary
                   selectedShippingMethod={selectedShippingMethod}
