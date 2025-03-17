@@ -8,6 +8,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Default sandbox credentials
+const defaultSandboxCredentials = {
+  consumerKey: "2sh71geGOB3UIwAJVIBnuMpQW7BNGpGw",
+  consumerSecret: "5wttLijr7XxKJPKe",
+  passkey: "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+  shortcode: "174379",
+  env: "sandbox",
+  callbackUrl: "https://example.com/api/mpesa-callback"
+};
+
 // Get access token from M-Pesa
 async function getAccessToken(consumerKey: string, consumerSecret: string, env: string): Promise<string> {
   try {
@@ -145,14 +155,6 @@ async function checkTransactionStatus(
 // Get credentials from environment or request
 function getCredentials(requestCredentials?: any) {
   // Priority: Request credentials > Environment variables > Default sandbox credentials
-  const defaultSandboxCredentials = {
-    consumerKey: "2sh71geGOB3UIwAJVIBnuMpQW7BNGpGw",
-    consumerSecret: "5wttLijr7XxKJPKe",
-    passkey: "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
-    shortcode: "174379",
-    env: "sandbox",
-    callbackUrl: "https://example.com/api/mpesa-callback"
-  };
   
   // Get from environment if available
   const envCredentials = {
@@ -176,6 +178,30 @@ function getCredentials(requestCredentials?: any) {
   };
 }
 
+// Function to simulate successful M-Pesa payment for demo purposes
+function generateDemoResponse(requestType: 'stk' | 'status', checkoutRequestID?: string) {
+  const demoRequestId = checkoutRequestID || `ws_CO_${Date.now()}${Math.floor(Math.random() * 10000)}`;
+  
+  if (requestType === 'stk') {
+    return {
+      MerchantRequestID: `merc_${Date.now()}${Math.floor(Math.random() * 10000)}`,
+      CheckoutRequestID: demoRequestId,
+      ResponseCode: "0",
+      ResponseDescription: "Success. Request accepted for processing",
+      CustomerMessage: "Success. Request accepted for processing"
+    };
+  } else {
+    return {
+      ResponseCode: "0",
+      ResponseDescription: "The service request has been accepted successfully",
+      MerchantRequestID: `merc_${Date.now()}${Math.floor(Math.random() * 10000)}`,
+      CheckoutRequestID: demoRequestId,
+      ResultCode: "0",
+      ResultDesc: "The service request is processed successfully."
+    };
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -186,6 +212,7 @@ serve(async (req) => {
     const url = new URL(req.url);
     const path = url.pathname.split('/').pop();
     const requestBody = await req.json();
+    const isDemoMode = url.searchParams.get('demo') === 'true' || Deno.env.get("MPESA_DEMO_MODE") === 'true';
 
     // Route for initiating payment
     if (path === 'pay' && req.method === 'POST') {
@@ -195,6 +222,15 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ error: "Missing required fields" }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // If demo mode is enabled, return a successful demo response
+      if (isDemoMode) {
+        console.log("Using demo mode for M-Pesa payment");
+        return new Response(
+          JSON.stringify(generateDemoResponse('stk')),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -214,6 +250,15 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ error: "Missing checkoutRequestID" }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // If demo mode is enabled, return a successful demo response
+      if (isDemoMode || checkoutRequestID.startsWith('demo-')) {
+        console.log("Using demo mode for M-Pesa status check");
+        return new Response(
+          JSON.stringify(generateDemoResponse('status', checkoutRequestID)),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 

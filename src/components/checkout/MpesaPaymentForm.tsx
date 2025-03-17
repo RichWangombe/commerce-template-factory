@@ -1,12 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { useMpesaPayment } from "@/hooks/useMpesaPayment";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Phone } from "lucide-react";
+import { Phone, Info } from "lucide-react";
 import { toast } from "sonner";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
@@ -17,6 +17,7 @@ export const MpesaPaymentForm: React.FC = () => {
   
   // Watch for payment validation status
   const paymentValid = watch("paymentValid");
+  const [demoMode, setDemoMode] = useState(process.env.NODE_ENV !== 'production');
 
   // Format phone number to standard format
   const formatPhone = (input: string) => {
@@ -41,7 +42,7 @@ export const MpesaPaymentForm: React.FC = () => {
   };
 
   const handleInitiatePayment = async () => {
-    if (!phoneNumber) {
+    if (!phoneNumber && !demoMode) {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -57,7 +58,7 @@ export const MpesaPaymentForm: React.FC = () => {
 
     try {
       const result = await initiateMpesaPayment({
-        phone: phoneNumber,
+        phone: phoneNumber || "0722000000", // Use dummy number in demo mode if empty
         amount: Math.round(total), // M-Pesa requires whole numbers
         reference,
         description: `Payment for order ${reference}`
@@ -66,6 +67,11 @@ export const MpesaPaymentForm: React.FC = () => {
       if (result.success) {
         // Set hidden field to indicate payment is initiated
         setValue("mpesaCheckoutRequestID", result.checkoutRequestID);
+        
+        // If this is a demo result, set demo mode flag
+        if (result.demo) {
+          setDemoMode(true);
+        }
         
         // Start polling for payment status
         startPaymentStatusPolling(result.checkoutRequestID);
@@ -76,6 +82,15 @@ export const MpesaPaymentForm: React.FC = () => {
   };
 
   const startPaymentStatusPolling = async (requestId: string) => {
+    // For demo mode, simulate a successful payment after a short delay
+    if (demoMode || requestId.startsWith('demo-')) {
+      setTimeout(() => {
+        setValue("paymentValid", true);
+        toast.success("Demo payment verified successfully!");
+      }, 3000);
+      return;
+    }
+    
     // Poll for payment status every 5 seconds for up to 2 minutes
     let attempts = 0;
     const maxAttempts = 24; // 2 minutes (24 * 5 seconds)
@@ -110,6 +125,19 @@ export const MpesaPaymentForm: React.FC = () => {
       <h3 className="text-lg font-medium">M-Pesa Payment</h3>
       <Separator className="my-4" />
       
+      {demoMode && (
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4">
+          <div className="flex items-start">
+            <Info className="h-5 w-5 text-amber-600 mt-0.5 mr-3" />
+            <div className="text-sm text-amber-800">
+              <p className="font-medium">Demo Mode Active</p>
+              <p>This is running in demo mode. No actual M-Pesa transactions will be made. 
+              You can test the checkout flow without entering real credentials or phone numbers.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="space-y-6">
         <div className="rounded-md border border-input p-4 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 transition-colors">
           <div className="mb-3 text-sm font-medium flex items-center gap-2">
@@ -123,10 +151,10 @@ export const MpesaPaymentForm: React.FC = () => {
               name="phoneNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>M-Pesa Phone Number</FormLabel>
+                  <FormLabel>M-Pesa Phone Number {demoMode && "(Optional in demo mode)"}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="07XX XXX XXX"
+                      placeholder={demoMode ? "Demo mode - any phone number works" : "07XX XXX XXX"}
                       value={phoneNumber}
                       onChange={handlePhoneChange}
                       className="py-3"
@@ -139,14 +167,16 @@ export const MpesaPaymentForm: React.FC = () => {
             />
             
             <div className="text-sm text-muted-foreground">
-              Enter the phone number linked to your M-Pesa account. You will receive an STK push prompt to confirm payment.
+              {demoMode 
+                ? "In demo mode, payments are automatically approved for testing purposes." 
+                : "Enter the phone number linked to your M-Pesa account. You will receive an STK push prompt to confirm payment."}
             </div>
             
             {!paymentValid && (
               <Button 
                 type="button" 
                 onClick={handleInitiatePayment}
-                disabled={isLoading || !phoneNumber || phoneNumber.length < 10}
+                disabled={isLoading || (!phoneNumber && !demoMode)}
                 className="w-full"
               >
                 {isLoading ? (
@@ -157,7 +187,7 @@ export const MpesaPaymentForm: React.FC = () => {
                 ) : checkoutRequestID ? (
                   "Waiting for Payment Confirmation..."
                 ) : (
-                  "Pay with M-Pesa"
+                  demoMode ? "Simulate M-Pesa Payment" : "Pay with M-Pesa"
                 )}
               </Button>
             )}
