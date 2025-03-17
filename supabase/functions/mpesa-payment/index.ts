@@ -2,17 +2,6 @@
 // Follow Daraja API documentation: https://developer.safaricom.co.ke/
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const MPESA_CONSUMER_KEY = Deno.env.get("MPESA_CONSUMER_KEY") || "";
-const MPESA_CONSUMER_SECRET = Deno.env.get("MPESA_CONSUMER_SECRET") || "";
-const MPESA_PASSKEY = Deno.env.get("MPESA_PASSKEY") || "";
-const MPESA_SHORTCODE = Deno.env.get("MPESA_SHORTCODE") || "";
-const MPESA_ENV = Deno.env.get("MPESA_ENV") || "sandbox"; // sandbox or production
-
-// API URLs based on environment
-const BASE_URL = MPESA_ENV === "production"
-  ? "https://api.safaricom.co.ke"
-  : "https://sandbox.safaricom.co.ke";
-
 // CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,10 +9,14 @@ const corsHeaders = {
 };
 
 // Get access token from M-Pesa
-async function getAccessToken(): Promise<string> {
+async function getAccessToken(consumerKey: string, consumerSecret: string, env: string): Promise<string> {
   try {
-    const auth = btoa(`${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`);
-    const response = await fetch(`${BASE_URL}/oauth/v1/generate?grant_type=client_credentials`, {
+    const auth = btoa(`${consumerKey}:${consumerSecret}`);
+    const baseUrl = env === "production"
+      ? "https://api.safaricom.co.ke"
+      : "https://sandbox.safaricom.co.ke";
+      
+    const response = await fetch(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -44,9 +37,18 @@ async function initiateSTKPush(
   amount: number,
   reference: string,
   description: string,
+  credentials: {
+    consumerKey: string;
+    consumerSecret: string;
+    passkey: string;
+    shortcode: string;
+    env: string;
+    callbackUrl: string;
+  }
 ): Promise<any> {
   try {
-    const accessToken = await getAccessToken();
+    const { consumerKey, consumerSecret, passkey, shortcode, env, callbackUrl } = credentials;
+    const accessToken = await getAccessToken(consumerKey, consumerSecret, env);
     
     // Format phone number (remove leading 0 or +254)
     let phoneNumber = phone.replace(/^0|^\+254/, "");
@@ -58,25 +60,30 @@ async function initiateSTKPush(
     // Generate timestamp
     const timestamp = new Date().toISOString().replace(/[-:\.]/g, "").slice(0, 14);
     // Generate password (shortcode + passkey + timestamp)
-    const password = btoa(`${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`);
+    const password = btoa(`${shortcode}${passkey}${timestamp}`);
+    
+    // Determine base URL based on environment
+    const baseUrl = env === "production"
+      ? "https://api.safaricom.co.ke"
+      : "https://sandbox.safaricom.co.ke";
     
     // STK Push request
-    const response = await fetch(`${BASE_URL}/mpesa/stkpush/v1/processrequest`, {
+    const response = await fetch(`${baseUrl}/mpesa/stkpush/v1/processrequest`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        BusinessShortCode: MPESA_SHORTCODE,
+        BusinessShortCode: shortcode,
         Password: password,
         Timestamp: timestamp,
         TransactionType: "CustomerPayBillOnline",
         Amount: amount.toString(),
         PartyA: phoneNumber,
-        PartyB: MPESA_SHORTCODE,
+        PartyB: shortcode,
         PhoneNumber: phoneNumber,
-        CallBackURL: `${Deno.env.get("PUBLIC_URL") || "https://example.com"}/api/mpesa-callback`,
+        CallBackURL: callbackUrl || "https://example.com/api/mpesa-callback",
         AccountReference: reference,
         TransactionDesc: description,
       }),
@@ -90,23 +97,38 @@ async function initiateSTKPush(
 }
 
 // Check transaction status
-async function checkTransactionStatus(checkoutRequestID: string): Promise<any> {
+async function checkTransactionStatus(
+  checkoutRequestID: string, 
+  credentials: {
+    consumerKey: string;
+    consumerSecret: string;
+    passkey: string;
+    shortcode: string;
+    env: string;
+  }
+): Promise<any> {
   try {
-    const accessToken = await getAccessToken();
+    const { consumerKey, consumerSecret, passkey, shortcode, env } = credentials;
+    const accessToken = await getAccessToken(consumerKey, consumerSecret, env);
     
     // Generate timestamp
     const timestamp = new Date().toISOString().replace(/[-:\.]/g, "").slice(0, 14);
     // Generate password (shortcode + passkey + timestamp)
-    const password = btoa(`${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`);
+    const password = btoa(`${shortcode}${passkey}${timestamp}`);
     
-    const response = await fetch(`${BASE_URL}/mpesa/stkpushquery/v1/query`, {
+    // Determine base URL based on environment
+    const baseUrl = env === "production"
+      ? "https://api.safaricom.co.ke"
+      : "https://sandbox.safaricom.co.ke";
+    
+    const response = await fetch(`${baseUrl}/mpesa/stkpushquery/v1/query`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        BusinessShortCode: MPESA_SHORTCODE,
+        BusinessShortCode: shortcode,
         Password: password,
         Timestamp: timestamp,
         CheckoutRequestID: checkoutRequestID,
@@ -120,6 +142,40 @@ async function checkTransactionStatus(checkoutRequestID: string): Promise<any> {
   }
 }
 
+// Get credentials from environment or request
+function getCredentials(requestCredentials?: any) {
+  // Priority: Request credentials > Environment variables > Default sandbox credentials
+  const defaultSandboxCredentials = {
+    consumerKey: "2sh71geGOB3UIwAJVIBnuMpQW7BNGpGw",
+    consumerSecret: "5wttLijr7XxKJPKe",
+    passkey: "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",
+    shortcode: "174379",
+    env: "sandbox",
+    callbackUrl: "https://example.com/api/mpesa-callback"
+  };
+  
+  // Get from environment if available
+  const envCredentials = {
+    consumerKey: Deno.env.get("MPESA_CONSUMER_KEY") || "",
+    consumerSecret: Deno.env.get("MPESA_CONSUMER_SECRET") || "",
+    passkey: Deno.env.get("MPESA_PASSKEY") || "",
+    shortcode: Deno.env.get("MPESA_SHORTCODE") || "",
+    env: Deno.env.get("MPESA_ENV") || "sandbox",
+    callbackUrl: Deno.env.get("PUBLIC_URL") ? `${Deno.env.get("PUBLIC_URL")}/api/mpesa-callback` : ""
+  };
+  
+  // Merge credentials from different sources with priority
+  return {
+    ...defaultSandboxCredentials,
+    ...Object.fromEntries(
+      Object.entries(envCredentials).filter(([_, value]) => value)
+    ),
+    ...Object.fromEntries(
+      Object.entries(requestCredentials || {}).filter(([_, value]) => value)
+    )
+  };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -129,10 +185,11 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const path = url.pathname.split('/').pop();
+    const requestBody = await req.json();
 
     // Route for initiating payment
     if (path === 'pay' && req.method === 'POST') {
-      const { phone, amount, reference, description } = await req.json();
+      const { phone, amount, reference, description, credentials: requestCredentials } = requestBody;
       
       if (!phone || !amount || !reference) {
         return new Response(
@@ -141,7 +198,8 @@ serve(async (req) => {
         );
       }
 
-      const result = await initiateSTKPush(phone, amount, reference, description || "Payment");
+      const credentials = getCredentials(requestCredentials);
+      const result = await initiateSTKPush(phone, amount, reference, description || "Payment", credentials);
       
       return new Response(
         JSON.stringify(result),
@@ -150,7 +208,7 @@ serve(async (req) => {
     } 
     // Route for checking status
     else if (path === 'status' && req.method === 'POST') {
-      const { checkoutRequestID } = await req.json();
+      const { checkoutRequestID, credentials: requestCredentials } = requestBody;
       
       if (!checkoutRequestID) {
         return new Response(
@@ -159,7 +217,8 @@ serve(async (req) => {
         );
       }
 
-      const result = await checkTransactionStatus(checkoutRequestID);
+      const credentials = getCredentials(requestCredentials);
+      const result = await checkTransactionStatus(checkoutRequestID, credentials);
       
       return new Response(
         JSON.stringify(result),

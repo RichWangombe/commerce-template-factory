@@ -3,32 +3,58 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+interface MpesaCredentials {
+  consumerKey?: string;
+  consumerSecret?: string;
+  passkey?: string;
+  shortcode?: string;
+  env?: 'sandbox' | 'production';
+  callbackUrl?: string;
+}
+
 interface MpesaPaymentProps {
   phone: string;
   amount: number;
   reference: string;
   description?: string;
+  credentials?: MpesaCredentials;
 }
 
 interface MpesaCheckStatusProps {
   checkoutRequestID: string;
+  credentials?: MpesaCredentials;
 }
 
-export function useMpesaPayment() {
+export function useMpesaPayment(defaultCredentials?: MpesaCredentials) {
   const [isLoading, setIsLoading] = useState(false);
   const [checkoutRequestID, setCheckoutRequestID] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState<MpesaCredentials | undefined>(defaultCredentials);
+
+  const updateCredentials = (newCredentials: MpesaCredentials) => {
+    setCredentials(prevCredentials => ({
+      ...prevCredentials,
+      ...newCredentials
+    }));
+  };
 
   const initiateMpesaPayment = async ({
     phone,
     amount,
     reference,
     description = "Payment for order",
+    credentials: requestCredentials,
   }: MpesaPaymentProps) => {
     setIsLoading(true);
     
     try {
       // Format phone number (remove spaces and any special characters)
       const formattedPhone = phone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+      
+      // Merge default and request credentials
+      const mergedCredentials = {
+        ...credentials,
+        ...requestCredentials
+      };
       
       // Call the Supabase edge function
       const { data, error } = await supabase.functions.invoke('mpesa-payment/pay', {
@@ -37,6 +63,7 @@ export function useMpesaPayment() {
           amount,
           reference,
           description,
+          credentials: mergedCredentials,
         },
       });
 
@@ -74,11 +101,23 @@ export function useMpesaPayment() {
     }
   };
 
-  const checkPaymentStatus = async ({ checkoutRequestID }: MpesaCheckStatusProps) => {
+  const checkPaymentStatus = async ({ 
+    checkoutRequestID, 
+    credentials: requestCredentials 
+  }: MpesaCheckStatusProps) => {
     try {
+      // Merge default and request credentials
+      const mergedCredentials = {
+        ...credentials,
+        ...requestCredentials
+      };
+      
       // Call the Supabase edge function
       const { data, error } = await supabase.functions.invoke('mpesa-payment/status', {
-        body: { checkoutRequestID },
+        body: { 
+          checkoutRequestID,
+          credentials: mergedCredentials
+        },
       });
 
       if (error) {
@@ -109,6 +148,7 @@ export function useMpesaPayment() {
   return {
     initiateMpesaPayment,
     checkPaymentStatus,
+    updateCredentials,
     isLoading,
     checkoutRequestID
   };
