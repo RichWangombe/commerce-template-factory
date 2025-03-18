@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { usePesapalPayment } from "@/hooks/usePesapalPayment";
 import { Progress } from "@/components/ui/progress";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const PesapalPaymentForm: React.FC = () => {
   const { control, setValue, watch, getValues } = useFormContext();
@@ -18,6 +19,7 @@ export const PesapalPaymentForm: React.FC = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
   
   const { 
     initiatePesapalPayment, 
@@ -49,7 +51,7 @@ export const PesapalPaymentForm: React.FC = () => {
         clearInterval(statusCheckInterval);
       }
     };
-  }, [setValue]);
+  }, [setValue, statusCheckInterval]);
 
   // Effect to watch payment status changes
   useEffect(() => {
@@ -64,7 +66,7 @@ export const PesapalPaymentForm: React.FC = () => {
         setStatusCheckInterval(null);
       }
     }
-  }, [paymentStatus, setValue]);
+  }, [paymentStatus, setValue, statusCheckInterval]);
 
   const handleInitiatePayment = async () => {
     setIsProcessing(true);
@@ -152,6 +154,9 @@ export const PesapalPaymentForm: React.FC = () => {
     }
   };
 
+  // Calculate iframe height based on viewport
+  const iframeHeight = isMobile ? "350px" : "450px";
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Pesapal Payment</h3>
@@ -181,7 +186,7 @@ export const PesapalPaymentForm: React.FC = () => {
                 type="button" 
                 onClick={handleInitiatePayment}
                 disabled={isProcessing || isLoading}
-                className="w-full max-w-sm mx-auto md:mx-0"
+                className="w-full sm:w-auto"
               >
                 {isProcessing || isLoading ? (
                   <>
@@ -198,7 +203,10 @@ export const PesapalPaymentForm: React.FC = () => {
           {showIframe && iframeUrl && (
             <div className="space-y-4">
               {/* Responsive iframe container */}
-              <div className="border rounded-md overflow-hidden" style={{ height: "450px", maxWidth: "100%" }}>
+              <div 
+                className="border rounded-md overflow-hidden mx-auto w-full" 
+                style={{ height: iframeHeight, maxWidth: "100%" }}
+              >
                 <iframe 
                   src={iframeUrl} 
                   width="100%" 
@@ -206,6 +214,7 @@ export const PesapalPaymentForm: React.FC = () => {
                   seamless 
                   frameBorder="0"
                   title="Pesapal Payment"
+                  className="w-full h-full"
                 />
               </div>
               
@@ -214,9 +223,10 @@ export const PesapalPaymentForm: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={handleSimulateCompletion}
-                className="w-full max-w-sm mx-auto md:mx-0"
+                className="w-full sm:w-auto"
+                size={isMobile ? "sm" : "default"}
               >
-                Simulate Payment Completion (Sandbox Testing)
+                {isMobile ? "Simulate Payment" : "Simulate Payment Completion (Sandbox Testing)"}
               </Button>
             </div>
           )}
