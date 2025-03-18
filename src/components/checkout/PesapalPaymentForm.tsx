@@ -6,15 +6,28 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Wallet, Info } from "lucide-react";
+import { Wallet, Info, PieChart, CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { usePesapalPayment } from "@/hooks/usePesapalPayment";
+import { Progress } from "@/components/ui/progress";
 
 export const PesapalPaymentForm: React.FC = () => {
   const { control, setValue, watch, getValues } = useFormContext();
   const [isProcessing, setIsProcessing] = useState(false);
-  const { initiatePesapalPayment, isLoading, iframeUrl } = usePesapalPayment();
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+  
+  const { 
+    initiatePesapalPayment, 
+    isLoading, 
+    iframeUrl, 
+    paymentReference,
+    checkPaymentStatus,
+    paymentStatus,
+    getAnalyticsSummary
+  } = usePesapalPayment();
   
   // Watch for payment validation status
   const paymentValid = watch("paymentValid");
@@ -23,10 +36,35 @@ export const PesapalPaymentForm: React.FC = () => {
   // Pesapal iframe state
   const [showIframe, setShowIframe] = useState(false);
 
+  // Analytics data
+  const analyticsSummary = getAnalyticsSummary();
+
   useEffect(() => {
     // Reset payment validation when the component mounts
     setValue("paymentValid", false);
+    
+    // Clean up interval when component unmounts
+    return () => {
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+      }
+    };
   }, [setValue]);
+
+  // Effect to watch payment status changes
+  useEffect(() => {
+    if (paymentStatus === 'completed') {
+      setValue("paymentValid", true);
+      setShowIframe(false);
+      toast.success("Payment completed successfully!");
+      
+      // Clear any existing interval
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        setStatusCheckInterval(null);
+      }
+    }
+  }, [paymentStatus, setValue]);
 
   const handleInitiatePayment = async () => {
     setIsProcessing(true);
@@ -47,7 +85,16 @@ export const PesapalPaymentForm: React.FC = () => {
 
       if (result.success) {
         setShowIframe(true);
-        // The payment is not yet validated - it will be validated after the customer completes payment in the iframe
+        
+        // Start polling for payment status
+        const interval = setInterval(async () => {
+          await checkPaymentStatus({ 
+            reference: paymentReference,
+            transactionId 
+          });
+        }, 5000); // Check every 5 seconds
+        
+        setStatusCheckInterval(interval);
       } else {
         toast.error(result.error || "Payment initialization failed");
       }
@@ -58,11 +105,51 @@ export const PesapalPaymentForm: React.FC = () => {
     }
   };
 
+  // Handler for iframe postMessage events - for sandbox testing
+  const handleIframeMessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data && data.pesapal_transaction_tracking_id) {
+        setTransactionId(data.pesapal_transaction_tracking_id);
+      }
+    } catch (e) {
+      // Not a JSON message, ignore
+    }
+  };
+
+  // Add event listener for postMessage
+  useEffect(() => {
+    window.addEventListener('message', handleIframeMessage);
+    return () => {
+      window.removeEventListener('message', handleIframeMessage);
+    };
+  }, []);
+
   // Simulated payment completion for testing
   const handleSimulateCompletion = () => {
     setValue("paymentValid", true);
     setShowIframe(false);
     toast.success("Payment completed successfully!");
+    
+    // Clear interval if running
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval);
+      setStatusCheckInterval(null);
+    }
+  };
+
+  // Get status indicator based on payment status
+  const getStatusIndicator = () => {
+    switch(paymentStatus) {
+      case 'completed':
+        return <div className="flex items-center text-green-600"><CheckCircle size={16} className="mr-2" /> Payment Completed</div>;
+      case 'failed':
+        return <div className="flex items-center text-red-600"><XCircle size={16} className="mr-2" /> Payment Failed</div>;
+      case 'pending':
+        return <div className="flex items-center text-amber-600"><Clock size={16} className="mr-2" /> Payment Pending</div>;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -77,6 +164,12 @@ export const PesapalPaymentForm: React.FC = () => {
             Pesapal Secure Payment
           </div>
           
+          {paymentStatus && (
+            <div className="mb-4">
+              {getStatusIndicator()}
+            </div>
+          )}
+          
           {!showIframe && !paymentValid && (
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -88,7 +181,7 @@ export const PesapalPaymentForm: React.FC = () => {
                 type="button" 
                 onClick={handleInitiatePayment}
                 disabled={isProcessing || isLoading}
-                className="w-full"
+                className="w-full max-w-sm mx-auto md:mx-0"
               >
                 {isProcessing || isLoading ? (
                   <>
@@ -104,7 +197,8 @@ export const PesapalPaymentForm: React.FC = () => {
           
           {showIframe && iframeUrl && (
             <div className="space-y-4">
-              <div className="border rounded-md overflow-hidden" style={{ height: "450px" }}>
+              {/* Responsive iframe container */}
+              <div className="border rounded-md overflow-hidden" style={{ height: "450px", maxWidth: "100%" }}>
                 <iframe 
                   src={iframeUrl} 
                   width="100%" 
@@ -120,7 +214,7 @@ export const PesapalPaymentForm: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={handleSimulateCompletion}
-                className="w-full"
+                className="w-full max-w-sm mx-auto md:mx-0"
               >
                 Simulate Payment Completion (Sandbox Testing)
               </Button>
@@ -129,7 +223,55 @@ export const PesapalPaymentForm: React.FC = () => {
           
           {paymentValid && (
             <div className="mt-3 text-sm text-green-600 flex items-center">
+              <CheckCircle size={16} className="mr-2" />
               Payment completed successfully!
+            </div>
+          )}
+        </div>
+        
+        {/* Analytics Section (for admins or testing) */}
+        <div>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            size="sm"
+            className="flex items-center"
+          >
+            <PieChart size={16} className="mr-2" />
+            {showAnalytics ? "Hide" : "Show"} Payment Analytics
+          </Button>
+          
+          {showAnalytics && analyticsSummary && (
+            <div className="mt-4 p-4 border rounded-md bg-slate-50 space-y-3">
+              <h4 className="text-sm font-medium">Payment Analytics</h4>
+              
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="p-2 bg-white rounded border">
+                  <div className="text-xs text-muted-foreground">Completed</div>
+                  <div className="text-sm font-medium">{analyticsSummary.completed}</div>
+                </div>
+                <div className="p-2 bg-white rounded border">
+                  <div className="text-xs text-muted-foreground">Failed</div>
+                  <div className="text-sm font-medium">{analyticsSummary.failed}</div>
+                </div>
+                <div className="p-2 bg-white rounded border">
+                  <div className="text-xs text-muted-foreground">Abandoned</div>
+                  <div className="text-sm font-medium">{analyticsSummary.abandoned}</div>
+                </div>
+                <div className="p-2 bg-white rounded border">
+                  <div className="text-xs text-muted-foreground">Pending</div>
+                  <div className="text-sm font-medium">{analyticsSummary.pending}</div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span>Completion Rate</span>
+                  <span>{analyticsSummary.completionRate}%</span>
+                </div>
+                <Progress value={analyticsSummary.completionRate} className="h-2" />
+              </div>
             </div>
           )}
         </div>
