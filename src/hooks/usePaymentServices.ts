@@ -6,6 +6,7 @@ import { usePesapalProvider } from "./payment/providers/pesapalProvider";
 import { useMpesaProvider } from "./payment/providers/mpesaProvider";
 import { useStripeProvider } from "./payment/providers/stripeProvider";
 import { PaymentProviderName } from "./payment/types";
+import { ReactNode } from "react";
 
 // Initialize Stripe outside of components
 const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
@@ -33,7 +34,7 @@ export function usePaymentServices(defaultProvider: PaymentProviderName = 'strip
     ...paymentGateway,
     
     // Provide the Stripe wrapper component for consumers that need it
-    StripeProvider: ({ children }) => (
+    StripeProvider: ({ children }: { children: ReactNode }) => (
       <Elements stripe={stripePromise}>
         {children}
       </Elements>
