@@ -4,15 +4,15 @@ import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Wallet, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { usePesapalPayment } from "@/hooks/usePesapalPayment";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { PaymentStatus } from "./pesapal/PaymentStatus";
+import { PaymentStatusMessage } from "./pesapal/PaymentStatusMessage";
 import { PaymentAnalytics } from "./pesapal/PaymentAnalytics";
 import { PaymentIframe } from "./pesapal/PaymentIframe";
 import { InitiatePaymentButton } from "./pesapal/InitiatePaymentButton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PaymentOptions } from "./pesapal/PaymentOptions";
+import { CompletedPaymentMessage } from "./pesapal/CompletedPaymentMessage";
 
 export const PesapalPaymentForm: React.FC = () => {
   const { setValue, watch, getValues } = useFormContext();
@@ -184,34 +184,13 @@ export const PesapalPaymentForm: React.FC = () => {
       <Separator className="my-4" />
       
       <div className="space-y-6">
-        <div className="rounded-md border border-input p-4 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1 transition-colors">
-          <div className="mb-3 text-sm font-medium flex items-center gap-2">
-            <Wallet size={16} />
-            Pesapal Secure Payment
-          </div>
-          
-          {/* Display error alert if there's an error message */}
-          {paymentStatus === 'error' && errorMessage && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {errorMessage}
-                {paymentStatus === 'error' && (
-                  <button 
-                    onClick={handleRetryPayment}
-                    className="ml-2 underline text-sm hover:text-primary"
-                  >
-                    Retry
-                  </button>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
-          
+        <PaymentOptions>
           {paymentStatus && (
-            <div className="mb-4">
-              <PaymentStatus status={paymentStatus} errorMessage={errorMessage} />
-            </div>
+            <PaymentStatusMessage 
+              paymentStatus={paymentStatus} 
+              errorMessage={errorMessage}
+              onRetry={paymentStatus === 'error' ? handleRetryPayment : undefined}
+            />
           )}
           
           {!showIframe && !paymentValid && paymentStatus !== 'error' && (
@@ -234,12 +213,9 @@ export const PesapalPaymentForm: React.FC = () => {
           )}
           
           {paymentValid && (
-            <div className="mt-3 text-sm text-green-600 flex items-center">
-              <CheckCircle size={16} className="mr-2" />
-              Payment completed successfully!
-            </div>
+            <CompletedPaymentMessage />
           )}
-        </div>
+        </PaymentOptions>
         
         {/* Analytics Section (for admins or testing) */}
         <PaymentAnalytics 
