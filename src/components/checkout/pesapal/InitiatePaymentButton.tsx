@@ -1,20 +1,36 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { Spinner } from "@/components/ui/spinner";
 import { Info } from "lucide-react";
 
 interface InitiatePaymentButtonProps {
   isProcessing: boolean;
   isLoading: boolean;
   onClick: () => void;
+  loadingState?: 'initializing' | 'processing' | 'verifying';
 }
 
 export const InitiatePaymentButton: React.FC<InitiatePaymentButtonProps> = ({
   isProcessing,
   isLoading,
   onClick,
+  loadingState = 'initializing'
 }) => {
+  // Determine the loading text based on the current state
+  const getLoadingText = () => {
+    switch(loadingState) {
+      case 'initializing':
+        return "Initializing payment...";
+      case 'processing':
+        return "Processing payment...";
+      case 'verifying':
+        return "Verifying payment...";
+      default:
+        return "Initializing payment...";
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -30,8 +46,8 @@ export const InitiatePaymentButton: React.FC<InitiatePaymentButtonProps> = ({
       >
         {isProcessing || isLoading ? (
           <>
-            <LoadingIndicator size="sm" />
-            <span className="ml-2">Initializing payment...</span>
+            <Spinner size="sm" />
+            <span className="ml-2">{getLoadingText()}</span>
           </>
         ) : (
           "Proceed to Payment"

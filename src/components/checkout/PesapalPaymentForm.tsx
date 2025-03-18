@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Wallet, CheckCircle } from "lucide-react";
+import { Wallet, CheckCircle, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { usePesapalPayment } from "@/hooks/usePesapalPayment";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,6 +12,7 @@ import { PaymentStatus } from "./pesapal/PaymentStatus";
 import { PaymentAnalytics } from "./pesapal/PaymentAnalytics";
 import { PaymentIframe } from "./pesapal/PaymentIframe";
 import { InitiatePaymentButton } from "./pesapal/InitiatePaymentButton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const PesapalPaymentForm: React.FC = () => {
   const { setValue, watch, getValues } = useFormContext();
@@ -19,6 +20,7 @@ export const PesapalPaymentForm: React.FC = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const isMobile = useIsMobile();
   
   const { 
@@ -28,6 +30,9 @@ export const PesapalPaymentForm: React.FC = () => {
     paymentReference,
     checkPaymentStatus,
     paymentStatus,
+    errorMessage,
+    loadingState,
+    resetPaymentState,
     getAnalyticsSummary
   } = usePesapalPayment();
   
@@ -65,11 +70,15 @@ export const PesapalPaymentForm: React.FC = () => {
         clearInterval(statusCheckInterval);
         setStatusCheckInterval(null);
       }
+    } else if (paymentStatus === 'failed' || paymentStatus === 'error') {
+      setValue("paymentValid", false);
+      // Don't hide iframe on failure to allow retry
     }
   }, [paymentStatus, setValue, statusCheckInterval]);
 
   const handleInitiatePayment = async () => {
     setIsProcessing(true);
+    setRetryCount(0);
     
     try {
       // Get shipping address from form
@@ -90,11 +99,30 @@ export const PesapalPaymentForm: React.FC = () => {
         
         // Start polling for payment status
         const interval = setInterval(async () => {
-          await checkPaymentStatus({ 
+          const statusResult = await checkPaymentStatus({ 
             reference: paymentReference,
             transactionId 
           });
-        }, 5000); // Check every 5 seconds
+          
+          // If we've been checking for a while with no success, slow down polling
+          setRetryCount(prev => prev + 1);
+          if (retryCount > 10 && statusCheckInterval) {
+            clearInterval(statusCheckInterval);
+            setStatusCheckInterval(
+              setInterval(async () => {
+                await checkPaymentStatus({ 
+                  reference: paymentReference,
+                  transactionId 
+                });
+              }, 10000) // Check every 10 seconds after multiple retries
+            );
+          }
+          
+          // If there's an error in status check, show it but don't stop polling
+          if (!statusResult.success) {
+            toast.error("Having trouble checking payment status. We'll keep trying.");
+          }
+        }, 5000); // Check every 5 seconds initially
         
         setStatusCheckInterval(interval);
       } else {
@@ -140,6 +168,13 @@ export const PesapalPaymentForm: React.FC = () => {
     }
   };
 
+  // Handle retry after failure
+  const handleRetryPayment = () => {
+    resetPaymentState();
+    setShowIframe(false);
+    setIsProcessing(false);
+  };
+
   // Calculate iframe height based on viewport
   const iframeHeight = isMobile ? "350px" : "450px";
 
@@ -155,17 +190,36 @@ export const PesapalPaymentForm: React.FC = () => {
             Pesapal Secure Payment
           </div>
           
+          {/* Display error alert if there's an error message */}
+          {paymentStatus === 'error' && errorMessage && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {errorMessage}
+                {paymentStatus === 'error' && (
+                  <button 
+                    onClick={handleRetryPayment}
+                    className="ml-2 underline text-sm hover:text-primary"
+                  >
+                    Retry
+                  </button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {paymentStatus && (
             <div className="mb-4">
-              <PaymentStatus status={paymentStatus} />
+              <PaymentStatus status={paymentStatus} errorMessage={errorMessage} />
             </div>
           )}
           
-          {!showIframe && !paymentValid && (
+          {!showIframe && !paymentValid && paymentStatus !== 'error' && (
             <InitiatePaymentButton 
               isProcessing={isProcessing}
               isLoading={isLoading}
               onClick={handleInitiatePayment}
+              loadingState={loadingState}
             />
           )}
           
@@ -175,6 +229,7 @@ export const PesapalPaymentForm: React.FC = () => {
               iframeHeight={iframeHeight}
               onSimulateCompletion={handleSimulateCompletion}
               isMobile={isMobile}
+              isLoading={isLoading}
             />
           )}
           
