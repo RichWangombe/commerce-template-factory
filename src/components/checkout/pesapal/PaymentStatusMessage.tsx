@@ -3,9 +3,10 @@ import React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { PaymentStatus } from "./PaymentStatus";
+import { PaymentStatus as PaymentStatusType } from "@/hooks/payment/types";
 
 interface PaymentStatusMessageProps {
-  paymentStatus: 'completed' | 'failed' | 'pending' | 'error' | null;
+  paymentStatus: PaymentStatusType;
   errorMessage?: string | null;
   onRetry?: () => void;
 }

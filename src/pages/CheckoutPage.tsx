@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
@@ -5,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
+import { loadStripe } from "@stripe/stripe-js"; // Added import for loadStripe
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/contexts/CartContext";

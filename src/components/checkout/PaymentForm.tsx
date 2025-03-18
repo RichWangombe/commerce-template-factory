@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { CardElement } from "@stripe/react-stripe-js";
@@ -10,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { Phone, CreditCard } from "lucide-react";
 import { usePaymentServices } from "@/hooks/usePaymentServices";
-import { PaymentProviderName, PaymentInitiateRequest } from "@/hooks/payment/types";
+import { PaymentProviderName, PaymentInitiateRequest, PaymentStatus } from "@/hooks/payment/types";
 import { PaymentStatusMessage } from "./pesapal/PaymentStatusMessage";
 import { PaymentIframe } from "./pesapal/PaymentIframe";
 import { PaymentAnalytics } from "./pesapal/PaymentAnalytics";
@@ -24,7 +23,6 @@ export const PaymentForm: React.FC = () => {
   const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   
-  // Get payment services
   const {
     StripeProvider,
     setProvider,
@@ -41,7 +39,6 @@ export const PaymentForm: React.FC = () => {
     currentProviderConfig
   } = usePaymentServices();
   
-  // Watch for payment validation status and selected payment method
   const paymentValid = watch("paymentValid");
   const orderTotal = watch("orderTotal") || 0;
   const selectedPaymentMethod = watch("paymentMethod") as PaymentProviderName || 'stripe';
@@ -50,35 +47,22 @@ export const PaymentForm: React.FC = () => {
   const [showIframe, setShowIframe] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   
-  // Analytics data
   const analyticsSummary = getAnalyticsSummary();
-  
-  // Get available payment providers
   const availableProviders = getAvailableProviders();
 
-  // Handle provider changes
   useEffect(() => {
-    // Don't change provider if payment is in progress
     if (isLoading) return;
     
-    // Update provider based on selected method
     setProvider(selectedPaymentMethod);
-    
-    // Reset form state when changing providers
     resetUIState();
-    
-    // Update form methods visibility based on provider
     setShowCardForm(selectedPaymentMethod === 'stripe');
     setShowMobileForm(selectedPaymentMethod === 'mpesa');
     setShowIframe(false);
-    
   }, [selectedPaymentMethod, isLoading, setProvider]);
 
-  // Reset payment validation when the component mounts
   useEffect(() => {
     setValue("paymentValid", false);
     
-    // Clean up interval when component unmounts
     return () => {
       if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
@@ -86,20 +70,17 @@ export const PaymentForm: React.FC = () => {
     };
   }, [setValue, statusCheckInterval]);
   
-  // Effect to watch payment status changes
   useEffect(() => {
     if (paymentStatus === 'completed') {
       setValue("paymentValid", true);
       setShowIframe(false);
       
-      // Clear any existing interval
       if (statusCheckInterval) {
         clearInterval(statusCheckInterval);
         setStatusCheckInterval(null);
       }
     } else if (paymentStatus === 'failed' || paymentStatus === 'error') {
       setValue("paymentValid", false);
-      // Don't hide iframe on failure to allow retry
     }
   }, [paymentStatus, setValue, statusCheckInterval]);
 
@@ -115,18 +96,17 @@ export const PaymentForm: React.FC = () => {
     setRetryCount(0);
     
     try {
-      // Get customer details from form
       const shippingAddress = getValues("shippingAddress");
       
       const paymentRequest: PaymentInitiateRequest = {
         amount: orderTotal,
-        currency: "USD", // Can be adjusted based on locale
+        currency: "USD",
         description: "Payment for your order",
         orderId: `ORDER-${Date.now()}`,
         customer: {
           firstName: shippingAddress.firstName,
           lastName: shippingAddress.lastName,
-          email: shippingAddress.email || "customer@example.com", // You may need to add email to your form
+          email: shippingAddress.email || "customer@example.com",
           phone: selectedPaymentMethod === 'mpesa' ? phoneNumber : shippingAddress.phone || ""
         },
         billingAddress: getValues("sameAsBilling") 
@@ -141,7 +121,6 @@ export const PaymentForm: React.FC = () => {
           : getValues("billingAddress")
       };
       
-      // Validate mobile payments require phone number
       if (selectedPaymentMethod === 'mpesa' && !phoneNumber) {
         setValue("paymentValid", false);
         return;
@@ -153,31 +132,28 @@ export const PaymentForm: React.FC = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
-          // Start polling for payment status
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
-              reference: result.reference,
-              transactionId: result.transactionId 
+              reference: result.reference || "",
+              transactionId: result.transactionId || ""
             });
             
-            // If we've been checking for a while with no success, slow down polling
             setRetryCount(prev => prev + 1);
             if (retryCount > 10 && statusCheckInterval) {
               clearInterval(statusCheckInterval);
               setStatusCheckInterval(
                 setInterval(async () => {
                   await checkPaymentStatus({ 
-                    reference: result.reference,
-                    transactionId: result.transactionId 
+                    reference: result.reference || "",
+                    transactionId: result.transactionId || ""
                   });
-                }, 10000) // Check every 10 seconds after multiple retries
+                }, 10000)
               );
             }
-          }, 5000); // Check every 5 seconds initially
+          }, 5000);
           
           setStatusCheckInterval(interval);
         } else if (selectedPaymentMethod === 'mpesa') {
-          // For M-Pesa, we need to wait for the user to complete the transaction on their phone
           setValue("paymentValid", true);
         }
       }
@@ -187,12 +163,9 @@ export const PaymentForm: React.FC = () => {
     }
   };
 
-  // Calculate iframe height based on viewport
   const iframeHeight = isMobile ? "350px" : "450px";
 
-  // This will render the appropriate payment form based on the selected provider
   const renderPaymentForm = () => {
-    // Common payment button
     const PaymentButton = (
       <Button 
         type="button" 
@@ -214,7 +187,6 @@ export const PaymentForm: React.FC = () => {
       </Button>
     );
     
-    // Payment provider specific forms
     switch (selectedPaymentMethod) {
       case 'stripe':
         return (
@@ -341,7 +313,6 @@ export const PaymentForm: React.FC = () => {
       <Separator className="my-4" />
       
       <div className="space-y-4">
-        {/* Payment Method Selection */}
         <div className="grid grid-cols-1 gap-4">
           {availableProviders.map(provider => (
             <div key={provider.name} className="flex items-center space-x-3">
@@ -362,12 +333,10 @@ export const PaymentForm: React.FC = () => {
           ))}
         </div>
         
-        {/* Selected Payment Method Form */}
         <div className="mt-6">
           {renderPaymentForm()}
         </div>
         
-        {/* Save Payment Info Option */}
         <FormField
           control={control}
           name="savePaymentInfo"
@@ -387,7 +356,6 @@ export const PaymentForm: React.FC = () => {
           )}
         />
         
-        {/* Analytics Section (for admins or testing) */}
         <PaymentAnalytics 
           show={showAnalytics}
           onToggle={() => setShowAnalytics(!showAnalytics)}
