@@ -5,8 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/contexts/CartContext";
@@ -15,9 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckoutProgress } from "@/components/checkout/CheckoutProgress";
 import { AddressForm } from "@/components/checkout/AddressForm";
 import { ShippingMethodSelector } from "@/components/checkout/ShippingMethodSelector";
-import { StripePaymentForm } from "@/components/checkout/StripePaymentForm";
-import { MpesaPaymentForm } from "@/components/checkout/MpesaPaymentForm";
-import { PesapalPaymentForm } from "@/components/checkout/PesapalPaymentForm";
+import { PaymentSection } from "@/components/checkout/PaymentSection";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { CheckoutStep, ShippingMethod } from "@/types/checkout";
 import { toast } from "sonner";
@@ -270,73 +266,7 @@ const CheckoutPage = () => {
                   )}
                   
                   {currentStep === "payment" && (
-                    <div className="space-y-8">
-                      <h3 className="text-base font-medium">Payment Method</h3>
-                      <Separator className="my-4" />
-                      
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="flex items-center space-x-3">
-                          <input
-                            id="card-payment"
-                            name="paymentMethod"
-                            type="radio"
-                            value="card"
-                            className="h-4 w-4 border-neutral-300 text-primary focus:ring-primary"
-                            checked={methods.watch("paymentMethod") === "card"}
-                            onChange={() => methods.setValue("paymentMethod", "card")}
-                          />
-                          <label htmlFor="card-payment" className="block text-sm font-medium text-neutral-700">
-                            Credit/Debit Card (Stripe)
-                          </label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-3">
-                          <input
-                            id="mpesa-payment"
-                            name="paymentMethod"
-                            type="radio"
-                            value="mpesa"
-                            className="h-4 w-4 border-neutral-300 text-primary focus:ring-primary"
-                            checked={methods.watch("paymentMethod") === "mpesa"}
-                            onChange={() => methods.setValue("paymentMethod", "mpesa")}
-                          />
-                          <label htmlFor="mpesa-payment" className="block text-sm font-medium text-neutral-700">
-                            M-Pesa
-                          </label>
-                        </div>
-
-                        <div className="flex items-center space-x-3">
-                          <input
-                            id="pesapal-payment"
-                            name="paymentMethod"
-                            type="radio"
-                            value="pesapal"
-                            className="h-4 w-4 border-neutral-300 text-primary focus:ring-primary"
-                            checked={methods.watch("paymentMethod") === "pesapal"}
-                            onChange={() => methods.setValue("paymentMethod", "pesapal")}
-                          />
-                          <label htmlFor="pesapal-payment" className="block text-sm font-medium text-neutral-700">
-                            Pesapal (Cards, M-Pesa, and more)
-                          </label>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-6">
-                        {methods.watch("paymentMethod") === "card" && (
-                          <Elements stripe={stripePromise}>
-                            <StripePaymentForm />
-                          </Elements>
-                        )}
-                        
-                        {methods.watch("paymentMethod") === "mpesa" && (
-                          <MpesaPaymentForm />
-                        )}
-
-                        {methods.watch("paymentMethod") === "pesapal" && (
-                          <PesapalPaymentForm />
-                        )}
-                      </div>
-                    </div>
+                    <PaymentSection />
                   )}
                   
                   {currentStep === "review" && (
