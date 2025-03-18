@@ -14,6 +14,7 @@ export function usePaymentOperations() {
     setIframeUrl,
     paymentStatus,
     setPaymentStatus,
+    errorMessage,
     setErrorMessage,
     loadingState,
     setLoadingState,
