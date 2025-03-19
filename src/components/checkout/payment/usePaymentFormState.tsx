@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { PaymentInitiateRequest, PaymentProviderName, PaymentStatus } from "@/hooks/payment/types";
@@ -123,8 +124,10 @@ export const usePaymentFormState = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
-          const reference = result.reference || "";
-          const transactionId = result.transactionId || "";
+          // Add type assertion to ensure TypeScript knows these properties exist when success is true
+          const successResult = result as { reference: string; transactionId: string; success: boolean };
+          const reference = successResult.reference || "";
+          const transactionId = successResult.transactionId || "";
           
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
