@@ -132,10 +132,13 @@ export const PaymentForm: React.FC = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
+          const reference = result.reference || "";
+          const transactionId = result.transactionId || "";
+          
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
-              reference: result.success ? (result.reference || "") : "",
-              transactionId: result.success ? (result.transactionId || "") : ""
+              reference: reference,
+              transactionId: transactionId
             });
             
             setRetryCount(prev => prev + 1);
@@ -144,8 +147,8 @@ export const PaymentForm: React.FC = () => {
               setStatusCheckInterval(
                 setInterval(async () => {
                   await checkPaymentStatus({ 
-                    reference: result.success ? (result.reference || "") : "",
-                    transactionId: result.success ? (result.transactionId || "") : ""
+                    reference: reference,
+                    transactionId: transactionId
                   });
                 }, 10000)
               );
