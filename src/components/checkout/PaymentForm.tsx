@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { CardElement } from "@stripe/react-stripe-js";
@@ -132,13 +133,16 @@ export const PaymentForm: React.FC = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
-          const reference = result.reference || "";
-          const transactionId = result.transactionId || "";
+          // Fix here: Use optional chaining and default empty string 
+          // Only access these properties when result.success is true
+          // We're already inside the if(result.success) block
+          const reference = result.reference ?? "";
+          const transactionId = result.transactionId ?? "";
           
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
-              reference: reference,
-              transactionId: transactionId
+              reference,
+              transactionId
             });
             
             setRetryCount(prev => prev + 1);
@@ -147,8 +151,8 @@ export const PaymentForm: React.FC = () => {
               setStatusCheckInterval(
                 setInterval(async () => {
                   await checkPaymentStatus({ 
-                    reference: reference,
-                    transactionId: transactionId
+                    reference,
+                    transactionId
                   });
                 }, 10000)
               );
