@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CreditCard } from "lucide-react";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { CompletedPaymentMessage } from "../pesapal/CompletedPaymentMessage";
+import { PaymentProviderConfig } from "@/hooks/payment/types";
 
 interface StripePaymentComponentProps {
   isLoading: boolean;
@@ -15,7 +16,7 @@ interface StripePaymentComponentProps {
   orderTotal: number;
   handleInitiatePayment: () => Promise<void>;
   currentProviderConfig: {
-    supportsSavedCards: boolean;
+    supportsSavedCards?: boolean;
   };
 }
 

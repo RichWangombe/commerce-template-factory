@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { PaymentInitiateRequest, PaymentProviderName, PaymentStatus } from "@/hooks/payment/types";
@@ -37,9 +36,11 @@ export const usePaymentFormState = () => {
   const [showMobileForm, setShowMobileForm] = useState(false);
   
   const analyticsSummary = getAnalyticsSummary();
-  const availableProviders = getAvailableProviders();
+  const availableProviders = getAvailableProviders().map(provider => ({
+    name: provider.name as PaymentProviderName,
+    displayName: provider.displayName
+  }));
 
-  // Effect to update provider when payment method changes
   useEffect(() => {
     if (isLoading) return;
     
@@ -50,7 +51,6 @@ export const usePaymentFormState = () => {
     setShowIframe(false);
   }, [selectedPaymentMethod, isLoading, setProvider]);
 
-  // Effect to initialize payment valid state
   useEffect(() => {
     setValue("paymentValid", false);
     
@@ -61,7 +61,6 @@ export const usePaymentFormState = () => {
     };
   }, [setValue, statusCheckInterval]);
   
-  // Effect to update payment valid state based on payment status
   useEffect(() => {
     if (paymentStatus === 'completed') {
       setValue("paymentValid", true);
@@ -124,11 +123,8 @@ export const usePaymentFormState = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
-          // Type assertion to help TypeScript understand this is a PaymentInitiateResponse
-          // We've already checked result.success is true, so it's safe to assume these properties exist
-          const paymentResult = result as { reference: string; transactionId: string };
-          const reference = paymentResult.reference || "";
-          const transactionId = paymentResult.transactionId || "";
+          const reference = result.reference || "";
+          const transactionId = result.transactionId || "";
           
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
