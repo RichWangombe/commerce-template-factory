@@ -30,7 +30,7 @@ export function usePaymentAnalytics() {
     status: 'completed' | 'failed' | 'pending' | 'abandoned' | 'error',
     provider?: PaymentProviderName
   ) => {
-    setAnalytics((prev) => {
+    setAnalytics((prev: PaymentAnalytics) => {
       // Update overall analytics
       const updated: PaymentAnalytics = {
         ...prev,

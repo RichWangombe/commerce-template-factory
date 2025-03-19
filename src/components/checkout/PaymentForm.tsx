@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { CardElement } from "@stripe/react-stripe-js";
@@ -135,8 +134,8 @@ export const PaymentForm: React.FC = () => {
           
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 
-              reference: result.reference ?? "", 
-              transactionId: result.transactionId ?? ""
+              reference: result.success ? (result.reference || "") : "",
+              transactionId: result.success ? (result.transactionId || "") : ""
             });
             
             setRetryCount(prev => prev + 1);
@@ -145,8 +144,8 @@ export const PaymentForm: React.FC = () => {
               setStatusCheckInterval(
                 setInterval(async () => {
                   await checkPaymentStatus({ 
-                    reference: result.reference ?? "",
-                    transactionId: result.transactionId ?? ""
+                    reference: result.success ? (result.reference || "") : "",
+                    transactionId: result.success ? (result.transactionId || "") : ""
                   });
                 }, 10000)
               );
