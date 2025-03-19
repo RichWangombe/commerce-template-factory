@@ -133,11 +133,11 @@ export const PaymentForm: React.FC = () => {
         if (selectedPaymentMethod === 'pesapal' && iframeUrl) {
           setShowIframe(true);
           
-          // Fix here: Use optional chaining and default empty string 
-          // Only access these properties when result.success is true
-          // We're already inside the if(result.success) block
-          const reference = result.reference ?? "";
-          const transactionId = result.transactionId ?? "";
+          // Type assertion to help TypeScript understand this is a PaymentInitiateResponse
+          // We've already checked result.success is true, so it's safe to assume these properties exist
+          const paymentResult = result as { reference: string; transactionId: string };
+          const reference = paymentResult.reference || "";
+          const transactionId = paymentResult.transactionId || "";
           
           const interval = setInterval(async () => {
             await checkPaymentStatus({ 

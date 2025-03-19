@@ -30,49 +30,42 @@ export function usePaymentAnalytics() {
     status: 'completed' | 'failed' | 'pending' | 'abandoned' | 'error',
     provider?: PaymentProviderName
   ) => {
-    // The issue is that setAnalytics expects a direct value but we're using a callback
-    // The underlying type for useLocalStorage assumes a value, not a callback, so we need to cast
-    const updateFn = (prev: PaymentAnalytics): PaymentAnalytics => {
-      // Update overall analytics
-      const updated: PaymentAnalytics = {
-        ...prev,
-        [status]: (prev[status] || 0) + 1,
-        attempts: prev.attempts + (status === 'pending' ? 1 : 0)
-      };
-      
-      // Update provider-specific analytics if provider is specified
-      if (provider && updated.provider) {
-        const providerStats = updated.provider[provider] || { 
-          attempts: 0, 
-          completed: 0, 
-          completionRate: 0 
-        };
-        
-        const newProviderStats = {
-          ...providerStats,
-          attempts: providerStats.attempts + (status === 'pending' ? 1 : 0),
-          completed: providerStats.completed + (status === 'completed' ? 1 : 0)
-        };
-        
-        // Calculate completion rate
-        if (newProviderStats.attempts > 0) {
-          newProviderStats.completionRate = Math.round(
-            (newProviderStats.completed / newProviderStats.attempts) * 100
-          );
-        }
-        
-        updated.provider = {
-          ...updated.provider,
-          [provider]: newProviderStats
-        };
-      }
-      
-      return updated;
+    // Create a new object with updates instead of using a callback function
+    const updated: PaymentAnalytics = {
+      ...analytics,
+      [status]: (analytics[status] || 0) + 1,
+      attempts: analytics.attempts + (status === 'pending' ? 1 : 0)
     };
     
-    // Cast the function to any to bypass the type check temporarily
-    // This is a workaround for the limitation in the useLocalStorage hook type
-    (setAnalytics as any)(updateFn);
+    // Update provider-specific analytics if provider is specified
+    if (provider && updated.provider) {
+      const providerStats = updated.provider[provider] || { 
+        attempts: 0, 
+        completed: 0, 
+        completionRate: 0 
+      };
+      
+      const newProviderStats = {
+        ...providerStats,
+        attempts: providerStats.attempts + (status === 'pending' ? 1 : 0),
+        completed: providerStats.completed + (status === 'completed' ? 1 : 0)
+      };
+      
+      // Calculate completion rate
+      if (newProviderStats.attempts > 0) {
+        newProviderStats.completionRate = Math.round(
+          (newProviderStats.completed / newProviderStats.attempts) * 100
+        );
+      }
+      
+      updated.provider = {
+        ...updated.provider,
+        [provider]: newProviderStats
+      };
+    }
+    
+    // Set the new analytics state directly
+    setAnalytics(updated);
   };
 
   // Get analytics summary with completion rate
