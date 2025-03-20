@@ -102,6 +102,7 @@ export type Database = {
           colors: string[] | null
           created_at: string | null
           description: string
+          featured: boolean | null
           features: string[] | null
           id: number
           image: string
@@ -120,6 +121,7 @@ export type Database = {
           colors?: string[] | null
           created_at?: string | null
           description: string
+          featured?: boolean | null
           features?: string[] | null
           id?: number
           image: string
@@ -138,6 +140,7 @@ export type Database = {
           colors?: string[] | null
           created_at?: string | null
           description?: string
+          featured?: boolean | null
           features?: string[] | null
           id?: number
           image?: string

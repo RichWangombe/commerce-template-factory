@@ -60,7 +60,7 @@ type Product = {
   name: string;
   price: number;
   category: string;
-  stock: number;
+  stock: number | null;
   status: string;
   featured: boolean;
   image: string;

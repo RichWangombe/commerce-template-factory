@@ -1,88 +1,89 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { 
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { AdminLayout } from "@/components/admin/AdminLayout";
-import { 
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter
-} from "@/components/ui/card";
-import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from "sonner";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { X, Plus, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminWrapper } from "@/components/AdminWrapper";
+import { Badge } from "@/components/ui/badge";
 
-// Define the product schema with zod
-const productSchema = z.object({
-  name: z.string().min(3, { message: "Product name must be at least 3 characters" }),
-  price: z.coerce.number().positive({ message: "Price must be a positive number" }),
-  original_price: z.coerce.number().positive({ message: "Original price must be a positive number" }).optional().nullable(),
-  description: z.string().min(10, { message: "Description must be at least 10 characters" }),
-  category: z.string().min(2, { message: "Category is required" }),
+// Define form schema with Zod
+const productFormSchema = z.object({
+  name: z.string().min(1, { message: "Product name is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  price: z.coerce.number().positive({ message: "Price must be positive" }),
+  original_price: z.coerce.number().positive().optional().nullable(),
+  category: z.string().min(1, { message: "Category is required" }),
   brand: z.string().optional(),
-  stock: z.coerce.number().int().min(0, { message: "Stock must be a non-negative integer" }),
-  image: z.string().url({ message: "Please provide a valid image URL" }),
+  stock: z.coerce.number().nonnegative().default(0),
+  image: z.string().url({ message: "Valid image URL is required" }),
   featured: z.boolean().default(false),
-  colors: z.array(z.string()).optional(),
-  features: z.array(z.string()).optional(),
-  specifications: z.record(z.string(), z.string()).optional()
+  colors: z.array(z.string()).default([]),
+  features: z.array(z.string()).default([]),
+  specifications: z.record(z.string()).default({}),
 });
 
-type ProductFormValues = z.infer<typeof productSchema>;
+// Infer TypeScript type from schema
+type ProductFormValues = z.infer<typeof productFormSchema>;
 
 const AdminProductFormPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const isEditMode = id !== undefined && id !== "new";
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // Initialize form with default values
+  const [isLoading, setIsLoading] = useState(isEditMode);
+  const [error, setError] = useState<string | null>(null);
+  const [newColorValue, setNewColorValue] = useState("");
+  const [newFeatureValue, setNewFeatureValue] = useState("");
+  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
+
+  // Initialize form
   const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: "",
+      description: "",
       price: 0,
       original_price: null,
-      description: "",
       category: "",
       brand: "",
       stock: 0,
-      image: "/placeholder.svg",
+      image: "",
       featured: false,
       colors: [],
       features: [],
-      specifications: {}
-    }
+      specifications: {},
+    },
   });
-  
+
   // Fetch product data if in edit mode
   useEffect(() => {
+    if (!isEditMode) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchProduct = async () => {
-      if (!isEditMode) return;
-      
-      setIsLoading(true);
       try {
+        setIsLoading(true);
+        setError(null);
+        
         const { data, error } = await supabase
           .from('products')
           .select('*')
@@ -114,8 +115,8 @@ const AdminProductFormPage = () => {
           });
         }
       } catch (error) {
-        console.error("Error fetching product:", error);
-        toast.error("Failed to load product data");
+        console.error("Error loading product:", error);
+        setError("Failed to load product data");
       } finally {
         setIsLoading(false);
       }
@@ -126,17 +127,22 @@ const AdminProductFormPage = () => {
   
   const onSubmit = async (values: ProductFormValues) => {
     setIsSaving(true);
+    setError(null);
     
     try {
-      if (isEditMode) {
-        // Update existing product
+      console.log("Saving product:", values);
+      
+      // Update existing product
+      if (isEditMode && id) {
+        console.log("Updating product with ID:", id);
+        
         const { error } = await supabase
           .from('products')
           .update({
             name: values.name,
-            price: values.price,
-            original_price: values.original_price || null,
             description: values.description,
+            price: values.price,
+            original_price: values.original_price,
             category: values.category,
             brand: values.brand || null,
             stock: values.stock,
@@ -152,15 +158,18 @@ const AdminProductFormPage = () => {
         if (error) throw error;
         
         toast.success("Product updated successfully");
-      } else {
-        // Insert new product
+      } 
+      // Create new product
+      else {
+        console.log("Creating new product");
+        
         const { error } = await supabase
           .from('products')
           .insert({
             name: values.name,
-            price: values.price,
-            original_price: values.original_price || null,
             description: values.description,
+            price: values.price,
+            original_price: values.original_price,
             category: values.category,
             brand: values.brand || null,
             stock: values.stock,
@@ -176,142 +185,128 @@ const AdminProductFormPage = () => {
         toast.success("Product created successfully");
       }
       
-      // Redirect back to products page
+      // Navigate back to products page
       navigate("/admin/products");
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Error saving product:", error);
-      toast.error(isEditMode ? "Failed to update product" : "Failed to create product");
+      setError(error.message || "Failed to save product");
+      toast.error("Failed to save product");
     } finally {
       setIsSaving(false);
     }
   };
-  
-  if (isLoading) {
-    return (
-      <AdminLayout title={isEditMode ? "Edit Product" : "Add New Product"}>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <LoadingIndicator />
-        </div>
-      </AdminLayout>
-    );
-  }
-  
+
+  // Handler for adding colors
+  const addColor = () => {
+    if (newColorValue.trim()) {
+      const currentColors = form.getValues("colors") || [];
+      form.setValue("colors", [...currentColors, newColorValue.trim()]);
+      setNewColorValue("");
+    }
+  };
+
+  // Handler for removing colors
+  const removeColor = (index: number) => {
+    const currentColors = form.getValues("colors") || [];
+    form.setValue("colors", currentColors.filter((_, i) => i !== index));
+  };
+
+  // Handler for adding features
+  const addFeature = () => {
+    if (newFeatureValue.trim()) {
+      const currentFeatures = form.getValues("features") || [];
+      form.setValue("features", [...currentFeatures, newFeatureValue.trim()]);
+      setNewFeatureValue("");
+    }
+  };
+
+  // Handler for removing features
+  const removeFeature = (index: number) => {
+    const currentFeatures = form.getValues("features") || [];
+    form.setValue("features", currentFeatures.filter((_, i) => i !== index));
+  };
+
+  // Handler for adding specifications
+  const addSpecification = () => {
+    if (newSpecKey.trim() && newSpecValue.trim()) {
+      const currentSpecs = form.getValues("specifications") || {};
+      form.setValue("specifications", {
+        ...currentSpecs,
+        [newSpecKey.trim()]: newSpecValue.trim(),
+      });
+      setNewSpecKey("");
+      setNewSpecValue("");
+    }
+  };
+
+  // Handler for removing specifications
+  const removeSpecification = (key: string) => {
+    const currentSpecs = form.getValues("specifications") || {};
+    const { [key]: removedSpec, ...rest } = currentSpecs;
+    form.setValue("specifications", rest);
+  };
+
   return (
-    <AdminLayout title={isEditMode ? "Edit Product" : "Add New Product"}>
-      <div className="mx-auto max-w-4xl">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  Enter the basic details for this product
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter product name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Brand</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter brand name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <FormControl>
-                          <RadioGroup 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                            className="flex flex-col space-y-1"
-                          >
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Electronics" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Electronics
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Clothing" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Clothing
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Home & Kitchen" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Home & Kitchen
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Books" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Books
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Accessories" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Accessories
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Other" />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                Other
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="space-y-6">
+    <AdminWrapper>
+      <AdminLayout title={isEditMode ? "Edit Product" : "Add Product"}>
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <LoadingIndicator />
+          </div>
+        ) : error ? (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Product Information</CardTitle>
+                  <CardDescription>
+                    Enter the basic details about the product.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    {/* Basic Information */}
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Product name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="image"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Image URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price ($)</FormLabel>
+                          <FormLabel>Price</FormLabel>
                           <FormControl>
                             <Input type="number" step="0.01" {...field} />
                           </FormControl>
@@ -319,157 +314,297 @@ const AdminProductFormPage = () => {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="original_price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Original Price ($) (Optional)</FormLabel>
+                          <FormLabel>Original Price (optional)</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
-                              step="0.01"
-                              placeholder="Leave empty for no discount"
-                              value={field.value ?? ""} 
-                              onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                              step="0.01" 
+                              {...field} 
+                              value={field.value === null ? "" : field.value}
+                              onChange={e => field.onChange(e.target.value === "" ? null : parseFloat(e.target.value))}
                             />
                           </FormControl>
                           <FormDescription>
-                            Set this higher than the price to show a discount
+                            Original price before discount
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </div>
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe the product..." 
-                          className="min-h-[120px]" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Inventory</CardTitle>
-                <CardDescription>
-                  Manage stock and product availability
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock Quantity</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="featured"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Featured Product
-                        </FormLabel>
-                        <FormDescription>
-                          Featured products appear on the homepage
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Media</CardTitle>
-                <CardDescription>
-                  Add images and media for the product
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="image"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Image URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Enter a URL for the product's main image
-                      </FormDescription>
-                      <FormMessage />
-                      {field.value && (
-                        <div className="mt-2">
-                          <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                          <div className="relative h-40 w-40 overflow-hidden rounded-md border">
-                            <img 
-                              src={field.value} 
-                              alt="Product preview" 
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "/placeholder.svg";
-                              }}
-                            />
-                          </div>
-                        </div>
+
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="Electronics">Electronics</SelectItem>
+                              <SelectItem value="Clothing">Clothing</SelectItem>
+                              <SelectItem value="Home & Kitchen">Home & Kitchen</SelectItem>
+                              <SelectItem value="Beauty">Beauty</SelectItem>
+                              <SelectItem value="Books">Books</SelectItem>
+                              <SelectItem value="Sports">Sports</SelectItem>
+                              <SelectItem value="Toys">Toys</SelectItem>
+                              <SelectItem value="Automotive">Automotive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </FormItem>
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="brand"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Brand (optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Brand name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="stock"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Stock</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="featured"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Featured Product</FormLabel>
+                            <FormDescription>
+                              Display this product in featured sections
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  {/* Description */}
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Product description"
+                            className="min-h-32"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Product Details & Specifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Additional Details</CardTitle>
+                  <CardDescription>
+                    Add colors, features, and specifications.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Colors */}
+                  <div>
+                    <Label>Colors</Label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {form.getValues("colors")?.map((color, index) => (
+                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                          {color}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-5 w-5 p-0 text-muted-foreground"
+                            onClick={() => removeColor(index)}
+                          >
+                            <X className="h-3 w-3" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <Input
+                        placeholder="Add color"
+                        value={newColorValue}
+                        onChange={(e) => setNewColorValue(e.target.value)}
+                        className="max-w-xs"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addColor}
+                      >
+                        <Plus className="mr-1 h-4 w-4" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div>
+                    <Label>Features</Label>
+                    <div className="mt-2 flex flex-col gap-2">
+                      {form.getValues("features")?.map((feature, index) => (
+                        <div key={index} className="flex items-center justify-between rounded-md border px-3 py-2">
+                          <span>{feature}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-muted-foreground"
+                            onClick={() => removeFeature(index)}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex gap-2">
+                      <Input
+                        placeholder="Add feature"
+                        value={newFeatureValue}
+                        onChange={(e) => setNewFeatureValue(e.target.value)}
+                        className="max-w-xs"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addFeature}
+                      >
+                        <Plus className="mr-1 h-4 w-4" />
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Specifications */}
+                  <div>
+                    <Label>Specifications</Label>
+                    <div className="mt-2 flex flex-col gap-2">
+                      {Object.entries(form.getValues("specifications") || {}).map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between rounded-md border px-3 py-2">
+                          <div>
+                            <span className="font-medium">{key}:</span> {value}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 text-muted-foreground"
+                            onClick={() => removeSpecification(key)}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <Input
+                        placeholder="Specification name"
+                        value={newSpecKey}
+                        onChange={(e) => setNewSpecKey(e.target.value)}
+                      />
+                      <Input
+                        placeholder="Specification value"
+                        value={newSpecValue}
+                        onChange={(e) => setNewSpecValue(e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="sm:col-span-2 w-full sm:w-auto"
+                        onClick={addSpecification}
+                      >
+                        <Plus className="mr-1 h-4 w-4" />
+                        Add Specification
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/admin/products")}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? (
+                    <>
+                      <LoadingIndicator className="mr-2" />
+                      Saving...
+                    </>
+                  ) : isEditMode ? (
+                    "Update Product"
+                  ) : (
+                    "Create Product"
                   )}
-                />
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-end space-x-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate("/admin/products")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? "Saving..." : isEditMode ? "Update Product" : "Create Product"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </AdminLayout>
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
+      </AdminLayout>
+    </AdminWrapper>
   );
 };
 

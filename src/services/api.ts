@@ -1,9 +1,8 @@
-
 import { useAuthFunctions } from "@/utils/auth";
 import { mockProducts } from "@/data/mockProducts";
 import { ProductCardProps } from "@/components/ProductCard";
 import { Order } from "@/types/checkout";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { Product } from "@/utils/dataFetchers";
 
 // Convert Supabase product to our Product interface
@@ -18,11 +17,12 @@ const mapSupabaseProduct = (product: any): Product => {
     originalPrice: product.original_price,
     rating: product.rating,
     reviewCount: product.review_count,
-    stock: product.stock,
-    colors: product.colors,
+    stock: product.stock || 0,
+    colors: product.colors || [],
     description: product.description,
-    features: product.features,
-    specifications: product.specifications,
+    features: product.features || [],
+    specifications: product.specifications || {},
+    featured: product.featured === true, // Handle the featured property
   };
 };
 
