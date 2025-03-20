@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -65,6 +66,12 @@ type Product = {
   image: string;
   original_price: number | null;
   description: string;
+  brand?: string | null;
+  colors?: string[] | null;
+  features?: string[] | null;
+  specifications?: Record<string, any> | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 const AdminProductsPage = () => {
@@ -108,7 +115,9 @@ const AdminProductsPage = () => {
         
         const formattedProducts = data.map(product => ({
           ...product,
-          status: determineStatus(product.stock)
+          status: determineStatus(product.stock || 0),
+          // Ensure featured property exists, default to false if not present
+          featured: product.featured === true
         }));
         
         setProducts(formattedProducts);

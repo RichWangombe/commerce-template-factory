@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -26,6 +25,7 @@ export interface Database {
           colors: string[] | null;
           features: string[] | null;
           specifications: Json | null;
+          featured: boolean | null;
           created_at: string;
           updated_at: string;
         };
@@ -44,6 +44,7 @@ export interface Database {
           colors?: string[] | null;
           features?: string[] | null;
           specifications?: Json | null;
+          featured?: boolean | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -62,6 +63,7 @@ export interface Database {
           colors?: string[] | null;
           features?: string[] | null;
           specifications?: Json | null;
+          featured?: boolean | null;
           created_at?: string;
           updated_at?: string;
         };

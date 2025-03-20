@@ -86,16 +86,31 @@ const AdminProductFormPage = () => {
         const { data, error } = await supabase
           .from('products')
           .select('*')
-          .eq('id', id)
+          .eq('id', parseInt(id as string)) // Convert id from string to number
           .single();
           
         if (error) throw error;
         
         if (data) {
           // Transform data to match form fields
+          // Handle specifications to ensure it's a Record<string, string>
+          const formattedSpecifications = typeof data.specifications === 'object' && data.specifications !== null 
+            ? data.specifications as Record<string, string>
+            : {};
+            
           form.reset({
-            ...data,
-            featured: data.stock > 0 && data.category === "Electronics" // Example logic for featured flag
+            name: data.name,
+            price: data.price,
+            original_price: data.original_price,
+            description: data.description,
+            category: data.category,
+            brand: data.brand || "",
+            stock: data.stock || 0,
+            image: data.image,
+            featured: data.featured === true, // Ensure it's a boolean
+            colors: data.colors || [],
+            features: data.features || [],
+            specifications: formattedSpecifications
           });
         }
       } catch (error) {
@@ -107,7 +122,7 @@ const AdminProductFormPage = () => {
     };
     
     fetchProduct();
-  }, [id, isEditMode]);
+  }, [id, isEditMode, form]);
   
   const onSubmit = async (values: ProductFormValues) => {
     setIsSaving(true);
@@ -126,12 +141,13 @@ const AdminProductFormPage = () => {
             brand: values.brand || null,
             stock: values.stock,
             image: values.image,
+            featured: values.featured,
             colors: values.colors || [],
             features: values.features || [],
             specifications: values.specifications || {},
             updated_at: new Date().toISOString()
           })
-          .eq('id', id);
+          .eq('id', parseInt(id as string)); // Convert id from string to number
           
         if (error) throw error;
         
@@ -149,6 +165,7 @@ const AdminProductFormPage = () => {
             brand: values.brand || null,
             stock: values.stock,
             image: values.image,
+            featured: values.featured,
             colors: values.colors || [],
             features: values.features || [],
             specifications: values.specifications || {}
