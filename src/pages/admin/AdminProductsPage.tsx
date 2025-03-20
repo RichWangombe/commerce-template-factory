@@ -43,7 +43,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { AdminWrapper } from "@/components/AdminWrapper";
 import { 
   Dialog,
@@ -54,8 +54,11 @@ import {
   DialogTitle
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Product } from "@/utils/dataFetchers";
 
-type Product = {
+// Define a complete Product type that includes all the fields from Supabase
+// and ensures compatibility with the Product interface from dataFetchers
+type AdminProduct = {
   id: number;
   name: string;
   price: number;
@@ -77,7 +80,7 @@ type Product = {
 const AdminProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

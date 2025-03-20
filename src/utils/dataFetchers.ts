@@ -1,3 +1,4 @@
+
 import { apiService } from "@/services/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductCardProps } from "@/components/ProductCard";
@@ -14,7 +15,8 @@ export interface Product extends ProductCardProps {
   colors?: string[];
   description?: string;
   features?: string[];
-  specifications?: Record<string, string>;
+  specifications?: Record<string, any>;
+  featured?: boolean;
 }
 
 // Product queries
