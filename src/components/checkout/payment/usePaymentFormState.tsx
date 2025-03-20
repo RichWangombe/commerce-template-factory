@@ -18,7 +18,7 @@ export const usePaymentFormState = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showIframe, setShowIframe] = useState(false);
-  const { state: cartState, clearCart } = useCart();
+  const { state: cartState, clearCart, subtotal } = useCart(); // Fixed: Get subtotal directly from useCart
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -111,7 +111,7 @@ export const usePaymentFormState = () => {
         billingAddress,
         shippingMethod,
         paymentMethod: selectedPaymentMethod,
-        subtotal: cartState.subtotal,
+        subtotal: subtotal, // Use subtotal from useCart hook
         tax: orderTotal * 0.08, // Example tax calculation
         shipping: shippingMethod.price,
         total: orderTotal
