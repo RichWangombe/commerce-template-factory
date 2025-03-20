@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
@@ -91,7 +90,7 @@ const App = () => {
                         <AdminProductFormPage />
                       </AdminWrapper>
                     } />
-                    <Route path="/admin/products/:id" element={
+                    <Route path="/admin/products/edit/:id" element={
                       <AdminWrapper>
                         <AdminProductFormPage />
                       </AdminWrapper>

@@ -7,6 +7,8 @@ import { ProfileTab } from "@/components/profile/ProfileTab";
 import { OrdersTab } from "@/components/profile/OrdersTab";
 import { SettingsTab } from "@/components/profile/SettingsTab";
 import { PreferencesTab } from "@/components/profile/PreferencesTab";
+import { AddressesTab } from "@/components/profile/AddressesTab";
+import { PaymentMethodsTab } from "@/components/profile/PaymentMethodsTab";
 import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { useOrders } from "@/utils/dataFetchers";
@@ -60,7 +62,7 @@ export const ProfilePage = () => {
                 onValueChange={setActiveTab}
                 className="space-y-8"
               >
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-[600px]">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:w-[900px]">
                   <TabsTrigger value="profile">Profile</TabsTrigger>
                   <TabsTrigger value="orders">
                     Orders
@@ -70,6 +72,8 @@ export const ProfilePage = () => {
                       </span>
                     )}
                   </TabsTrigger>
+                  <TabsTrigger value="addresses">Addresses</TabsTrigger>
+                  <TabsTrigger value="payment">Payment</TabsTrigger>
                   <TabsTrigger value="preferences">Preferences</TabsTrigger>
                   <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
@@ -80,6 +84,14 @@ export const ProfilePage = () => {
                 
                 <TabsContent value="orders" className="space-y-6">
                   {renderOrdersTabContent()}
+                </TabsContent>
+                
+                <TabsContent value="addresses" className="space-y-6">
+                  <AddressesTab />
+                </TabsContent>
+                
+                <TabsContent value="payment" className="space-y-6">
+                  <PaymentMethodsTab />
                 </TabsContent>
                 
                 <TabsContent value="preferences" className="space-y-6">
