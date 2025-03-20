@@ -10,15 +10,38 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useProductReviews, useMarkReviewHelpful } from "@/utils/dataFetchers";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ReviewsListProps {
-  reviews: Review[];
+  reviews?: Review[];
   productId: string;
+  isLoading?: boolean;
 }
 
-export const ReviewsList = ({ reviews, productId }: ReviewsListProps) => {
+export const ReviewsList = ({ 
+  reviews: propReviews, 
+  productId, 
+  isLoading: propIsLoading 
+}: ReviewsListProps) => {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [filteredRating, setFilteredRating] = useState<number | null>(null);
+  
+  // If reviews aren't passed as props, fetch them from Supabase
+  const { 
+    data: fetchedReviews, 
+    isLoading: isLoadingReviews 
+  } = useProductReviews(productId);
+  
+  const markHelpful = useMarkReviewHelpful();
+  
+  // Use either the props or fetched reviews
+  const reviews = propReviews || fetchedReviews || [];
+  const isLoading = propIsLoading || isLoadingReviews;
+  
+  const handleMarkHelpful = (reviewId: string) => {
+    markHelpful.mutate({ reviewId, productId });
+  };
   
   const filteredReviews = reviews
     .filter(review => filteredRating ? review.rating === filteredRating : true)
@@ -48,6 +71,25 @@ export const ReviewsList = ({ reviews, productId }: ReviewsListProps) => {
     const percentage = reviews.length ? Math.round((count / reviews.length) * 100) : 0;
     return { rating, count, percentage };
   });
+
+  if (isLoading) {
+    return (
+      <div className="mt-12 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="flex flex-col md:flex-row gap-8">
+          <Skeleton className="h-64 w-full md:w-1/3" />
+          <div className="md:w-2/3 space-y-6">
+            <div className="flex justify-between">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-12">
@@ -97,7 +139,7 @@ export const ReviewsList = ({ reviews, productId }: ReviewsListProps) => {
             </h3>
             
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {[null, 5, 4, 3, 2, 1].map((rating) => (
                   <Button
                     key={rating === null ? "all" : rating}
@@ -166,7 +208,12 @@ export const ReviewsList = ({ reviews, productId }: ReviewsListProps) => {
                   <p className="mt-3 text-neutral-700">{review.comment}</p>
                   
                   <div className="flex items-center mt-4">
-                    <Button variant="ghost" size="sm" className="text-neutral-500 gap-1.5">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-neutral-500 gap-1.5"
+                      onClick={() => handleMarkHelpful(review.id)}
+                    >
                       <ThumbsUp className="h-4 w-4" />
                       Helpful ({review.helpful})
                     </Button>
@@ -176,7 +223,9 @@ export const ReviewsList = ({ reviews, productId }: ReviewsListProps) => {
             </div>
           ) : (
             <div className="text-center py-8 border border-dashed border-neutral-300 rounded-lg">
-              <p className="text-neutral-500">No reviews match your filters.</p>
+              <p className="text-neutral-500">
+                {filteredRating ? "No reviews match your filters." : "Be the first to review this product!"}
+              </p>
             </div>
           )}
         </div>

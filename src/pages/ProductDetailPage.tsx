@@ -10,7 +10,7 @@ import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { ProductNotFound } from "@/components/product/ProductNotFound";
 import { useRecommendations } from "@/contexts/recommendation";
 import { ProductViewTracker } from "@/components/ProductViewTracker";
-import { useProduct } from "@/utils/dataFetchers";
+import { useProduct, useProductReviews } from "@/utils/dataFetchers";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -20,6 +20,7 @@ const ProductDetailPage = () => {
   const productId = parseInt(id || "0");
   
   const { data: product, isLoading, error } = useProduct(productId);
+  const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(productId);
   
   useEffect(() => {
     if (product && recordProductView) {
@@ -100,7 +101,7 @@ const ProductDetailPage = () => {
               features: product.features || [],
               colors: product.colors || ["Default"]
             }}
-            reviews={[]}
+            reviews={reviews || []}
             productId={product.id.toString()}
             specifications={product.specifications}
           />

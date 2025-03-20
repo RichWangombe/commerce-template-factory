@@ -8,7 +8,6 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -17,13 +16,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useCreateReview } from "@/utils/dataFetchers";
+import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   rating: z.number().min(1, { message: "Rating is required" }).max(5),
   title: z.string().min(2, { message: "Title is required" }).max(100),
   comment: z.string().min(10, { message: "Comment must be at least 10 characters" }).max(1000),
-  name: z.string().min(2, { message: "Name is required" }).max(50),
-  email: z.string().email({ message: "Please enter a valid email" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -35,6 +34,8 @@ interface ReviewFormProps {
 
 export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
   const [hoveredRating, setHoveredRating] = useState(0);
+  const { user } = useAuth();
+  const createReview = useCreateReview();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -42,20 +43,24 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
       rating: 0,
       title: "",
       comment: "",
-      name: "",
-      email: "",
     },
   });
   
   const watchedRating = form.watch("rating");
   
   const onSubmit = async (data: FormValues) => {
+    if (!user) {
+      toast.error("You must be logged in to submit a review");
+      return;
+    }
+    
     try {
-      // In a real app, this would send data to an API
-      console.log("Submitting review:", { productId, ...data });
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await createReview.mutateAsync({
+        productId,
+        rating: data.rating,
+        title: data.title,
+        comment: data.comment,
+      });
       
       toast.success("Thank you for your review!");
       form.reset();
@@ -64,10 +69,22 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
         onSuccess();
       }
     } catch (error) {
-      toast.error("Failed to submit review. Please try again.");
+      toast.error(error instanceof Error ? error.message : "Failed to submit review. Please try again.");
       console.error("Error submitting review:", error);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="bg-neutral-50 p-6 rounded-xl">
+        <h3 className="text-xl font-bold mb-2">Write a Review</h3>
+        <p className="text-gray-600 mb-4">You need to be logged in to write a review.</p>
+        <Button variant="outline" asChild>
+          <a href="/signin">Sign In to Review</a>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-neutral-50 p-6 rounded-xl">
@@ -140,42 +157,12 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
             )}
           />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Email</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="johndoe@example.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <Button type="submit" className="w-full sm:w-auto">
-            Submit Review
+          <Button 
+            type="submit" 
+            className="w-full sm:w-auto"
+            disabled={createReview.isPending}
+          >
+            {createReview.isPending ? "Submitting..." : "Submit Review"}
           </Button>
         </form>
       </Form>
