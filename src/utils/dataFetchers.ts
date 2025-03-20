@@ -130,15 +130,34 @@ export const useProductReviews = (productId: string | number) => {
       
       // Map from Supabase format to our Review type
       return data.map(item => {
-        // Safely access profile data, which is a single object, not an array
-        const profile = item.profiles as { first_name: string | null, last_name: string | null } | null;
+        // The profiles field is coming back differently than expected
+        // In Supabase join queries, the join result can sometimes be structured
+        // in complex ways, so we need to safely access the data
+        const profile = item.profiles;
+        let firstName = '';
+        let lastName = '';
+        
+        // Determine what shape the profile data is in and extract accordingly
+        if (profile) {
+          if (Array.isArray(profile)) {
+            // If it's an array, take the first item
+            if (profile.length > 0) {
+              firstName = profile[0].first_name || '';
+              lastName = profile[0].last_name || '';
+            }
+          } else {
+            // If it's an object, access directly
+            firstName = profile.first_name || '';
+            lastName = profile.last_name || '';
+          }
+        }
         
         return {
           id: item.id.toString(),
           productId: item.product_id?.toString() || '',
           userId: item.user_id || '',
-          userName: profile ? 
-            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous User' : 
+          userName: firstName || lastName ? 
+            `${firstName} ${lastName}`.trim() : 
             'Anonymous User',
           rating: item.rating,
           comment: item.review_text || '',
