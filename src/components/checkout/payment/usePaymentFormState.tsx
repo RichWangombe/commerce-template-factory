@@ -4,6 +4,11 @@ import { useFormContext } from "react-hook-form";
 import { PaymentInitiateRequest, PaymentProviderName, PaymentStatus } from "@/hooks/payment/types";
 import { usePaymentServices } from "@/hooks/usePaymentServices";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiService } from "@/services/api";
+import { useNavigate } from "react-router-dom";
+import { Address } from "@/types/checkout";
 
 export const usePaymentFormState = () => {
   const { control, setValue, watch, getValues } = useFormContext();
@@ -13,6 +18,9 @@ export const usePaymentFormState = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showIframe, setShowIframe] = useState(false);
+  const { state: cartState, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   
   const {
     StripeProvider,
@@ -71,6 +79,9 @@ export const usePaymentFormState = () => {
         clearInterval(statusCheckInterval);
         setStatusCheckInterval(null);
       }
+      
+      // Process completed payment and create order
+      processCompletedPayment();
     } else if (paymentStatus === 'failed' || paymentStatus === 'error') {
       setValue("paymentValid", false);
     }
@@ -82,6 +93,40 @@ export const usePaymentFormState = () => {
     setShowIframe(false);
     setPhoneNumber("");
     resetPaymentState();
+  };
+  
+  const processCompletedPayment = async () => {
+    try {
+      const shippingAddress = getValues("shippingAddress") as Address;
+      const billingAddress = getValues("sameAsBilling") 
+        ? shippingAddress
+        : getValues("billingAddress") as Address;
+      const shippingMethod = getValues("shippingMethod");
+      
+      // Create order from cart and form data
+      const orderData = {
+        userId: user?.id || "guest-user",
+        items: cartState.items,
+        shippingAddress,
+        billingAddress,
+        shippingMethod,
+        paymentMethod: selectedPaymentMethod,
+        subtotal: cartState.subtotal,
+        tax: orderTotal * 0.08, // Example tax calculation
+        shipping: shippingMethod.price,
+        total: orderTotal
+      };
+      
+      const createdOrder = await apiService.createOrder(orderData);
+      
+      // Navigate to confirmation page
+      navigate(`/order-confirmation?orderId=${createdOrder.id}`);
+      
+      // Clear cart
+      clearCart();
+    } catch (error) {
+      console.error("Error processing order:", error);
+    }
   };
 
   const handleInitiatePayment = async () => {
@@ -152,6 +197,7 @@ export const usePaymentFormState = () => {
           setStatusCheckInterval(interval);
         } else if (selectedPaymentMethod === 'mpesa') {
           setValue("paymentValid", true);
+          processCompletedPayment();
         }
       }
     } catch (error) {
@@ -162,6 +208,7 @@ export const usePaymentFormState = () => {
 
   const handleSimulateCompletion = () => {
     setValue("paymentValid", true);
+    processCompletedPayment();
   };
 
   return {

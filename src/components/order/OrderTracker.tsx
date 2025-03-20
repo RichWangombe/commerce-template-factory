@@ -4,11 +4,13 @@ import { Order, OrderStatus } from "@/types/checkout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Package, Truck, CheckCircle, Clock, X } from "lucide-react";
+import { Package, Truck, CheckCircle, Clock, X, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface OrderTrackerProps {
   order: Order;
+  compact?: boolean;
 }
 
 const getStatusIcon = (status: OrderStatus) => {
@@ -45,7 +47,7 @@ const getStatusColor = (status: OrderStatus) => {
   }
 };
 
-export const OrderTracker: React.FC<OrderTrackerProps> = ({ order }) => {
+export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, compact = false }) => {
   const orderStatusSteps: OrderStatus[] = ["pending", "processing", "shipped", "delivered"];
   const currentStatusIndex = orderStatusSteps.indexOf(order.status);
   
@@ -56,6 +58,12 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order }) => {
       day: "numeric",
     });
   };
+
+  // Check if order is cancelled - we'll display a different UI
+  const isCancelled = order.status === "cancelled";
+
+  // If this is a shipping carrier tracking link
+  const hasTrackingLink = !!order.trackingNumber && order.status === "shipped";
 
   return (
     <Card className="w-full">
@@ -74,120 +82,146 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order }) => {
         <div className="text-sm text-muted-foreground">
           Placed on {formatDate(order.createdAt)}
         </div>
-        {order.estimatedDelivery && (
+        {order.estimatedDelivery && !isCancelled && (
           <div className="text-sm font-medium">
             Estimated delivery: {order.estimatedDelivery}
           </div>
         )}
         {order.trackingNumber && (
-          <div className="text-sm">
-            Tracking #: <span className="font-medium">{order.trackingNumber}</span>
+          <div className="flex items-center mt-2">
+            <div className="text-sm flex flex-wrap items-center gap-2">
+              <span className="font-medium">Tracking #: </span> 
+              <span>{order.trackingNumber}</span>
+              {hasTrackingLink && (
+                <Button variant="outline" size="sm" className="h-7">
+                  Track Package
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </CardHeader>
       <CardContent>
-        <div className="mt-2">
-          {/* Order Status Timeline */}
-          <div className="relative mt-6 py-2">
-            <div className="absolute left-[15px] top-0 h-full w-0.5 bg-gray-200" />
-            
-            {order.statusHistory ? (
-              // If we have detailed status history, show it
-              order.statusHistory.map((statusEvent, index) => (
-                <div key={index} className="relative mb-8 flex items-start pl-8">
-                  <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-white">
-                    {getStatusIcon(statusEvent.status)}
-                  </div>
-                  <div className="ml-4">
-                    <div className="flex items-center font-medium capitalize">
-                      {statusEvent.status}
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {new Date(statusEvent.timestamp).toLocaleString()}
-                      </span>
-                    </div>
-                    {statusEvent.location && (
-                      <div className="text-sm text-muted-foreground">
-                        {statusEvent.location}
-                      </div>
-                    )}
-                    {statusEvent.description && (
-                      <div className="text-sm">{statusEvent.description}</div>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              // Default status steps if no detailed history
-              orderStatusSteps.map((status, index) => {
-                const isActive = index <= currentStatusIndex;
-                const isCurrent = index === currentStatusIndex;
-                
-                return (
-                  <div 
-                    key={status} 
-                    className={cn(
-                      "relative mb-8 flex items-start pl-8",
-                      isActive ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
-                    <div 
-                      className={cn(
-                        "absolute left-0 flex h-8 w-8 items-center justify-center rounded-full",
-                        isActive 
-                          ? isCurrent 
-                            ? "bg-primary text-white" 
-                            : "bg-primary/20 text-primary" 
-                          : "bg-gray-200 text-gray-400"
-                      )}
-                    >
-                      {getStatusIcon(status)}
+        {isCancelled ? (
+          <div className="bg-red-50 p-4 rounded-md border border-red-200 text-center">
+            <X className="h-10 w-10 text-red-500 mx-auto mb-2" />
+            <h3 className="font-medium text-lg mb-1">Order Cancelled</h3>
+            <p className="text-sm text-muted-foreground">
+              This order was cancelled on {order.statusHistory 
+                ? formatDate(order.statusHistory.find(h => h.status === "cancelled")?.timestamp || order.createdAt)
+                : formatDate(order.createdAt)
+              }
+            </p>
+          </div>
+        ) : (
+          <div className="mt-2">
+            {/* Order Status Timeline */}
+            <div className="relative mt-6 py-2">
+              <div className="absolute left-[15px] top-0 h-full w-0.5 bg-gray-200" />
+              
+              {order.statusHistory ? (
+                // If we have detailed status history, show it
+                order.statusHistory.map((statusEvent, index) => (
+                  <div key={index} className="relative mb-8 flex items-start pl-8">
+                    <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                      {getStatusIcon(statusEvent.status)}
                     </div>
                     <div className="ml-4">
-                      <div className={cn(
-                        "capitalize font-medium",
-                        isActive ? "" : "text-muted-foreground"
-                      )}>
-                        {status}
+                      <div className="flex items-center font-medium capitalize">
+                        {statusEvent.status}
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {new Date(statusEvent.timestamp).toLocaleString()}
+                        </span>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {status === "pending" && "Order received"}
-                        {status === "processing" && "Preparing your order"}
-                        {status === "shipped" && "Your order is on the way"}
-                        {status === "delivered" && "Order delivered successfully"}
-                      </div>
+                      {statusEvent.location && (
+                        <div className="text-sm text-muted-foreground flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {statusEvent.location}
+                        </div>
+                      )}
+                      {statusEvent.description && (
+                        <div className="text-sm">{statusEvent.description}</div>
+                      )}
                     </div>
                   </div>
-                );
-              })
+                ))
+              ) : (
+                // Default status steps if no detailed history
+                orderStatusSteps.map((status, index) => {
+                  const isActive = index <= currentStatusIndex;
+                  const isCurrent = index === currentStatusIndex;
+                  
+                  return (
+                    <div 
+                      key={status} 
+                      className={cn(
+                        "relative mb-8 flex items-start pl-8",
+                        isActive ? "text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      <div 
+                        className={cn(
+                          "absolute left-0 flex h-8 w-8 items-center justify-center rounded-full",
+                          isActive 
+                            ? isCurrent 
+                              ? "bg-primary text-white" 
+                              : "bg-primary/20 text-primary" 
+                            : "bg-gray-200 text-gray-400"
+                        )}
+                      >
+                        {getStatusIcon(status)}
+                      </div>
+                      <div className="ml-4">
+                        <div className={cn(
+                          "capitalize font-medium",
+                          isActive ? "" : "text-muted-foreground"
+                        )}>
+                          {status}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {status === "pending" && "Order received"}
+                          {status === "processing" && "Preparing your order"}
+                          {status === "shipped" && "Your order is on the way"}
+                          {status === "delivered" && "Order delivered successfully"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {!compact && (
+              <>
+                <Separator className="my-4" />
+                
+                {/* Order Items Summary */}
+                <div className="space-y-3">
+                  <h4 className="font-medium">Order Items</h4>
+                  {order.items.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-4">
+                      <div className="h-16 w-16 overflow-hidden rounded-md bg-gray-100">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium">{item.name}</h5>
+                        {item.variant && <p className="text-sm text-muted-foreground">{item.variant}</p>}
+                        <p className="text-sm">Qty: {item.quantity}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
-
-          <Separator className="my-4" />
-          
-          {/* Order Items Summary */}
-          <div className="space-y-3">
-            <h4 className="font-medium">Order Items</h4>
-            {order.items.map((item) => (
-              <div key={item.id} className="flex items-center space-x-4">
-                <div className="h-16 w-16 overflow-hidden rounded-md bg-gray-100">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h5 className="font-medium">{item.name}</h5>
-                  {item.variant && <p className="text-sm text-muted-foreground">{item.variant}</p>}
-                  <p className="text-sm">Qty: {item.quantity}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">${(item.price * item.quantity).toFixed(2)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

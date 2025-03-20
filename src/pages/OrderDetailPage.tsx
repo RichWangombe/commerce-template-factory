@@ -1,21 +1,28 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { OrderTracker } from "@/components/order/OrderTracker";
+import { OrderDetail } from "@/components/order/OrderDetail";
+import { OrderHistory } from "@/components/order/OrderHistory";
 import { Order } from "@/types/checkout";
 import { apiService } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOrderProcessing } from "@/hooks/useOrderProcessing";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { cancelOrder } = useOrderProcessing();
+  
   useEffect(() => {
     const fetchOrder = async () => {
       if (!orderId) return;
@@ -23,6 +30,18 @@ const OrderDetailPage = () => {
       try {
         setIsLoading(true);
         const fetchedOrder = await apiService.getOrderById(orderId);
+        
+        // Verify user is authorized to view this order
+        if (fetchedOrder && user && fetchedOrder.userId !== user.id) {
+          toast({
+            title: "Unauthorized",
+            description: "You don't have permission to view this order.",
+            variant: "destructive",
+          });
+          navigate("/profile");
+          return;
+        }
+        
         setOrder(fetchedOrder);
       } catch (error) {
         console.error("Error fetching order:", error);
@@ -37,7 +56,35 @@ const OrderDetailPage = () => {
     };
     
     fetchOrder();
-  }, [orderId, toast]);
+  }, [orderId, toast, user, navigate]);
+
+  const handleCancelOrder = async () => {
+    if (!order) return;
+    
+    try {
+      await cancelOrder(order.id);
+      // Update the local order state to show the cancelled status immediately
+      setOrder({
+        ...order,
+        status: "cancelled",
+        statusHistory: [
+          ...(order.statusHistory || []),
+          {
+            status: "cancelled",
+            timestamp: new Date().toISOString(),
+            description: "Order cancelled by customer",
+          }
+        ]
+      });
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      toast({
+        title: "Error",
+        description: "Could not cancel the order. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -74,6 +121,11 @@ const OrderDetailPage = () => {
     );
   }
 
+  // Helper function to determine if an order can be cancelled
+  const canCancelOrder = (orderStatus: Order["status"]) => {
+    return ["pending", "processing"].includes(orderStatus);
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -90,72 +142,45 @@ const OrderDetailPage = () => {
               <h1 className="text-2xl font-bold md:text-3xl">Order Details</h1>
             </div>
             
-            <OrderTracker order={order} />
+            <OrderDetail order={order} />
             
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Shipping Information</h2>
-                <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-                  <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                  <p>{order.shippingAddress.address1}</p>
-                  {order.shippingAddress.address2 && <p>{order.shippingAddress.address2}</p>}
-                  <p>
-                    {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
-                  </p>
-                  <p>{order.shippingAddress.country}</p>
-                  {order.shippingAddress.phone && <p>Phone: {order.shippingAddress.phone}</p>}
-                </div>
-                
-                <h2 className="text-lg font-medium">Shipping Method</h2>
-                <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-                  <p className="font-medium">{order.shippingMethod.name}</p>
-                  <p className="text-sm text-muted-foreground">{order.shippingMethod.description}</p>
-                  <p className="mt-1">${order.shippingMethod.price.toFixed(2)}</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <h2 className="text-lg font-medium">Order Summary</h2>
-                <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal</span>
-                      <span>${order.subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Shipping</span>
-                      <span>${order.shipping.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Tax</span>
-                      <span>${order.tax.toFixed(2)}</span>
-                    </div>
-                    <div className="border-t border-neutral-200 pt-2 mt-2">
-                      <div className="flex justify-between font-medium">
-                        <span>Total</span>
-                        <span>${order.total.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <h2 className="text-lg font-medium">Payment Information</h2>
-                <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-                  <p>Payment Method: {order.paymentMethod === 'card' ? 'Credit Card' : order.paymentMethod}</p>
-                  <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Order Date: {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
+            <div className="mt-8">
+              <h2 className="text-lg font-medium mb-4">Order Timeline</h2>
+              <OrderHistory order={order} />
             </div>
             
             <div className="mt-8">
               <h2 className="text-lg font-medium mb-4">Need Help?</h2>
               <div className="flex flex-wrap gap-4">
-                <Button variant="outline">Contact Support</Button>
-                <Button variant="outline">Request Return</Button>
-                <Button variant="outline">Cancel Order</Button>
+                <Button variant="outline" asChild>
+                  <Link to="/support">Contact Support</Link>
+                </Button>
+                
+                {order.status === "delivered" && (
+                  <Button variant="outline">Request Return</Button>
+                )}
+                
+                {canCancelOrder(order.status) && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline">Cancel Order</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to cancel this order? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>No, keep my order</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleCancelOrder}>
+                          Yes, cancel order
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </div>
           </div>

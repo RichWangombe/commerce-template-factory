@@ -9,14 +9,42 @@ import { SettingsTab } from "@/components/profile/SettingsTab";
 import { PreferencesTab } from "@/components/profile/PreferencesTab";
 import { UserPreferencesProvider } from "@/contexts/UserPreferencesContext";
 import { AuthWrapper } from "@/components/AuthWrapper";
-import { Order, OrderStatus } from "@/types/checkout";
 import { useOrders } from "@/utils/dataFetchers";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("profile");
   
-  // Use the orders query hook instead of hard-coded mock data
-  const { data: orders, isLoading: ordersLoading } = useOrders();
+  // Use the orders query hook
+  const { data: orders, isLoading: ordersLoading, isError: ordersError } = useOrders();
+
+  const renderOrdersTabContent = () => {
+    if (ordersLoading) {
+      return (
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      );
+    }
+
+    if (ordersError) {
+      return (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            There was a problem loading your orders. Please try again later.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
+    return <OrdersTab orders={orders} />;
+  };
 
   return (
     <AuthWrapper requireAuth>
@@ -34,7 +62,14 @@ export const ProfilePage = () => {
               >
                 <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-[600px]">
                   <TabsTrigger value="profile">Profile</TabsTrigger>
-                  <TabsTrigger value="orders">Orders</TabsTrigger>
+                  <TabsTrigger value="orders">
+                    Orders
+                    {orders && orders.length > 0 && (
+                      <span className="ml-1 text-xs bg-primary text-white rounded-full px-1.5 py-0.5">
+                        {orders.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
                   <TabsTrigger value="preferences">Preferences</TabsTrigger>
                   <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
@@ -44,7 +79,7 @@ export const ProfilePage = () => {
                 </TabsContent>
                 
                 <TabsContent value="orders" className="space-y-6">
-                  <OrdersTab orders={orders} />
+                  {renderOrdersTabContent()}
                 </TabsContent>
                 
                 <TabsContent value="preferences" className="space-y-6">

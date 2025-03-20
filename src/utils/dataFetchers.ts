@@ -1,4 +1,3 @@
-
 import { apiService } from "@/services/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductCardProps } from "@/components/ProductCard";
@@ -39,9 +38,12 @@ export const useOrders = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['orders', user?.id],
-    queryFn: () => apiService.getUserOrders(user?.id || ''),
-    enabled: !!user?.id, // Only fetch orders if user is authenticated
+    queryKey: ["orders", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      return await apiService.getUserOrders(user.id);
+    },
+    enabled: !!user,
   });
 };
 
