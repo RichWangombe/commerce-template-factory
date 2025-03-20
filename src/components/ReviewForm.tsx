@@ -69,8 +69,8 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
         onSuccess();
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to submit review. Please try again.");
       console.error("Error submitting review:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to submit review. Please try again.");
     }
   };
 

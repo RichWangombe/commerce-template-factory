@@ -63,6 +63,7 @@ export type Database = {
       product_reviews: {
         Row: {
           created_at: string | null
+          helpful_count: number | null
           id: number
           product_id: number | null
           rating: number
@@ -71,6 +72,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          helpful_count?: number | null
           id?: number
           product_id?: number | null
           rating: number
@@ -79,6 +81,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          helpful_count?: number | null
           id?: number
           product_id?: number | null
           rating?: number

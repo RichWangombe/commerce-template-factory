@@ -109,9 +109,12 @@ export const useProductReviews = (productId: string | number) => {
         .from('product_reviews')
         .select(`
           id,
+          product_id,
+          user_id,
           rating,
           review_text,
           created_at,
+          helpful_count,
           profiles:user_id (
             first_name,
             last_name
@@ -128,7 +131,7 @@ export const useProductReviews = (productId: string | number) => {
       // Map from Supabase format to our Review type
       return data.map(item => ({
         id: item.id.toString(),
-        productId: productId.toString(),
+        productId: item.product_id?.toString() || '',
         userId: item.user_id || '',
         userName: item.profiles ? 
           `${item.profiles.first_name || ''} ${item.profiles.last_name || ''}`.trim() || 'Anonymous User' : 
@@ -136,7 +139,7 @@ export const useProductReviews = (productId: string | number) => {
         rating: item.rating,
         comment: item.review_text || '',
         date: item.created_at || new Date().toISOString(),
-        helpful: 0, // We'll implement this later
+        helpful: item.helpful_count || 0,
         verified: true // Assuming all logged-in users are verified
       }));
     },
@@ -159,14 +162,19 @@ export const useCreateReview = () => {
         throw new Error('You must be logged in to submit a review');
       }
       
+      const productIdNum = typeof reviewData.productId === 'string' 
+        ? parseInt(reviewData.productId) 
+        : reviewData.productId;
+      
       const { data, error } = await supabase
         .from('product_reviews')
         .insert({
-          product_id: typeof reviewData.productId === 'string' ? parseInt(reviewData.productId) : reviewData.productId,
+          product_id: productIdNum,
           user_id: user.id,
           rating: reviewData.rating,
           review_text: reviewData.comment,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          helpful_count: 0
         })
         .select('id')
         .single();
@@ -204,10 +212,33 @@ export const useMarkReviewHelpful = () => {
       reviewId: string; 
       productId: string | number;
     }) => {
-      // In a real implementation, we would increment a helpful count in the database
-      // For now we'll just console log it
-      console.log(`Marked review ${reviewId} as helpful`);
-      return { success: true };
+      // Get the current helpful count
+      const { data: review, error: fetchError } = await supabase
+        .from('product_reviews')
+        .select('helpful_count')
+        .eq('id', reviewId)
+        .single();
+      
+      if (fetchError) {
+        console.error('Error fetching review:', fetchError);
+        throw fetchError;
+      }
+      
+      // Increment the helpful count
+      const currentCount = review?.helpful_count || 0;
+      const { data, error } = await supabase
+        .from('product_reviews')
+        .update({ helpful_count: currentCount + 1 })
+        .eq('id', reviewId)
+        .select('id, helpful_count')
+        .single();
+      
+      if (error) {
+        console.error('Error updating review:', error);
+        throw error;
+      }
+      
+      return data;
     },
     onSuccess: (_, variables) => {
       // Invalidate reviews for this product
