@@ -1,4 +1,3 @@
-
 import { apiService } from "@/services/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductCardProps } from "@/components/ProductCard";
@@ -142,13 +141,17 @@ export const useProductReviews = (productId: string | number) => {
           if (Array.isArray(profile)) {
             // If it's an array, take the first item
             if (profile.length > 0) {
-              firstName = profile[0].first_name || '';
-              lastName = profile[0].last_name || '';
+              // Explicitly cast the profile element to have the expected properties
+              const profileItem = profile[0] as { first_name?: string, last_name?: string };
+              firstName = profileItem.first_name || '';
+              lastName = profileItem.last_name || '';
             }
           } else {
             // If it's an object, access directly
-            firstName = profile.first_name || '';
-            lastName = profile.last_name || '';
+            // Cast profile to the expected shape
+            const profileObj = profile as { first_name?: string, last_name?: string };
+            firstName = profileObj.first_name || '';
+            lastName = profileObj.last_name || '';
           }
         }
         
