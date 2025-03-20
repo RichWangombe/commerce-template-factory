@@ -129,19 +129,24 @@ export const useProductReviews = (productId: string | number) => {
       }
       
       // Map from Supabase format to our Review type
-      return data.map(item => ({
-        id: item.id.toString(),
-        productId: item.product_id?.toString() || '',
-        userId: item.user_id || '',
-        userName: item.profiles ? 
-          `${item.profiles.first_name || ''} ${item.profiles.last_name || ''}`.trim() || 'Anonymous User' : 
-          'Anonymous User',
-        rating: item.rating,
-        comment: item.review_text || '',
-        date: item.created_at || new Date().toISOString(),
-        helpful: item.helpful_count || 0,
-        verified: true // Assuming all logged-in users are verified
-      }));
+      return data.map(item => {
+        // Safely access profile data, which is a single object, not an array
+        const profile = item.profiles as { first_name: string | null, last_name: string | null } | null;
+        
+        return {
+          id: item.id.toString(),
+          productId: item.product_id?.toString() || '',
+          userId: item.user_id || '',
+          userName: profile ? 
+            `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous User' : 
+            'Anonymous User',
+          rating: item.rating,
+          comment: item.review_text || '',
+          date: item.created_at || new Date().toISOString(),
+          helpful: item.helpful_count || 0,
+          verified: true // Assuming all logged-in users are verified
+        };
+      });
     },
     enabled: !!productId
   });
