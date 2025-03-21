@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useTheme } from "@/providers/ThemeProvider";
+import { Sun, Moon, Laptop, Bell, BellOff } from "lucide-react";
 
 export const SettingsTab: React.FC = () => {
   const { toast } = useToast();
@@ -33,7 +34,7 @@ export const SettingsTab: React.FC = () => {
 
   return (
     <>
-      <Card className="mb-6">
+      <Card className="mb-6 border-border">
         <CardHeader>
           <CardTitle>Notification Preferences</CardTitle>
           <CardDescription>
@@ -43,7 +44,10 @@ export const SettingsTab: React.FC = () => {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between space-x-2">
             <Label htmlFor="marketing-emails" className="flex flex-col space-y-1">
-              <span>Marketing emails</span>
+              <span className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Marketing emails
+              </span>
               <span className="text-xs font-normal text-muted-foreground">
                 Receive emails about new products, features, and more.
               </span>
@@ -57,7 +61,10 @@ export const SettingsTab: React.FC = () => {
           
           <div className="flex items-center justify-between space-x-2">
             <Label htmlFor="order-updates" className="flex flex-col space-y-1">
-              <span>Order updates</span>
+              <span className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Order updates
+              </span>
               <span className="text-xs font-normal text-muted-foreground">
                 Receive notifications about your order status.
               </span>
@@ -71,7 +78,10 @@ export const SettingsTab: React.FC = () => {
           
           <div className="flex items-center justify-between space-x-2">
             <Label htmlFor="product-updates" className="flex flex-col space-y-1">
-              <span>Product updates</span>
+              <span className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Product updates
+              </span>
               <span className="text-xs font-normal text-muted-foreground">
                 Get notified when products you've viewed are on sale.
               </span>
@@ -90,44 +100,53 @@ export const SettingsTab: React.FC = () => {
         </CardFooter>
       </Card>
       
-      <Card className="mb-6">
+      <Card className="mb-6 border-border">
         <CardHeader>
           <CardTitle>Display Settings</CardTitle>
           <CardDescription>
             Customize your browsing experience.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="theme-mode" className="flex flex-col space-y-1">
-              <span>Theme mode</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                Choose between light and dark theme.
-              </span>
-            </Label>
-            <div className="flex items-center space-x-2">
+        <CardContent>
+          <div className="space-y-4">
+            <Label className="text-base">Theme mode</Label>
+            <div className="grid grid-cols-3 gap-2">
               <Button 
                 variant={theme === "light" ? "default" : "outline"} 
-                size="sm"
+                className="w-full flex items-center justify-center gap-2"
                 onClick={() => setTheme("light")}
               >
+                <Sun className="h-4 w-4" />
                 Light
               </Button>
               <Button 
-                variant={theme === "dark" ? "default" : "outline"} 
-                size="sm"
+                variant={theme === "dark" ? "default" : "outline"}
+
+                className="w-full flex items-center justify-center gap-2"
                 onClick={() => setTheme("dark")}
               >
+                <Moon className="h-4 w-4" />
                 Dark
+              </Button>
+              <Button 
+                variant={theme === "system" ? "default" : "outline"} 
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => setTheme("system")}
+              >
+                <Laptop className="h-4 w-4" />
+                System
               </Button>
             </div>
           </div>
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle>Danger Zone</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <BellOff className="h-5 w-5 text-destructive" />
+            Danger Zone
+          </CardTitle>
           <CardDescription>
             Irreversible actions that affect your account.
           </CardDescription>

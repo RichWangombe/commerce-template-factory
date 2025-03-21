@@ -76,9 +76,9 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
 
   if (!user) {
     return (
-      <div className="bg-neutral-50 p-6 rounded-xl">
+      <div className="bg-card p-6 rounded-xl border border-border">
         <h3 className="text-xl font-bold mb-2">Write a Review</h3>
-        <p className="text-gray-600 mb-4">You need to be logged in to write a review.</p>
+        <p className="text-muted-foreground mb-4">You need to be logged in to write a review.</p>
         <Button variant="outline" asChild>
           <a href="/signin">Sign In to Review</a>
         </Button>
@@ -87,7 +87,7 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
   }
 
   return (
-    <div className="bg-neutral-50 p-6 rounded-xl">
+    <div className="bg-card p-6 rounded-xl border border-border">
       <h3 className="text-xl font-bold mb-4">Write a Review</h3>
       
       <Form {...form}>
@@ -113,7 +113,7 @@ export const ReviewForm = ({ productId, onSuccess }: ReviewFormProps) => {
                           className={`h-8 w-8 ${
                             rating <= (hoveredRating || field.value)
                               ? "fill-yellow-400 text-yellow-400"
-                              : "text-neutral-300"
+                              : "text-neutral-300 dark:text-neutral-600"
                           }`}
                         />
                       </button>
