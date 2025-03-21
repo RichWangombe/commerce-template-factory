@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useTheme } from "@/providers/ThemeProvider";
-import { Sun, Moon, Laptop, Bell, BellOff } from "lucide-react";
+import { Sun, Moon, Bell, BellOff } from "lucide-react";
 
 export const SettingsTab: React.FC = () => {
   const { toast } = useToast();
@@ -110,7 +109,7 @@ export const SettingsTab: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             <Label className="text-base">Theme mode</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 variant={theme === "light" ? "default" : "outline"} 
                 className="w-full flex items-center justify-center gap-2"
@@ -121,20 +120,11 @@ export const SettingsTab: React.FC = () => {
               </Button>
               <Button 
                 variant={theme === "dark" ? "default" : "outline"}
-
                 className="w-full flex items-center justify-center gap-2"
                 onClick={() => setTheme("dark")}
               >
                 <Moon className="h-4 w-4" />
                 Dark
-              </Button>
-              <Button 
-                variant={theme === "system" ? "default" : "outline"} 
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => setTheme("system")}
-              >
-                <Laptop className="h-4 w-4" />
-                System
               </Button>
             </div>
           </div>
