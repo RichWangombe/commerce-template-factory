@@ -10,10 +10,25 @@ import { AlertCircle, Sparkles, TrendingUp, Star, Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
+// Define types for our products and grouped products
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  category?: string;
+  isNew?: boolean;
+  rating?: number;
+  discount?: number;
+  originalPrice?: number;
+}
+
+type GroupedProducts = Record<string, Product[]>;
+
 const NewArrivalsPage = () => {
   const { data: products, isLoading, error } = useProducts();
-  const [newProducts, setNewProducts] = useState<any[]>([]);
-  const [featuredProduct, setFeaturedProduct] = useState<any | null>(null);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [featuredProduct, setFeaturedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     if (products) {
@@ -36,14 +51,14 @@ const NewArrivalsPage = () => {
   }, [products]);
 
   // Group products by category for better organization
-  const groupedProducts = newProducts.reduce((acc, product) => {
+  const groupedProducts = newProducts.reduce<GroupedProducts>((acc, product) => {
     const category = product.category || 'Uncategorized';
     if (!acc[category]) {
       acc[category] = [];
     }
     acc[category].push(product);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {});
 
   return (
     <MainLayout>
