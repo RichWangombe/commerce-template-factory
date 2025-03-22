@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
@@ -5,6 +6,7 @@ import AllProductsPage from "@/pages/AllProductsPage";
 import ProductDetailPage from "@/pages/ProductDetailPage";
 import CategoryPage from "@/pages/CategoryPage";
 import CategoriesPage from "@/pages/CategoriesPage";
+import NewArrivalsPage from "@/pages/NewArrivalsPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderConfirmationPage from "@/pages/OrderConfirmationPage";
@@ -59,6 +61,7 @@ const App = () => {
                     <Route path="/product/:id" element={<ProductDetailPage />} />
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/category/:category" element={<CategoryPage />} />
+                    <Route path="/new-arrivals" element={<NewArrivalsPage />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/order-confirmation/:id" element={<OrderConfirmationPage />} />

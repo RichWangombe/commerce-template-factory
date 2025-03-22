@@ -35,6 +35,7 @@ export const mockProducts: ProductCardProps[] = [
     price: 499,
     image: "https://images.unsplash.com/photo-1605236453806-6ff36851218e?q=80&w=300",
     category: "Tablet",
+    isNew: true,
     rating: 4.0
   },
   {
