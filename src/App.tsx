@@ -1,6 +1,8 @@
+
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
+import AllProductsPage from "@/pages/AllProductsPage";
 import ProductDetailPage from "@/pages/ProductDetailPage";
 import CategoryPage from "@/pages/CategoryPage";
 import CartPage from "@/pages/CartPage";
@@ -53,6 +55,7 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
+                    <Route path="/products" element={<AllProductsPage />} />
                     <Route path="/product/:id" element={<ProductDetailPage />} />
                     <Route path="/category/:category" element={<CategoryPage />} />
                     <Route path="/cart" element={<CartPage />} />
