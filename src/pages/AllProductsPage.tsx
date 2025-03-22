@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layouts/MainLayout';
 import { ProductGrid } from '@/components/ProductGrid';
 import { useProducts } from '@/utils/dataFetchers';
-import { Breadcrumb } from '@/components/product/Breadcrumb';
+import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -21,7 +21,7 @@ const AllProductsPage = () => {
   return (
     <MainLayout>
       <div className="container px-4 py-8 mx-auto">
-        <Breadcrumb 
+        <Breadcrumbs 
           items={[
             { label: 'Home', href: '/' },
             { label: 'All Products', href: '#' }
@@ -32,7 +32,7 @@ const AllProductsPage = () => {
         
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
-            <LoadingIndicator size="large" />
+            <LoadingIndicator size="lg" text="Loading products..." />
           </div>
         ) : error ? (
           <Alert variant="destructive" className="my-6">
@@ -44,7 +44,11 @@ const AllProductsPage = () => {
           </Alert>
         ) : (
           <ProductGrid 
-            products={filteredProducts} 
+            products={filteredProducts.map(product => ({
+              ...product,
+              // Ensure category is always provided
+              category: product.category || 'Uncategorized'
+            }))} 
             columns={4} 
           />
         )}
