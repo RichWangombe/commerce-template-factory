@@ -33,14 +33,35 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement;
+    
+    // First add a transition class to enable smooth transition
+    root.classList.add("theme-transition");
+    
+    // Remove existing theme classes
     root.classList.remove("light", "dark");
+    
+    // Add the new theme class
     root.classList.add(theme);
-  }, [theme]);
+    
+    // Store the theme preference
+    localStorage.setItem(storageKey, theme);
+    
+    // Optional: remove the transition class after the transition is complete
+    // to prevent transitions when other classes change
+    const transitionEndHandler = () => {
+      root.classList.remove("theme-transition");
+    };
+    
+    root.addEventListener("transitionend", transitionEndHandler);
+    
+    return () => {
+      root.removeEventListener("transitionend", transitionEndHandler);
+    };
+  }, [theme, storageKey]);
 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
       setTheme(theme);
     },
   };

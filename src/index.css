@@ -54,9 +54,29 @@
   * {
     @apply border-border;
   }
+  
+  /* Add smooth transition for all elements when theme changes */
+  html {
+    @apply scroll-smooth;
+  }
+  
+  html, body, * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Focus styles for better accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+  
+  /* Improved contrast for links */
+  a {
+    @apply font-medium text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
   }
   
   .dark .glass-effect {
@@ -65,5 +85,26 @@
   
   .dark .hover-card {
     @apply hover:bg-white/5 transition-colors;
+  }
+  
+  /* Accessibility: Ensure text fields have proper contrast */
+  input, textarea, select {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Theme transition animation */
+  .theme-transition {
+    @apply transition-all duration-300;
+  }
+}
+
+/* Accessibility helper classes */
+@layer utilities {
+  .visually-hidden {
+    @apply sr-only;
+  }
+  
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
   }
 }
