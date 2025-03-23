@@ -1,9 +1,9 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { toast } from 'sonner';
 import { CartState, CartItem, CartPreferences } from '@/types/cart';
 import { cartReducer, initialCartState } from '@/reducers/cartReducer';
 import { useCartStorage } from '@/hooks/useCartStorage';
+import { toast } from '@/hooks/use-toast';
 
 type CartContextType = {
   state: CartState;
@@ -43,12 +43,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = (item: CartItem) => {
     dispatch({ type: 'ADD_ITEM', payload: item });
-    toast.success(`Added ${item.name} to cart`);
+    toast({
+      title: "Item Added",
+      description: `Added ${item.name} to cart`,
+      variant: "default",
+    });
   };
 
   const removeItem = (id: number) => {
     dispatch({ type: 'REMOVE_ITEM', payload: { id } });
-    toast.info('Item removed from cart');
+    toast({
+      title: "Item Removed",
+      description: "Item removed from cart",
+      variant: "default",
+    });
   };
 
   const updateQuantity = (id: number, quantity: number) => {
@@ -57,7 +65,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
-    toast.info('Cart cleared');
+    toast({
+      title: "Cart Cleared",
+      description: "All items have been removed from your cart",
+      variant: "default",
+    });
   };
 
   const toggleCart = (isOpen?: boolean) => {
@@ -66,7 +78,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePreferences = (preferences: Partial<CartPreferences>) => {
     dispatch({ type: 'UPDATE_PREFERENCES', payload: preferences });
-    toast.success('Preferences updated');
+    toast({
+      title: "Preferences Updated",
+      description: "Your cart preferences have been updated",
+      variant: "default",
+    });
   };
 
   const totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
