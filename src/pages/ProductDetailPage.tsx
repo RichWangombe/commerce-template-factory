@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layouts/MainLayout";
-import { ProductImages } from "@/components/product/ProductImages";
+import { ProductImageCarousel } from "@/components/product/ProductImageCarousel";
 import { ProductInfo } from "@/components/product/ProductInfo";
 import { RecommendationSection } from "@/components/home/RecommendationSection";
 import { ProductTabs } from "@/components/product/ProductTabs";
@@ -27,6 +27,20 @@ const ProductDetailPage = () => {
       recordProductView(product.id);
     }
   }, [product, recordProductView]);
+
+  // Mock multiple images for demo purposes
+  // In a real application, these would come from the product data
+  const getProductImages = (mainImage: string) => {
+    if (!mainImage) return ["/placeholder.svg"];
+    
+    // Create an array with the main image repeated to simulate multiple views
+    // In a real app, each product would have actual different images
+    return [
+      mainImage,
+      "https://images.unsplash.com/photo-1661956602868-6ae368943878?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1661956602944-249bcd04b63f?w=800&auto=format&fit=crop&q=80",
+    ];
+  };
 
   if (error || (!isLoading && !product)) {
     return (
@@ -70,7 +84,10 @@ const ProductDetailPage = () => {
         
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <ErrorBoundary fallback={<div>Error loading product images</div>}>
-            <ProductImages images={[product.image]} />
+            <ProductImageCarousel 
+              images={getProductImages(product.image)} 
+              productName={product.name}
+            />
           </ErrorBoundary>
           
           <ErrorBoundary fallback={<div>Error loading product information</div>}>

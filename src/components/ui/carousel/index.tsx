@@ -1,8 +1,18 @@
 
-export * from './Carousel';
-export * from './CarouselContent';
-export * from './CarouselItem';
-export * from './CarouselPrevious';
-export * from './CarouselNext';
-export * from './types';
-export * from './useCarousel';
+import { Carousel } from "./Carousel"
+import { CarouselContent } from "./CarouselContent"
+import { CarouselItem } from "./CarouselItem"
+import { CarouselNext } from "./CarouselNext"
+import { CarouselPrevious } from "./CarouselPrevious"
+import { type CarouselApi } from "./types"
+import { useCarousel } from "./useCarousel"
+
+export {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  CarouselApi,
+  useCarousel,
+}
