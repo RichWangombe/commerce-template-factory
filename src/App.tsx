@@ -14,7 +14,7 @@ import OrderConfirmationPage from '@/pages/OrderConfirmationPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { ContactPage } from '@/pages/ContactPage';
-import { NotFound } from '@/pages/NotFound';
+import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
