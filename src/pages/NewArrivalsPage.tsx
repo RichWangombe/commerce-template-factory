@@ -10,7 +10,7 @@ import { AlertCircle, Sparkles, TrendingUp, Star, Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
-// Define types for our products and grouped products
+// Define our local Product interface
 interface Product {
   id: number;
   name: string;
@@ -18,6 +18,19 @@ interface Product {
   image: string;
   category?: string;
   isNew?: boolean;
+  rating?: number;
+  discount?: number;
+  originalPrice?: number;
+}
+
+// Interface for the ProductGrid component's Product
+interface ProductGridItem {
+  id: number;
+  name: string;
+  price: number;
+  image: string;
+  category: string; // Required in ProductGrid
+  description?: string;
   rating?: number;
   discount?: number;
   originalPrice?: number;
@@ -59,6 +72,12 @@ const NewArrivalsPage = () => {
     acc[category].push(product);
     return acc;
   }, {});
+
+  // Helper function to map our Product type to ProductGridItem
+  const mapToGridItem = (product: Product): ProductGridItem => ({
+    ...product,
+    category: product.category || 'Uncategorized'
+  });
 
   return (
     <MainLayout>
@@ -135,7 +154,7 @@ const NewArrivalsPage = () => {
                     <div>
                       <h3 className="text-2xl font-bold mb-2">{featuredProduct.name}</h3>
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-muted-foreground">{featuredProduct.category}</span>
+                        <span className="text-muted-foreground">{featuredProduct.category || 'Uncategorized'}</span>
                         <div className="flex items-center">
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star 
@@ -191,7 +210,7 @@ const NewArrivalsPage = () => {
                                   <CardContent className="p-0">
                                     <div className="p-1">
                                       <ProductGrid 
-                                        products={[product]} 
+                                        products={[mapToGridItem(product)]}
                                         columns={1}
                                       />
                                     </div>
@@ -207,7 +226,7 @@ const NewArrivalsPage = () => {
                         </Carousel>
                       ) : (
                         <ProductGrid 
-                          products={categoryProducts} 
+                          products={categoryProducts.map(mapToGridItem)}
                           columns={categoryProducts.length < 3 ? categoryProducts.length as 1 | 2 : 3} 
                         />
                       )}
@@ -225,7 +244,7 @@ const NewArrivalsPage = () => {
                   <h2 className="text-xl font-bold">All New Arrivals</h2>
                 </div>
                 <ProductGrid 
-                  products={newProducts} 
+                  products={newProducts.map(mapToGridItem)}
                   columns={4} 
                 />
               </div>
