@@ -191,11 +191,7 @@ const NewArrivalsPage = () => {
                                   <CardContent className="p-0">
                                     <div className="p-1">
                                       <ProductGrid 
-                                        products={[{
-                                          ...product,
-                                          category: product.category || 'Uncategorized',
-                                          isNew: true
-                                        }]} 
+                                        products={[product]} 
                                         columns={1}
                                       />
                                     </div>
@@ -211,11 +207,7 @@ const NewArrivalsPage = () => {
                         </Carousel>
                       ) : (
                         <ProductGrid 
-                          products={categoryProducts.map(product => ({
-                            ...product,
-                            category: product.category || 'Uncategorized',
-                            isNew: true
-                          }))} 
+                          products={categoryProducts} 
                           columns={categoryProducts.length < 3 ? categoryProducts.length as 1 | 2 : 3} 
                         />
                       )}
@@ -233,11 +225,7 @@ const NewArrivalsPage = () => {
                   <h2 className="text-xl font-bold">All New Arrivals</h2>
                 </div>
                 <ProductGrid 
-                  products={newProducts.map(product => ({
-                    ...product,
-                    category: product.category || 'Uncategorized',
-                    isNew: true
-                  }))} 
+                  products={newProducts} 
                   columns={4} 
                 />
               </div>
