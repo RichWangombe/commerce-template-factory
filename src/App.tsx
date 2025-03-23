@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ToastProvider } from '@/components/ui/toast';
@@ -7,13 +8,13 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { HomePage } from '@/pages/HomePage';
 import { AboutPage } from '@/pages/AboutPage';
 import { CartPage } from '@/pages/CartPage';
-import { CheckoutPage } from '@/pages/CheckoutPage';
-import { ProductPage } from '@/pages/ProductPage';
-import { OrderConfirmationPage } from '@/pages/OrderConfirmationPage';
-import { OrderDetailsPage } from '@/pages/OrderDetailsPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import ProductDetailPage from '@/pages/ProductDetailPage';
+import OrderConfirmationPage from '@/pages/OrderConfirmationPage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
 import { ProfilePage } from '@/pages/ProfilePage';
 import { ContactPage } from '@/pages/ContactPage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
+import { NotFound } from '@/pages/NotFound';
 
 function App() {
   return (
@@ -26,12 +27,12 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/product/:id" element={<ProductDetailPage />} />
               <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-              <Route path="/order/:id" element={<OrderDetailsPage />} />
+              <Route path="/order/:id" element={<OrderDetailPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/contact" element={<ContactPage />} />
-              <Route path="*" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
           </ToastProvider>
