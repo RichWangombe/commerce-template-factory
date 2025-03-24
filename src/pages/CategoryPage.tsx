@@ -20,10 +20,24 @@ export const CategoryPage = () => {
         .join(" ")
     : "";
   
-  // Case-insensitive matching
-  const products = mockProducts.filter(
-    product => product.category?.toLowerCase() === formattedCategoryName.toLowerCase()
-  );
+  // Case-insensitive and fuzzy matching for better category matching
+  const products = mockProducts.filter(product => {
+    if (!product.category) return false;
+    
+    // Try different matching strategies
+    const exactMatch = product.category.toLowerCase() === formattedCategoryName.toLowerCase();
+    const containsMatch = product.category.toLowerCase().includes(formattedCategoryName.toLowerCase()) || 
+                         formattedCategoryName.toLowerCase().includes(product.category.toLowerCase());
+    
+    // Handle specific category mappings
+    if (categoryName === "smartphones" && product.category === "Smartphone") return true;
+    if (categoryName === "wearables" && product.category === "Wearable") return true;
+    if (categoryName === "accessories" && product.category === "Audio") return true;
+    if (categoryName === "laptops" && product.category === "Laptop") return true;
+    if (categoryName === "gaming" && product.category === "Gaming") return true;
+    
+    return exactMatch || containsMatch;
+  });
 
   // Make sure all products have the required category field set
   const productsWithRequiredCategory = products.map(product => ({

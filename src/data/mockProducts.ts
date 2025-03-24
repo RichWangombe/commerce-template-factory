@@ -72,6 +72,40 @@ export const mockProducts: ProductCardProps[] = [
     category: "Audio",
     rating: 4.6
   },
+  // Additional products for more category coverage
+  {
+    id: 9,
+    name: "Phone Case",
+    price: 29,
+    image: "https://images.unsplash.com/photo-1601593346740-925612772163?q=80&w=800&auto=format&fit=crop",
+    category: "Accessories",
+    rating: 4.1
+  },
+  {
+    id: 10,
+    name: "Wireless Charger",
+    price: 49,
+    image: "https://images.unsplash.com/photo-1618760439047-796adbd32877?q=80&w=800&auto=format&fit=crop",
+    category: "Accessories",
+    rating: 4.4
+  },
+  {
+    id: 11,
+    name: "Gaming Laptop",
+    price: 1599,
+    image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=800&auto=format&fit=crop",
+    category: "Gaming",
+    isNew: true,
+    rating: 4.9
+  },
+  {
+    id: 12,
+    name: "Gaming Headset",
+    price: 129,
+    image: "https://images.unsplash.com/photo-1591105575639-a334978de1a3?q=80&w=800&auto=format&fit=crop",
+    category: "Gaming",
+    rating: 4.5
+  }
 ];
 
 // Product categories for better organization of recommendations
@@ -81,4 +115,6 @@ export const productCategories: Record<string, number[]> = {
   "Audio": [3, 6, 8],
   "Tablet": [4],
   "Laptop": [5],
+  "Accessories": [9, 10],
+  "Gaming": [11, 12]
 };
