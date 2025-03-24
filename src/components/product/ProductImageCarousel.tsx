@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
   Carousel, 
@@ -7,7 +7,7 @@ import {
   CarouselItem, 
   CarouselNext, 
   CarouselPrevious,
-  useCarousel
+  type CarouselApi
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MoveLeft, MoveRight, ZoomIn, X } from "lucide-react";
@@ -28,19 +28,34 @@ export const ProductImageCarousel = ({
   const [isZoomed, setIsZoomed] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const imageRef = useRef<HTMLDivElement>(null);
   const displayName = productName || name || "Product";
 
   // Make sure we always have at least one image
   const displayImages = images.length > 0 ? images : ["/placeholder.svg"];
   
-  // For main carousel
-  const carousel = useCarousel();
+  // Handle changes in carousel position
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const onChange = () => {
+      setSelectedImage(carouselApi.selectedScrollSnap());
+    };
+
+    carouselApi.on("select", onChange);
+    // Initialize selected image
+    onChange();
+
+    return () => {
+      carouselApi.off("select", onChange);
+    };
+  }, [carouselApi]);
   
   // Handle thumbnail click
   const handleThumbnailClick = (index: number) => {
     setSelectedImage(index);
-    carousel.api?.scrollTo(index);
+    carouselApi?.scrollTo(index);
   };
   
   // Handle mouse position for zoom effect
@@ -78,8 +93,7 @@ export const ProductImageCarousel = ({
           loop: true,
           skipSnaps: true
         }}
-        onValueChange={(value) => setSelectedImage(Number(value))}
-        ref={carousel.carouselRef}
+        setApi={setCarouselApi}
       >
         <CarouselContent>
           {displayImages.map((image, index) => (
