@@ -21,6 +21,7 @@ import { ContactPage } from '@/pages/ContactPage';
 import NotFound from '@/pages/NotFound';
 import SearchPage from '@/pages/SearchPage';
 import AllProductsPage from '@/pages/AllProductsPage';
+import { CategoryPage } from '@/pages/CategoryPage';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/product/:id" element={<ProductDetailPage />} />
+                    <Route path="/category/:categoryName" element={<CategoryPage />} />
                     <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
                     <Route path="/order/:id" element={<OrderDetailPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
