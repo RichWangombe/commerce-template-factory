@@ -14,6 +14,34 @@ import { useProduct, useProductReviews } from "@/utils/dataFetchers";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Higher quality sample product images for demo purposes
+const sampleProductImages = {
+  electronics: [
+    "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=1600&auto=format&fit=crop"
+  ],
+  clothing: [
+    "https://images.unsplash.com/photo-1578632767657-b96c3106ffad?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?q=80&w=1600&auto=format&fit=crop"
+  ],
+  furniture: [
+    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?q=80&w=1600&auto=format&fit=crop"
+  ],
+  default: [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1600&auto=format&fit=crop"
+  ]
+};
+
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { recordProductView } = useRecommendations();
@@ -28,18 +56,32 @@ const ProductDetailPage = () => {
     }
   }, [product, recordProductView]);
 
-  // Mock multiple images for demo purposes
-  // In a real application, these would come from the product data
-  const getProductImages = (mainImage: string) => {
-    if (!mainImage) return ["/placeholder.svg"];
+  // Generate high-quality product images based on category or main image
+  const getProductImages = (mainImage: string, category?: string) => {
+    if (!mainImage) return sampleProductImages.default;
     
-    // Create an array with the main image repeated to simulate multiple views
-    // In a real app, each product would have actual different images
-    return [
-      mainImage,
-      "https://images.unsplash.com/photo-1661956602868-6ae368943878?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1661956602944-249bcd04b63f?w=800&auto=format&fit=crop&q=80",
-    ];
+    // Start with the main product image
+    let images = [mainImage];
+    
+    // Determine which category images to use
+    let categoryImages;
+    if (category?.toLowerCase().includes('electronics')) {
+      categoryImages = sampleProductImages.electronics;
+    } else if (category?.toLowerCase().includes('clothing') || 
+               category?.toLowerCase().includes('fashion')) {
+      categoryImages = sampleProductImages.clothing;
+    } else if (category?.toLowerCase().includes('furniture') || 
+               category?.toLowerCase().includes('home')) {
+      categoryImages = sampleProductImages.furniture;
+    } else {
+      categoryImages = sampleProductImages.default;
+    }
+    
+    // Add some high-quality category-specific images
+    // In a real application, these would be actual different angles/views of the same product
+    images = images.concat(categoryImages.slice(0, 3));
+    
+    return images;
   };
 
   if (error || (!isLoading && !product)) {
@@ -85,7 +127,7 @@ const ProductDetailPage = () => {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <ErrorBoundary fallback={<div>Error loading product images</div>}>
             <ProductImageCarousel 
-              images={getProductImages(product.image)} 
+              images={getProductImages(product.image, product.category)} 
               productName={product.name}
             />
           </ErrorBoundary>
