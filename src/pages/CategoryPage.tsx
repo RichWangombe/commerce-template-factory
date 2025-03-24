@@ -22,8 +22,14 @@ export const CategoryPage = () => {
   
   // Case-insensitive matching
   const products = mockProducts.filter(
-    product => product.category.toLowerCase() === formattedCategoryName.toLowerCase()
+    product => product.category?.toLowerCase() === formattedCategoryName.toLowerCase()
   );
+
+  // Make sure all products have the required category field set
+  const productsWithRequiredCategory = products.map(product => ({
+    ...product,
+    category: product.category || formattedCategoryName // Ensure category is not undefined
+  }));
 
   return (
     <MainLayout>
@@ -40,7 +46,7 @@ export const CategoryPage = () => {
             <p className="text-muted-foreground mb-6">
               Showing {products.length} products in {formattedCategoryName}
             </p>
-            <ProductGrid products={products} />
+            <ProductGrid products={productsWithRequiredCategory} />
           </>
         ) : (
           <div className="py-12">
