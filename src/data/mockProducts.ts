@@ -7,7 +7,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 1,
     name: "Smartphone X",
     price: 799,
-    image: "/lovable-uploads/6b752309-063d-437b-b887-e07e2232e3ba.png",
+    image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=800&auto=format&fit=crop",
     category: "Smartphone",
     isNew: true,
     rating: 4.5
@@ -16,7 +16,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 2,
     name: "Smartwatch Pro",
     price: 299,
-    image: "/lovable-uploads/f306dd50-931c-4e73-b66d-61b3383f1151.png",
+    image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=800&auto=format&fit=crop",
     category: "Wearable",
     rating: 4.2
   },
@@ -24,7 +24,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 3,
     name: "Wireless Earbuds",
     price: 149,
-    image: "/lovable-uploads/5724322a-7599-465b-8abc-a56c59781885.png",
+    image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=800&auto=format&fit=crop",
     category: "Audio",
     discount: 15,
     rating: 4.7
@@ -33,7 +33,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 4,
     name: "Tablet Ultra",
     price: 499,
-    image: "https://images.unsplash.com/photo-1605236453806-6ff36851218e?q=80&w=300",
+    image: "https://images.unsplash.com/photo-1589739900875-8453b348aa0e?q=80&w=800&auto=format&fit=crop",
     category: "Tablet",
     isNew: true,
     rating: 4.0
@@ -42,7 +42,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 5,
     name: "Laptop Pro",
     price: 1299,
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=300",
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=800&auto=format&fit=crop",
     category: "Laptop",
     rating: 4.8
   },
@@ -50,7 +50,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 6,
     name: "Bluetooth Speaker",
     price: 79,
-    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=300",
+    image: "https://images.unsplash.com/photo-1547393947-e8d9f26a39f4?q=80&w=800&auto=format&fit=crop",
     category: "Audio",
     discount: 10,
     rating: 3.9
@@ -59,7 +59,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 7,
     name: "Fitness Tracker",
     price: 129,
-    image: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?q=80&w=300",
+    image: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?q=80&w=800&auto=format&fit=crop",
     category: "Wearable",
     isNew: true,
     rating: 4.3
@@ -68,7 +68,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 8,
     name: "Home Speaker System",
     price: 349,
-    image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=300",
+    image: "https://images.unsplash.com/photo-1603057002111-906f49ebbd48?q=80&w=800&auto=format&fit=crop",
     category: "Audio",
     rating: 4.6
   },

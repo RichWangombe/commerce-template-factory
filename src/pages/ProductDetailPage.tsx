@@ -13,34 +13,7 @@ import { ProductViewTracker } from "@/components/ProductViewTracker";
 import { useProduct, useProductReviews } from "@/utils/dataFetchers";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Higher quality sample product images for demo purposes
-const sampleProductImages = {
-  electronics: [
-    "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?q=80&w=1600&auto=format&fit=crop"
-  ],
-  clothing: [
-    "https://images.unsplash.com/photo-1578632767657-b96c3106ffad?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?q=80&w=1600&auto=format&fit=crop"
-  ],
-  furniture: [
-    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?q=80&w=1600&auto=format&fit=crop"
-  ],
-  default: [
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1600&auto=format&fit=crop"
-  ]
-};
+import { processProductImages, getProductSpecificImages } from "@/utils/imageUtils";
 
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,43 +29,22 @@ const ProductDetailPage = () => {
     }
   }, [product, recordProductView]);
 
-  // Generate high-quality product images based on category
+  // Generate product images based on product ID, main image, and category
   const getProductImages = (mainImage: string, category?: string) => {
-    // Initialize images array
-    let images = [];
-    
-    // Only add the main product image if it's a valid URL (not empty and not undefined)
-    if (mainImage && !mainImage.includes('undefined') && mainImage.trim() !== '') {
-      // Check if image URL is valid by ensuring it has a proper extension or is a data URI
-      const validImageUrl = 
-        mainImage.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || 
-        mainImage.startsWith('data:image/') ||
-        mainImage.startsWith('http');
-        
-      if (validImageUrl) {
-        images.push(mainImage);
-      }
+    // First check if we have product-specific images
+    const specificImages = getProductSpecificImages(productId);
+    if (specificImages.length > 0) {
+      return specificImages;
     }
     
-    // Determine which category images to use
-    let categoryImages;
-    if (category?.toLowerCase().includes('electronics')) {
-      categoryImages = sampleProductImages.electronics;
-    } else if (category?.toLowerCase().includes('clothing') || 
-              category?.toLowerCase().includes('fashion')) {
-      categoryImages = sampleProductImages.clothing;
-    } else if (category?.toLowerCase().includes('furniture') || 
-              category?.toLowerCase().includes('home')) {
-      categoryImages = sampleProductImages.furniture;
-    } else {
-      categoryImages = sampleProductImages.default;
+    // Build array starting with the main product image if valid
+    const images = [];
+    if (mainImage && mainImage.trim() !== '' && !mainImage.includes('undefined')) {
+      images.push(mainImage);
     }
     
-    // Add category-specific images (always add at least some images)
-    const numberOfExtraImages = images.length > 0 ? 3 : 4;
-    images = images.concat(categoryImages.slice(0, numberOfExtraImages));
-    
-    return images;
+    // Process and return the images, falling back to category-based images if needed
+    return processProductImages(images, productId, category);
   };
 
   if (error || (!isLoading && !product)) {

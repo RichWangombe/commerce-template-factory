@@ -11,6 +11,7 @@ import {
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MoveLeft, MoveRight, ZoomIn, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isValidImageUrl, getDefaultProductImage } from "@/utils/imageUtils";
 
 interface ProductImageCarouselProps {
   images: string[];
@@ -31,18 +32,11 @@ export const ProductImageCarousel = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const displayName = productName || name || "Product";
 
-  // Filter out any potentially problematic image URLs
-  const validImages = images.filter(img => 
-    img && 
-    img.trim() !== '' && 
-    !img.includes('undefined') && 
-    img !== '/placeholder.svg'
-  );
+  // Filter out any potentially problematic image URLs using our utility
+  const validImages = images.filter(img => isValidImageUrl(img));
   
   // Make sure we always have at least one image
-  const displayImages = validImages.length > 0 ? validImages : [
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop"
-  ];
+  const displayImages = validImages.length > 0 ? validImages : [getDefaultProductImage()];
   
   // Handle changes in carousel position
   useEffect(() => {
