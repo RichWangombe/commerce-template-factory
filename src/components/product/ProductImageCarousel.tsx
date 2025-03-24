@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { 
@@ -32,8 +31,18 @@ export const ProductImageCarousel = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const displayName = productName || name || "Product";
 
+  // Filter out any potentially problematic image URLs
+  const validImages = images.filter(img => 
+    img && 
+    img.trim() !== '' && 
+    !img.includes('undefined') && 
+    img !== '/placeholder.svg'
+  );
+  
   // Make sure we always have at least one image
-  const displayImages = images.length > 0 ? images : ["/placeholder.svg"];
+  const displayImages = validImages.length > 0 ? validImages : [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop"
+  ];
   
   // Handle changes in carousel position
   useEffect(() => {

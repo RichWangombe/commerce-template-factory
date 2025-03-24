@@ -56,30 +56,41 @@ const ProductDetailPage = () => {
     }
   }, [product, recordProductView]);
 
-  // Generate high-quality product images based on category or main image
+  // Generate high-quality product images based on category
   const getProductImages = (mainImage: string, category?: string) => {
-    if (!mainImage) return sampleProductImages.default;
+    // Initialize images array
+    let images = [];
     
-    // Start with the main product image
-    let images = [mainImage];
+    // Only add the main product image if it's a valid URL (not empty and not undefined)
+    if (mainImage && !mainImage.includes('undefined') && mainImage.trim() !== '') {
+      // Check if image URL is valid by ensuring it has a proper extension or is a data URI
+      const validImageUrl = 
+        mainImage.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || 
+        mainImage.startsWith('data:image/') ||
+        mainImage.startsWith('http');
+        
+      if (validImageUrl) {
+        images.push(mainImage);
+      }
+    }
     
     // Determine which category images to use
     let categoryImages;
     if (category?.toLowerCase().includes('electronics')) {
       categoryImages = sampleProductImages.electronics;
     } else if (category?.toLowerCase().includes('clothing') || 
-               category?.toLowerCase().includes('fashion')) {
+              category?.toLowerCase().includes('fashion')) {
       categoryImages = sampleProductImages.clothing;
     } else if (category?.toLowerCase().includes('furniture') || 
-               category?.toLowerCase().includes('home')) {
+              category?.toLowerCase().includes('home')) {
       categoryImages = sampleProductImages.furniture;
     } else {
       categoryImages = sampleProductImages.default;
     }
     
-    // Add some high-quality category-specific images
-    // In a real application, these would be actual different angles/views of the same product
-    images = images.concat(categoryImages.slice(0, 3));
+    // Add category-specific images (always add at least some images)
+    const numberOfExtraImages = images.length > 0 ? 3 : 4;
+    images = images.concat(categoryImages.slice(0, numberOfExtraImages));
     
     return images;
   };
