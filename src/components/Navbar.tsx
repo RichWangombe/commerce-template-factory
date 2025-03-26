@@ -69,8 +69,13 @@ export const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[350px] flex flex-col">
                 <div className="px-2 py-6 flex-1">
-                  <Link to="/" className="font-semibold text-xl block mb-6">
-                    Store
+                  <Link to="/" className="font-semibold text-xl block mb-6 flex items-center gap-2">
+                    <img 
+                      src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
+                      alt="GadgetHub Logo" 
+                      className="h-6 w-auto"
+                    />
+                    GadgetHub
                   </Link>
                   <nav className="flex flex-col space-y-6">
                     <div className="space-y-3">
@@ -111,8 +116,13 @@ export const Navbar = () => {
               </SheetContent>
             </Sheet>
             
-            <Link to="/" className="font-semibold text-xl text-primary">
-              Store
+            <Link to="/" className="font-semibold text-xl text-primary flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
+                alt="GadgetHub Logo" 
+                className="h-6 w-auto"
+              />
+              GadgetHub
             </Link>
 
             <nav className="hidden md:flex items-center gap-6 ml-6">
