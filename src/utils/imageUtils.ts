@@ -1,3 +1,4 @@
+
 /**
  * Image utility functions for validating and processing images across the application
  */
@@ -92,6 +93,41 @@ export const getProductSpecificImages = (productId: number): string[] => {
       "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop", // Side view
       "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?q=80&w=1600&auto=format&fit=crop", // In use
       "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop"  // Detail
+    ],
+    // Gaming Headset (ID: 12)
+    12: [
+      "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=1600&auto=format&fit=crop", // Headset front
+      "https://images.unsplash.com/photo-1615582631056-a2ed95fadcd5?q=80&w=1600&auto=format&fit=crop", // Headset side
+      "https://images.unsplash.com/photo-1579435728642-22e31ba4953d?q=80&w=1600&auto=format&fit=crop", // Headset close-up
+      "https://images.unsplash.com/photo-1627331540354-98844162ab70?q=80&w=1600&auto=format&fit=crop"  // Headset in use
+    ],
+    // Gaming Mouse (ID: 25)
+    25: [
+      "https://images.unsplash.com/photo-1563297007-0686b7003af7?q=80&w=1600&auto=format&fit=crop", // Mouse top view
+      "https://images.unsplash.com/photo-1605773527852-c546a8584ea3?q=80&w=1600&auto=format&fit=crop", // Mouse side
+      "https://images.unsplash.com/photo-1586349906319-8d0595d033e4?q=80&w=1600&auto=format&fit=crop", // Mouse in use
+      "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=1600&auto=format&fit=crop"  // Mouse detail
+    ],
+    // Gaming Keyboard (ID: 26)
+    26: [
+      "https://images.unsplash.com/photo-1595044426077-d36d9236d067?q=80&w=1600&auto=format&fit=crop", // Keyboard top view
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=1600&auto=format&fit=crop", // RGB lighting
+      "https://images.unsplash.com/photo-1576521096592-f8dd7cfbcf7e?q=80&w=1600&auto=format&fit=crop", // Keyboard side
+      "https://images.unsplash.com/photo-1589578228447-e1a4e481c6c8?q=80&w=1600&auto=format&fit=crop"  // Keys detail
+    ],
+    // Gaming Chair (ID: 27)
+    27: [
+      "https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=1600&auto=format&fit=crop", // Chair front
+      "https://images.unsplash.com/photo-1603101267760-c68cc7680f44?q=80&w=1600&auto=format&fit=crop", // Chair side
+      "https://images.unsplash.com/photo-1636099926134-28a906e5e5f5?q=80&w=1600&auto=format&fit=crop", // Detail
+      "https://images.unsplash.com/photo-1572545884955-6acdcf5ed887?q=80&w=1600&auto=format&fit=crop"  // In gaming setup
+    ],
+    // Gaming Console (ID: 28)
+    28: [
+      "https://images.unsplash.com/photo-1605901309584-818e25960a8f?q=80&w=1600&auto=format&fit=crop", // Console front
+      "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?q=80&w=1600&auto=format&fit=crop", // Console setup
+      "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?q=80&w=1600&auto=format&fit=crop", // Controller
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1600&auto=format&fit=crop"  // Gaming session
     ],
   };
   
