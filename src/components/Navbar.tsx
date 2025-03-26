@@ -116,7 +116,7 @@ export const Navbar = () => {
               </SheetContent>
             </Sheet>
             
-            <Link to="/" className="font-semibold text-xl text-primary flex items-center gap-2">
+            <Link to="/" className="font-semibold text-xl text-primary flex items-center gap-2 mr-8">
               <img 
                 src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                 alt="GadgetHub Logo" 
@@ -125,7 +125,7 @@ export const Navbar = () => {
               GadgetHub
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6 ml-6">
+            <nav className="hidden md:flex items-center gap-6">
               <NavLinks />
             </nav>
           </div>
