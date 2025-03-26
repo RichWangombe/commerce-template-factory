@@ -19,9 +19,9 @@ export const LightboxImage = ({
 }: LightboxImageProps) => {
   const navigateLightbox = (direction: 'next' | 'prev') => {
     if (direction === 'next') {
-      setLightboxIndex((prev) => (prev + 1) % images.length);
+      setLightboxIndex((lightboxIndex + 1) % images.length);
     } else {
-      setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
+      setLightboxIndex((lightboxIndex - 1 + images.length) % images.length);
     }
   };
 
