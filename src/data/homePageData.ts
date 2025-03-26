@@ -1,3 +1,4 @@
+
 export const categories = [
   { 
     id: "smartphones", 
@@ -27,7 +28,7 @@ export const categories = [
     icon: "https://api.iconify.design/lucide:watch.svg?color=%23d946ef", 
     productCount: 12,
     backgroundImages: [
-      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1617043983671-adaadcaa2460?q=80&w=800&auto=format&fit=crop"
     ]
@@ -62,7 +63,10 @@ export const categories = [
     backgroundImages: [
       "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1591105575639-a334978de1a3?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=800&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1605979257913-1704eb7b6246?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=800&auto=format&fit=crop"
     ]
   },
   { 
@@ -73,7 +77,10 @@ export const categories = [
     backgroundImages: [
       "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1585771362212-e3f6e61668f4?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1558002038-1055953a7b91?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=800&auto=format&fit=crop"
     ]
   },
 ];

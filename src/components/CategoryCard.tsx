@@ -1,14 +1,8 @@
 
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { useCarousel } from "@/components/ui/carousel/useCarousel";
+import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
 export interface CategoryCardProps {
   id: string;
@@ -32,8 +26,26 @@ export const CategoryCard = ({
   
   // State for controlling background image animation
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [nextImageIndex, setNextImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const nextImageIndexRef = useRef(0);
+  const imagesLoadedRef = useRef<boolean[]>([]);
+  
+  // Preload images to prevent blank frames
+  useEffect(() => {
+    if (backgroundImages.length <= 1) return;
+    
+    // Initialize array to track which images are loaded
+    imagesLoadedRef.current = new Array(backgroundImages.length).fill(false);
+    
+    // Preload all images
+    backgroundImages.forEach((src, idx) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        imagesLoadedRef.current[idx] = true;
+      };
+    });
+  }, [backgroundImages]);
   
   // Generate an elegant background gradient based on the category index
   const getBgColor = () => {
@@ -69,24 +81,55 @@ export const CategoryCard = ({
     }
   };
 
-  // Improved background image rotation logic to prevent blank frames
+  // Improved background image rotation logic with better transition handling
   useEffect(() => {
     if (backgroundImages.length <= 1) return;
     
     const interval = setInterval(() => {
-      // Set up the next image before transitioning
-      setNextImageIndex((currentImageIndex + 1) % backgroundImages.length);
-      setIsTransitioning(true);
+      // Calculate next image index, ensuring it's different from current
+      nextImageIndexRef.current = (currentImageIndex + 1) % backgroundImages.length;
       
-      // After a short delay, complete the transition
-      setTimeout(() => {
-        setCurrentImageIndex(nextImageIndex);
-        setIsTransitioning(false);
-      }, 1000); // Match this with the animation duration
+      // Only transition if the next image is loaded
+      if (imagesLoadedRef.current[nextImageIndexRef.current]) {
+        setIsTransitioning(true);
+        
+        // After transition completes, update current image
+        setTimeout(() => {
+          setCurrentImageIndex(nextImageIndexRef.current);
+          setIsTransitioning(false);
+        }, 800); // Slightly shorter than animation duration for smooth transition
+      } else {
+        // If next image isn't loaded, try to find one that is
+        let attempts = 0;
+        while (!imagesLoadedRef.current[nextImageIndexRef.current] && attempts < backgroundImages.length) {
+          nextImageIndexRef.current = (nextImageIndexRef.current + 1) % backgroundImages.length;
+          attempts++;
+        }
+        
+        // If we found a loaded image, use it
+        if (imagesLoadedRef.current[nextImageIndexRef.current]) {
+          setIsTransitioning(true);
+          setTimeout(() => {
+            setCurrentImageIndex(nextImageIndexRef.current);
+            setIsTransitioning(false);
+          }, 800);
+        }
+      }
     }, 5000); // Change image every 5 seconds
     
     return () => clearInterval(interval);
-  }, [backgroundImages, currentImageIndex, nextImageIndex]);
+  }, [backgroundImages, currentImageIndex]);
+  
+  // Get current and next image URLs, with fallbacks
+  const getCurrentImage = () => {
+    if (backgroundImages.length === 0) return "";
+    return backgroundImages[currentImageIndex];
+  };
+  
+  const getNextImage = () => {
+    if (backgroundImages.length === 0) return "";
+    return backgroundImages[nextImageIndexRef.current];
+  };
   
   return (
     <motion.div
@@ -110,22 +153,24 @@ export const CategoryCard = ({
         <div className="absolute inset-0 overflow-hidden">
           {backgroundImages.length > 0 ? (
             <div className="absolute inset-0">
-              {/* Always show current image */}
+              {/* Current image always visible */}
               <div className="absolute inset-0">
                 <div className="absolute inset-0 bg-gradient-to-br z-0"
                   style={{
-                    backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
+                    backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.5), rgba(0,0,0,0.7))`,
                   }}
                 />
-                <img 
-                  src={backgroundImages[currentImageIndex]} 
-                  alt={name}
-                  className="h-full w-full object-cover object-center opacity-80"
-                />
+                {getCurrentImage() && (
+                  <img 
+                    src={getCurrentImage()} 
+                    alt={name}
+                    className="h-full w-full object-cover object-center opacity-80"
+                  />
+                )}
               </div>
               
-              {/* Show next image with animation only during transition */}
-              {isTransitioning && (
+              {/* Next image fades in during transition */}
+              {isTransitioning && getNextImage() && (
                 <motion.div
                   className="absolute inset-0"
                   initial={{ opacity: 0 }}
@@ -134,11 +179,11 @@ export const CategoryCard = ({
                 >
                   <div className="absolute inset-0 bg-gradient-to-br z-0"
                     style={{
-                      backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
+                      backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.5), rgba(0,0,0,0.7))`,
                     }}
                   />
                   <img 
-                    src={backgroundImages[nextImageIndex]} 
+                    src={getNextImage()} 
                     alt={name}
                     className="h-full w-full object-cover object-center opacity-80"
                   />
