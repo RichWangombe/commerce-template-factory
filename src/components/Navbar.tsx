@@ -59,7 +59,7 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 md:px-6">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center space-x-8">
             <Sheet>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon" className="-ml-2">
@@ -116,7 +116,7 @@ export const Navbar = () => {
               </SheetContent>
             </Sheet>
             
-            <Link to="/" className="font-semibold text-xl text-primary flex items-center gap-2 mr-8">
+            <Link to="/" className="font-semibold text-xl text-primary flex items-center gap-2">
               <img 
                 src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                 alt="GadgetHub Logo" 
