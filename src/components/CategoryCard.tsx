@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export interface CategoryCardProps {
   id: string;
@@ -20,46 +21,74 @@ export const CategoryCard = ({
   // Convert name to kebab-case for URL
   const categorySlug = id.toLowerCase();
   
-  // Generate a pastel background color based on the category name
+  // Generate an elegant background gradient based on the category index
   const getBgColor = () => {
     const colors = [
-      "from-blue-50 to-blue-100",
-      "from-green-50 to-green-100",
-      "from-purple-50 to-purple-100",
-      "from-amber-50 to-amber-100",
-      "from-rose-50 to-rose-100",
-      "from-teal-50 to-teal-100",
-      "from-indigo-50 to-indigo-100",
+      "from-blue-50/80 to-sky-100/80",
+      "from-emerald-50/80 to-teal-100/80",
+      "from-violet-50/80 to-purple-100/80",
+      "from-amber-50/80 to-yellow-100/80", 
+      "from-rose-50/80 to-pink-100/80",
+      "from-teal-50/80 to-cyan-100/80",
+      "from-indigo-50/80 to-blue-100/80",
     ];
     
     return colors[index % colors.length];
   };
+
+  // Animation variants for hover state
+  const cardVariants = {
+    initial: { y: 0, boxShadow: "0 2px 4px rgba(0,0,0,0.05)" },
+    hover: { 
+      y: -5, 
+      boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+      transition: { duration: 0.3, ease: "easeOut" }
+    }
+  };
+  
+  const iconVariants = {
+    initial: { rotate: 0, scale: 1 },
+    hover: { 
+      rotate: 3, 
+      scale: 1.1,
+      transition: { duration: 0.3, ease: "easeOut" }
+    }
+  };
   
   return (
-    <Link 
-      to={`/category/${categorySlug}`}
-      className={cn(
-        "group flex flex-col items-center justify-center rounded-xl bg-gradient-to-br p-6 text-center",
-        getBgColor(),
-        "transition-all duration-300 hover:shadow-md hover:scale-105 hover:translate-y-[-5px]",
-        "animate-fade-in",
-        "product-card"
-      )}
-      style={{
-        animationDelay: `${index * 100}ms`,
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover="hover"
+      initial="initial"
+      variants={cardVariants}
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm transition-transform group-hover:scale-110 group-hover:shadow-md">
-        <img 
-          src={icon} 
-          alt={name} 
-          className="h-8 w-8 transition-transform group-hover:rotate-3" 
-        />
-      </div>
-      <h3 className="text-base font-medium">{name}</h3>
-      {productCount !== undefined && (
-        <p className="mt-1 text-xs text-neutral-600">{productCount} products</p>
-      )}
-    </Link>
+      <Link 
+        to={`/category/${categorySlug}`}
+        className={cn(
+          "group flex flex-col items-center justify-center rounded-xl bg-gradient-to-br p-6 text-center",
+          getBgColor(),
+          "border border-white/40 backdrop-blur-sm",
+          "transition-all duration-300",
+          "product-card"
+        )}
+      >
+        <motion.div 
+          className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-sm"
+          variants={iconVariants}
+        >
+          <img 
+            src={icon} 
+            alt={name} 
+            className="h-8 w-8" 
+          />
+        </motion.div>
+        <h3 className="text-base font-medium">{name}</h3>
+        {productCount !== undefined && (
+          <p className="mt-1 text-xs text-neutral-600">{productCount} products</p>
+        )}
+      </Link>
+    </motion.div>
   );
 };
