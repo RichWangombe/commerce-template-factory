@@ -5,30 +5,48 @@ import { cn } from "@/lib/utils";
 export const Hero = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState<Record<number, boolean>>({});
 
   const slides = [
     {
       title: "Discover cutting-edge tech",
       subtitle: "Products for your lifestyle",
       description: "Browse gadgets by category or deals available",
-      image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-slate-100 to-slate-200",
     },
     {
       title: "New Photography Gear",
       subtitle: "Capture Every Moment",
       description: "Professional cameras and accessories for enthusiasts",
-      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1542567455-cd733f23fbb1?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-amber-50 to-amber-100",
     },
     {
       title: "Smart Home Solutions",
       subtitle: "Transform Your Space",
       description: "Devices that make everyday life easier and more connected",
-      image: "https://images.unsplash.com/photo-1585771362212-e3f6e61668f4?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-emerald-50 to-teal-100",
     },
   ];
+
+  useEffect(() => {
+    // Preload all images
+    slides.forEach((slide, index) => {
+      const img = new Image();
+      img.src = slide.image;
+      img.onload = () => {
+        setImagesLoaded(prev => ({ ...prev, [index]: true }));
+      };
+      img.onerror = () => {
+        console.error(`Failed to load image: ${slide.image}`);
+        // Set a fallback image
+        slides[index].image = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=800&auto=format&fit=crop";
+        setImagesLoaded(prev => ({ ...prev, [index]: true }));
+      };
+    });
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,14 +112,28 @@ export const Hero = () => {
 
               {/* Image */}
               <div className="w-full md:w-1/2 md:pl-12 mt-8 md:mt-0 flex justify-center">
-                <img
-                  src={slide.image}
-                  alt="Hero product"
-                  className={cn(
-                    "max-h-[300px] md:max-h-[400px] object-contain transition-all duration-700 transform",
-                    isAnimating ? "opacity-0 scale-95" : "opacity-100 scale-100"
-                  )}
-                />
+                {imagesLoaded[index] || index !== activeSlide ? (
+                  <img
+                    src={slide.image}
+                    alt={`${slide.title} hero product`}
+                    className={cn(
+                      "max-h-[300px] md:max-h-[400px] object-contain transition-all duration-700 transform rounded-lg shadow-md",
+                      isAnimating && index === activeSlide ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                    )}
+                    onError={(e) => {
+                      // Fallback for runtime errors
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=800&auto=format&fit=crop";
+                      target.onerror = null; // Prevent infinite loops
+                    }}
+                  />
+                ) : (
+                  <div className="max-h-[300px] md:max-h-[400px] w-[300px] flex items-center justify-center bg-gray-200 rounded-lg animate-pulse">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                )}
               </div>
             </div>
           </div>
