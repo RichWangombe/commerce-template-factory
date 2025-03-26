@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -95,7 +94,7 @@ export const CategoryCard = ({
           "group flex flex-col items-center justify-center rounded-xl overflow-hidden p-6 text-center",
           "border border-white/40 backdrop-blur-sm",
           "transition-all duration-300 h-full",
-          "relative z-10 product-card"
+          "relative z-10 product-card text-white"
         )}
       >
         {/* Background images carousel */}
@@ -114,7 +113,7 @@ export const CategoryCard = ({
                   >
                     <div className="absolute inset-0 bg-gradient-to-br z-0"
                       style={{
-                        backgroundImage: `linear-gradient(to bottom right, rgba(255,255,255,0.75), rgba(255,255,255,0.65))`,
+                        backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
                       }}
                     />
                     <img 
@@ -145,9 +144,9 @@ export const CategoryCard = ({
             className="h-8 w-8" 
           />
         </motion.div>
-        <h3 className="text-base font-medium relative z-10">{name}</h3>
+        <h3 className="text-base font-medium relative z-10 text-white">{name}</h3>
         {productCount !== undefined && (
-          <p className="mt-1 text-xs text-neutral-600 relative z-10">{productCount} products</p>
+          <p className="mt-1 text-xs text-white/90 relative z-10">{productCount} products</p>
         )}
       </Link>
     </motion.div>
