@@ -10,6 +10,7 @@ interface CategoriesSectionProps {
     name: string;
     icon: string;
     productCount: number;
+    backgroundImages?: string[];
   }[];
 }
 
@@ -54,6 +55,7 @@ export const CategoriesSection = ({ categories }: CategoriesSectionProps) => {
               name={category.name}
               icon={category.icon}
               productCount={category.productCount}
+              backgroundImages={category.backgroundImages}
               index={index}
             />
           ))}

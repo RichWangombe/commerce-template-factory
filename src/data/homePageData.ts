@@ -1,11 +1,81 @@
 export const categories = [
-  { id: "smartphones", name: "Smartphones", icon: "https://api.iconify.design/lucide:smartphone.svg?color=%233b82f6", productCount: 24 },
-  { id: "laptops", name: "Laptops", icon: "https://api.iconify.design/lucide:laptop.svg?color=%23059669", productCount: 18 },
-  { id: "wearables", name: "Wearables", icon: "https://api.iconify.design/lucide:watch.svg?color=%23d946ef", productCount: 12 },
-  { id: "accessories", name: "Accessories", icon: "https://api.iconify.design/lucide:headphones.svg?color=%23ec4899", productCount: 30 },
-  { id: "photography", name: "Photography", icon: "https://api.iconify.design/lucide:camera.svg?color=%23f97316", productCount: 8 },
-  { id: "gaming", name: "Gaming", icon: "https://api.iconify.design/lucide:gamepad-2.svg?color=%238b5cf6", productCount: 15 },
-  { id: "home", name: "Smart Home", icon: "https://api.iconify.design/lucide:home.svg?color=%2306b6d4", productCount: 20 },
+  { 
+    id: "smartphones", 
+    name: "Smartphones", 
+    icon: "https://api.iconify.design/lucide:smartphone.svg?color=%233b82f6", 
+    productCount: 24,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "laptops", 
+    name: "Laptops", 
+    icon: "https://api.iconify.design/lucide:laptop.svg?color=%23059669", 
+    productCount: 18,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1602080858428-57174f9431cf?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1541807360746-039080941306?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "wearables", 
+    name: "Wearables", 
+    icon: "https://api.iconify.design/lucide:watch.svg?color=%23d946ef", 
+    productCount: 12,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1617043983671-adaadcaa2460?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "accessories", 
+    name: "Accessories", 
+    icon: "https://api.iconify.design/lucide:headphones.svg?color=%23ec4899", 
+    productCount: 30,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1605773527852-c546a8584ea3?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "photography", 
+    name: "Photography", 
+    icon: "https://api.iconify.design/lucide:camera.svg?color=%23f97316", 
+    productCount: 8,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1542567455-cd733f23fbb1?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "gaming", 
+    name: "Gaming", 
+    icon: "https://api.iconify.design/lucide:gamepad-2.svg?color=%238b5cf6", 
+    productCount: 15,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591105575639-a334978de1a3?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
+  { 
+    id: "home", 
+    name: "Smart Home", 
+    icon: "https://api.iconify.design/lucide:home.svg?color=%2306b6d4", 
+    productCount: 20,
+    backgroundImages: [
+      "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585771362212-e3f6e61668f4?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop"
+    ]
+  },
 ];
 
 export const featuredProducts = [

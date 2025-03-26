@@ -61,6 +61,7 @@ const CategoriesPage = () => {
                 name={category.name}
                 icon={category.icon}
                 productCount={category.productCount}
+                backgroundImages={category.backgroundImages}
                 index={index}
               />
             ))}
