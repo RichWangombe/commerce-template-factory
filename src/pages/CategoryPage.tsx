@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layouts/MainLayout";
@@ -20,21 +19,44 @@ export const CategoryPage = () => {
         .join(" ")
     : "";
   
-  // Case-insensitive and fuzzy matching for better category matching
+  // More robust category mapping
+  const getCategoryMapping = (categorySlug?: string): string[] => {
+    if (!categorySlug) return [];
+
+    const mappings: Record<string, string[]> = {
+      "smartphones": ["Smartphone"],
+      "wearables": ["Wearable"],
+      "audio": ["Audio"],
+      "accessories": ["Accessories", "Audio"],
+      "laptops": ["Laptop"],
+      "gaming": ["Gaming"],
+      "photography": ["Photography"],
+      "home": ["Home"],
+      "tablets": ["Tablet"]
+    };
+
+    return mappings[categorySlug.toLowerCase()] || [];
+  };
+  
+  // Get matching products with improved category handling
   const products = mockProducts.filter(product => {
     if (!product.category) return false;
     
-    // Try different matching strategies
+    // Get possible category mappings for the current slug
+    const categoryMappings = getCategoryMapping(categoryName);
+    
+    // Check if the product category matches any of the possible mappings
+    const matchesMapping = categoryMappings.some(mapping => 
+      product.category?.toLowerCase() === mapping.toLowerCase()
+    );
+    
+    // If there's a direct mapping, use it
+    if (matchesMapping) return true;
+    
+    // Otherwise, try fuzzy matching
     const exactMatch = product.category.toLowerCase() === formattedCategoryName.toLowerCase();
     const containsMatch = product.category.toLowerCase().includes(formattedCategoryName.toLowerCase()) || 
-                         formattedCategoryName.toLowerCase().includes(product.category.toLowerCase());
-    
-    // Handle specific category mappings
-    if (categoryName === "smartphones" && product.category === "Smartphone") return true;
-    if (categoryName === "wearables" && product.category === "Wearable") return true;
-    if (categoryName === "accessories" && product.category === "Audio") return true;
-    if (categoryName === "laptops" && product.category === "Laptop") return true;
-    if (categoryName === "gaming" && product.category === "Gaming") return true;
+                          formattedCategoryName.toLowerCase().includes(product.category.toLowerCase());
     
     return exactMatch || containsMatch;
   });

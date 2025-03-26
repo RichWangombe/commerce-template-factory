@@ -11,15 +11,22 @@ export const Hero = () => {
       title: "Discover cutting-edge tech",
       subtitle: "Products for your lifestyle",
       description: "Browse gadgets by category or deals available",
-      image: "/lovable-uploads/6b752309-063d-437b-b887-e07e2232e3ba.png",
+      image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-slate-100 to-slate-200",
     },
     {
-      title: "New Arrivals",
-      subtitle: "The Latest Innovation",
-      description: "Be the first to experience the future of technology",
-      image: "/lovable-uploads/5724322a-7599-465b-8abc-a56c59781885.png",
-      className: "bg-gradient-to-r from-blue-50 to-indigo-50",
+      title: "New Photography Gear",
+      subtitle: "Capture Every Moment",
+      description: "Professional cameras and accessories for enthusiasts",
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",
+      className: "bg-gradient-to-r from-amber-50 to-amber-100",
+    },
+    {
+      title: "Smart Home Solutions",
+      subtitle: "Transform Your Space",
+      description: "Devices that make everyday life easier and more connected",
+      image: "https://images.unsplash.com/photo-1585771362212-e3f6e61668f4?q=80&w=800&auto=format&fit=crop",
+      className: "bg-gradient-to-r from-emerald-50 to-teal-100",
     },
   ];
 
