@@ -1,11 +1,11 @@
 export const categories = [
-  { id: "smartphones", name: "Smartphones", icon: "https://api.iconify.design/lucide:smartphone.svg?color=%23000000", productCount: 24 },
-  { id: "laptops", name: "Laptops", icon: "https://api.iconify.design/lucide:laptop.svg?color=%23000000", productCount: 18 },
-  { id: "wearables", name: "Wearables", icon: "https://api.iconify.design/lucide:watch.svg?color=%23000000", productCount: 12 },
-  { id: "accessories", name: "Accessories", icon: "https://api.iconify.design/lucide:headphones.svg?color=%23000000", productCount: 30 },
-  { id: "photography", name: "Photography", icon: "https://api.iconify.design/lucide:camera.svg?color=%23000000", productCount: 8 },
-  { id: "gaming", name: "Gaming", icon: "https://api.iconify.design/lucide:gamepad-2.svg?color=%23000000", productCount: 15 },
-  { id: "home", name: "Smart Home", icon: "https://api.iconify.design/lucide:home.svg?color=%23000000", productCount: 20 },
+  { id: "smartphones", name: "Smartphones", icon: "https://api.iconify.design/lucide:smartphone.svg?color=%233b82f6", productCount: 24 },
+  { id: "laptops", name: "Laptops", icon: "https://api.iconify.design/lucide:laptop.svg?color=%23059669", productCount: 18 },
+  { id: "wearables", name: "Wearables", icon: "https://api.iconify.design/lucide:watch.svg?color=%23d946ef", productCount: 12 },
+  { id: "accessories", name: "Accessories", icon: "https://api.iconify.design/lucide:headphones.svg?color=%23ec4899", productCount: 30 },
+  { id: "photography", name: "Photography", icon: "https://api.iconify.design/lucide:camera.svg?color=%23f97316", productCount: 8 },
+  { id: "gaming", name: "Gaming", icon: "https://api.iconify.design/lucide:gamepad-2.svg?color=%238b5cf6", productCount: 15 },
+  { id: "home", name: "Smart Home", icon: "https://api.iconify.design/lucide:home.svg?color=%2306b6d4", productCount: 20 },
 ];
 
 export const featuredProducts = [
