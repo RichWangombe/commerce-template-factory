@@ -9,7 +9,7 @@ export const productCategories: CategoryMapping = {
   "Tablet": [4],
   "Laptop": [5],
   "Accessories": [9, 10, 13, 14, 15, 16],
-  "Gaming": [11, 12],
+  "Gaming": [11, 12, 25, 26, 27, 28],
   "Photography": [17, 18],
   "Home": [19, 20, 21, 22]
 };
