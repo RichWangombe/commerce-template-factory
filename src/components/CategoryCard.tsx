@@ -61,7 +61,6 @@ export const CategoryCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover="hover"
-      initial="initial"
       variants={cardVariants}
     >
       <Link 
