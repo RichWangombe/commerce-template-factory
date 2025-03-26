@@ -32,6 +32,8 @@ export const CategoryCard = ({
   
   // State for controlling background image animation
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [nextImageIndex, setNextImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   // Generate an elegant background gradient based on the category index
   const getBgColor = () => {
@@ -67,18 +69,24 @@ export const CategoryCard = ({
     }
   };
 
-  // Animate background images
+  // Improved background image rotation logic to prevent blank frames
   useEffect(() => {
     if (backgroundImages.length <= 1) return;
     
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
-        (prevIndex + 1) % backgroundImages.length
-      );
+      // Set up the next image before transitioning
+      setNextImageIndex((currentImageIndex + 1) % backgroundImages.length);
+      setIsTransitioning(true);
+      
+      // After a short delay, complete the transition
+      setTimeout(() => {
+        setCurrentImageIndex(nextImageIndex);
+        setIsTransitioning(false);
+      }, 1000); // Match this with the animation duration
     }, 5000); // Change image every 5 seconds
     
     return () => clearInterval(interval);
-  }, [backgroundImages]);
+  }, [backgroundImages, currentImageIndex, nextImageIndex]);
   
   return (
     <motion.div
@@ -98,34 +106,45 @@ export const CategoryCard = ({
           "relative z-10 product-card text-white"
         )}
       >
-        {/* Background images carousel */}
+        {/* Background images with improved transition */}
         <div className="absolute inset-0 overflow-hidden">
           {backgroundImages.length > 0 ? (
-            <AnimatePresence mode="sync">
-              {backgroundImages.map((img, imgIndex) => (
-                imgIndex === currentImageIndex && (
-                  <motion.div
-                    key={imgIndex}
-                    className="absolute inset-0"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1 }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br z-0"
-                      style={{
-                        backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
-                      }}
-                    />
-                    <img 
-                      src={img} 
-                      alt={name}
-                      className="h-full w-full object-cover object-center opacity-80"
-                    />
-                  </motion.div>
-                )
-              ))}
-            </AnimatePresence>
+            <div className="absolute inset-0">
+              {/* Always show current image */}
+              <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-br z-0"
+                  style={{
+                    backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
+                  }}
+                />
+                <img 
+                  src={backgroundImages[currentImageIndex]} 
+                  alt={name}
+                  className="h-full w-full object-cover object-center opacity-80"
+                />
+              </div>
+              
+              {/* Show next image with animation only during transition */}
+              {isTransitioning && (
+                <motion.div
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br z-0"
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, rgba(0,0,0,0.4), rgba(0,0,0,0.6))`,
+                    }}
+                  />
+                  <img 
+                    src={backgroundImages[nextImageIndex]} 
+                    alt={name}
+                    className="h-full w-full object-cover object-center opacity-80"
+                  />
+                </motion.div>
+              )}
+            </div>
           ) : (
             // Fallback gradient if no images
             <div className={cn(
