@@ -112,15 +112,15 @@ export const CategoryCard = ({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br bg-opacity-90 z-0"
+                    <div className="absolute inset-0 bg-gradient-to-br z-0"
                       style={{
-                        backgroundImage: `linear-gradient(to bottom right, rgba(255,255,255,0.92), rgba(255,255,255,0.85))`,
+                        backgroundImage: `linear-gradient(to bottom right, rgba(255,255,255,0.75), rgba(255,255,255,0.65))`,
                       }}
                     />
                     <img 
                       src={img} 
                       alt={name}
-                      className="h-full w-full object-cover object-center opacity-40 scale-110 filter blur-[1px]"
+                      className="h-full w-full object-cover object-center opacity-80"
                     />
                   </motion.div>
                 )
