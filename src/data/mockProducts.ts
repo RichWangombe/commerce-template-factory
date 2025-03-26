@@ -50,7 +50,7 @@ export const mockProducts: ProductCardProps[] = [
     id: 6,
     name: "Bluetooth Speaker",
     price: 79,
-    image: "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=800&auto=format&fit=crop",
     category: "Audio",
     discount: 10,
     rating: 3.9

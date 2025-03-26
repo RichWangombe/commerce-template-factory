@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { isValidImageUrl, getDefaultProductImage } from "@/utils/imageUtils";
 
 export interface ProductCardProps {
   id: number;
@@ -28,9 +29,19 @@ export const ProductCard = ({
   rating,
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [imgSrc, setImgSrc] = useState(isValidImageUrl(image) ? image : getDefaultProductImage());
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const isFavorite = isInWishlist(id);
+
+  useEffect(() => {
+    // If image URL changes, reset states
+    setImgSrc(isValidImageUrl(image) ? image : getDefaultProductImage());
+    setImgLoaded(false);
+    setImgError(false);
+  }, [image]);
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -52,7 +63,7 @@ export const ProductCard = ({
       id,
       name,
       price,
-      image,
+      image: imgError ? getDefaultProductImage() : imgSrc,
       quantity: 1
     });
   };
@@ -68,10 +79,15 @@ export const ProductCard = ({
         id,
         name,
         price,
-        image,
+        image: imgError ? getDefaultProductImage() : imgSrc,
         category
       });
     }
+  };
+
+  const handleImageError = () => {
+    setImgError(true);
+    setImgSrc(getDefaultProductImage());
   };
 
   return (
@@ -83,13 +99,29 @@ export const ProductCard = ({
       {/* Product Image */}
       <Link to={`/product/${id}`} className="block overflow-hidden">
         <div className="relative aspect-square overflow-hidden bg-neutral-50 p-6">
+          {!imgLoaded && !imgError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 animate-pulse">
+              <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+            </div>
+          )}
+          
+          {imgError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-100 text-neutral-400">
+              <ImageOff className="h-10 w-10 mb-2" />
+              <span className="text-xs">Image unavailable</span>
+            </div>
+          )}
+          
           <img
-            src={image}
+            src={imgSrc}
             alt={name}
             className={cn(
               "h-full w-full object-contain transition-transform duration-500", 
-              isHovered ? "scale-105" : "scale-100"
+              isHovered ? "scale-105" : "scale-100",
+              imgLoaded && !imgError ? "opacity-100" : "opacity-0"
             )}
+            onLoad={() => setImgLoaded(true)}
+            onError={handleImageError}
           />
           
           {discount > 0 && (

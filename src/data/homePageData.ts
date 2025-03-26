@@ -1,4 +1,3 @@
-
 export const categories = [
   { id: "smartphones", name: "Smartphones", icon: "https://api.iconify.design/lucide:smartphone.svg?color=%23000000", productCount: 24 },
   { id: "laptops", name: "Laptops", icon: "https://api.iconify.design/lucide:laptop.svg?color=%23000000", productCount: 18 },
@@ -34,11 +33,12 @@ export const featuredProducts = [
     discount: 15,
   },
   {
-    id: 19,
-    name: "Smart TV",
-    price: 999,
-    image: "https://images.unsplash.com/photo-1593359677879-4bb92f829d1?q=80&w=300&auto=format&fit=crop",
-    category: "Home",
+    id: 6,
+    name: "Bluetooth Speaker",
+    price: 79,
+    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=300&auto=format&fit=crop",
+    category: "Audio",
+    discount: 10,
   },
 ];
 

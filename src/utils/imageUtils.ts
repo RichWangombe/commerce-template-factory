@@ -86,6 +86,13 @@ export const getProductSpecificImages = (productId: number): string[] => {
       "https://images.unsplash.com/photo-1484704849700-f032a568e944?q=80&w=1600&auto=format&fit=crop", // Headphones detail
       "https://images.unsplash.com/photo-1520170350707-b2c36f0412e4?q=80&w=1600&auto=format&fit=crop"  // Headphones in use
     ],
+    // Bluetooth Speaker (ID: 6)
+    6: [
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop", // Front view
+      "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop", // Side view
+      "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?q=80&w=1600&auto=format&fit=crop", // In use
+      "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop"  // Detail
+    ],
   };
   
   return productImages[productId] || [];
@@ -174,7 +181,7 @@ export const sampleProductImages = {
   ],
   audio: [
     "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop"
   ],
