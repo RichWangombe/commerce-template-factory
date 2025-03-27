@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { CarouselApi } from "@/components/ui/carousel";
+import { type CarouselApi } from "@/components/ui/carousel";
 import { isValidImageUrl, getDefaultProductImage } from "@/utils/imageUtils";
 
 export interface UseCarouselStateProps {
