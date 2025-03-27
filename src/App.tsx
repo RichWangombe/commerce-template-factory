@@ -24,6 +24,8 @@ import AllProductsPage from '@/pages/AllProductsPage';
 import { CategoryPage } from '@/pages/CategoryPage';
 import CategoriesPage from '@/pages/CategoriesPage';
 import NewArrivalsPage from '@/pages/NewArrivalsPage';
+import SignInPage from '@/pages/SignInPage';
+import WishlistPage from '@/pages/WishlistPage';
 
 function App() {
   return (
@@ -49,6 +51,8 @@ function App() {
                     <Route path="/products" element={<AllProductsPage />} />
                     <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+                    <Route path="/sign-in" element={<SignInPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   <Toaster />
