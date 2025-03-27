@@ -13,12 +13,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn, mockMode } = useAuth();
@@ -38,6 +40,7 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAuthError(null);
     
     // Save or remove email from localStorage based on rememberMe
     if (rememberMe) {
@@ -50,6 +53,7 @@ export default function SignInPage() {
       const { error } = await signIn(email, password);
       
       if (error) {
+        setAuthError(error.message || "Please check your credentials and try again");
         toast.error("Sign in failed", {
           description: error.message || "Please check your credentials and try again",
         });
@@ -67,6 +71,7 @@ export default function SignInPage() {
         navigate(from, { replace: true });
       }
     } catch (err: any) {
+      setAuthError(err.message || "Could not process your request");
       toast.error("An error occurred", {
         description: err.message || "Could not process your request",
       });
@@ -93,6 +98,14 @@ export default function SignInPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {authError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>
+                      {authError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
