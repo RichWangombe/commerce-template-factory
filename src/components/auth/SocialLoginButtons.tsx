@@ -14,85 +14,13 @@ export const SocialLoginButtons: React.FC = () => {
 
   // Check which providers are enabled
   useEffect(() => {
-    const checkProviders = async () => {
-      try {
-        setIsCheckingProviders(true);
-        // We'll use a safer approach that doesn't trigger the error in the UI
-        const providers: Provider[] = [];
-        
-        // Check for Google
-        try {
-          const { error: googleError } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              queryParams: {
-                skipBrowserRedirect: "true"
-              }
-            }
-          });
-          
-          // If the error doesn't contain "provider is not enabled", then it's enabled
-          if (googleError && !googleError.message.includes("provider is not enabled")) {
-            providers.push("google");
-          }
-        } catch (err) {
-          // Ignore errors here
-        }
-        
-        // Check for Facebook
-        try {
-          const { error: facebookError } = await supabase.auth.signInWithOAuth({
-            provider: 'facebook',
-            options: {
-              queryParams: {
-                skipBrowserRedirect: "true"
-              }
-            }
-          });
-          
-          if (facebookError && !facebookError.message.includes("provider is not enabled")) {
-            providers.push("facebook");
-          }
-        } catch (err) {
-          // Ignore errors here
-        }
-        
-        // Check for GitHub
-        try {
-          const { error: githubError } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: {
-              queryParams: {
-                skipBrowserRedirect: "true"
-              }
-            }
-          });
-          
-          if (githubError && !githubError.message.includes("provider is not enabled")) {
-            providers.push("github");
-          }
-        } catch (err) {
-          // Ignore errors here
-        }
-        
-        setEnabledProviders(providers);
-        console.log("Detected enabled providers:", providers);
-      } catch (error) {
-        console.error("Failed to check providers:", error);
-      } finally {
-        setIsCheckingProviders(false);
-      }
-    };
-    
-    checkProviders();
+    // Simply set all providers to disabled by default
+    setEnabledProviders([]);
+    setIsCheckingProviders(false);
   }, []);
 
   const handleSocialLogin = async (provider: Provider) => {
     try {
-      if (!enabledProviders.includes(provider)) {
-        throw new Error(`${provider} authentication is not enabled`);
-      }
-      
       setIsLoading(provider);
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
