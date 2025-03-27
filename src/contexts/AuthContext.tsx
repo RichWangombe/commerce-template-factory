@@ -70,23 +70,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Initial session check
       const initializeAuth = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setAuthState({
-            isLoaded: true,
-            isSignedIn: true,
-            user: session.user,
-            session,
-            mockMode: false
-          });
-        } else {
-          setAuthState({
-            isLoaded: true,
-            isSignedIn: false,
-            user: null,
-            session: null,
-            mockMode: false
-          });
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            setAuthState({
+              isLoaded: true,
+              isSignedIn: true,
+              user: session.user,
+              session,
+              mockMode: false
+            });
+          } else {
+            setAuthState({
+              isLoaded: true,
+              isSignedIn: false,
+              user: null,
+              session: null,
+              mockMode: false
+            });
+          }
+        } catch (error) {
+          console.error("Error getting session:", error);
+          // Fallback to mock mode if there's an error
+          enableMockMode();
         }
       };
       
@@ -131,16 +137,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Auth functions
   const signIn = async (email: string, password: string) => {
     if (supabaseConfigured) {
-      // Use persistSession: true to enable "Remember Me" functionality
-      const { error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password,
-        options: {
-          // This enables persistent sessions, effectively implementing "Remember Me"
-          // We'll manage the email remembering separately with localStorage
-        }
-      });
-      return { error };
+      try {
+        // Use persistSession: true to enable "Remember Me" functionality
+        const { error } = await supabase.auth.signInWithPassword({ 
+          email, 
+          password,
+          options: {
+            // This enables persistent sessions, effectively implementing "Remember Me"
+            // We'll manage the email remembering separately with localStorage
+          }
+        });
+        return { error };
+      } catch (error) {
+        console.error("Sign in error:", error);
+        toast.error("Authentication error", {
+          description: "An error occurred while trying to sign in. Please try again."
+        });
+        return { error };
+      }
     }
     
     // Mock signIn when Supabase isn't configured
