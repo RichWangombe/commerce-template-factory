@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingCart, User, Heart, Search as SearchIcon } from "lucide-react";
+import { Menu, X, ShoppingCart, User, Heart, Search as SearchIcon, LogOut } from "lucide-react";
 import { NavbarSearch } from "@/components/NavbarSearch";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,16 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserData } from "@/utils/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -17,6 +27,8 @@ export const Navbar = () => {
   const { state } = useCart();
   const { items } = state;
   const cartItemCount = items.length;
+  const { isSignedIn, signOut } = useAuth();
+  const { getUserName } = useUserData();
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
@@ -55,6 +67,14 @@ export const Navbar = () => {
     );
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 md:px-6">
@@ -89,21 +109,36 @@ export const Navbar = () => {
                     <div className="space-y-3">
                       <h2 className="text-sm font-medium text-muted-foreground">Account</h2>
                       <div className="flex flex-col space-y-4 pl-1">
-                        <SheetClose asChild>
-                          <Link to="/profile" className="text-sm font-medium hover:text-primary transition-colors">
-                            My Account
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/wishlist" className="text-sm font-medium hover:text-primary transition-colors">
-                            My Wishlist
-                          </Link>
-                        </SheetClose>
-                        <SheetClose asChild>
-                          <Link to="/orders" className="text-sm font-medium hover:text-primary transition-colors">
-                            My Orders
-                          </Link>
-                        </SheetClose>
+                        {isSignedIn ? (
+                          <>
+                            <SheetClose asChild>
+                              <Link to="/profile" className="text-sm font-medium hover:text-primary transition-colors">
+                                My Account
+                              </Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                              <Link to="/wishlist" className="text-sm font-medium hover:text-primary transition-colors">
+                                My Wishlist
+                              </Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                              <Link to="/orders" className="text-sm font-medium hover:text-primary transition-colors">
+                                My Orders
+                              </Link>
+                            </SheetClose>
+                            <SheetClose asChild>
+                              <button onClick={handleSignOut} className="text-sm font-medium hover:text-primary transition-colors text-left">
+                                Sign Out
+                              </button>
+                            </SheetClose>
+                          </>
+                        ) : (
+                          <SheetClose asChild>
+                            <Link to="/sign-in" className="text-sm font-medium hover:text-primary transition-colors">
+                              Sign In
+                            </Link>
+                          </SheetClose>
+                        )}
                       </div>
                     </div>
                   </nav>
@@ -169,12 +204,53 @@ export const Navbar = () => {
                 </Button>
               </Link>
               
-              <Link to="/profile">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">Profile</span>
-                </Button>
-              </Link>
+              {isSignedIn ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <User className="h-5 w-5" />
+                      <span className="sr-only">Profile</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {getUserName()}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        My Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer">
+                        My Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="cursor-pointer">
+                        My Wishlist
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-500 cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Sign out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/sign-in">
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">Sign In</span>
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

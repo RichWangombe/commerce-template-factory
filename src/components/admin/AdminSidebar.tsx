@@ -11,9 +11,9 @@ import {
   ChevronRight,
   LineChart
 } from "lucide-react";
-import { useAuth } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const sidebarLinks = [
   { 
