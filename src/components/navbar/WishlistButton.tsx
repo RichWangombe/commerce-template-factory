@@ -9,8 +9,8 @@ import { useWishlist } from "@/contexts/WishlistContext";
 
 export const WishlistButton = () => {
   const { isSignedIn } = useAuth();
-  const { items } = useWishlist();
-  const wishlistCount = items.length;
+  const { state } = useWishlist();
+  const wishlistCount = state.items.length;
 
   return (
     <Link to={isSignedIn ? "/wishlist" : "/sign-in"}>

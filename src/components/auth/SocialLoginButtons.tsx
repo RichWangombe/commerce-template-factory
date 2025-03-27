@@ -15,22 +15,30 @@ export const SocialLoginButtons: React.FC = () => {
   useEffect(() => {
     const checkProviders = async () => {
       try {
-        // Try to get the settings to see which providers are configured
-        const { data, error } = await supabase.auth.getSettings();
+        // Get the list of configured providers
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            queryParams: {
+              // This will intentionally fail but will tell us which providers are available
+              skipBrowserRedirect: true
+            }
+          }
+        });
         
         if (error) {
-          console.error("Error checking auth providers:", error);
-          return;
+          // Parse the error message to see which providers are mentioned
+          const errorMessage = error.message.toLowerCase();
+          const providers: Provider[] = [];
+          
+          // Check for each provider in the error message
+          if (errorMessage.includes("google")) providers.push("google");
+          if (errorMessage.includes("facebook")) providers.push("facebook");
+          if (errorMessage.includes("github")) providers.push("github");
+          
+          setEnabledProviders(providers);
+          console.log("Detected enabled providers:", providers);
         }
-        
-        const providers: Provider[] = [];
-        const providersData = data?.external?.providers || [];
-        
-        if (providersData.includes("google")) providers.push("google");
-        if (providersData.includes("facebook")) providers.push("facebook");
-        if (providersData.includes("github")) providers.push("github");
-        
-        setEnabledProviders(providers);
       } catch (error) {
         console.error("Failed to check providers:", error);
       }
