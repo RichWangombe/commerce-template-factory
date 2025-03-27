@@ -7,6 +7,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { processProductImages } from "@/utils/imageUtils";
 
 interface RecommendedProductsProps {
   productId?: number;
@@ -52,10 +53,21 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
           recommendedProducts = await recommendations.getRecommendations(count, filter);
         }
         
-        setProducts(recommendedProducts);
+        // Enhance each product with better images
+        const enhancedProducts = recommendedProducts.map(product => {
+          // Process images to ensure high quality
+          const betterImages = processProductImages([product.image], product.id, product.category);
+          
+          return {
+            ...product,
+            image: betterImages[0], // Use the first (best) image
+          };
+        });
+        
+        setProducts(enhancedProducts);
         
         // Track that these recommendations were viewed
-        recommendedProducts.forEach(product => {
+        enhancedProducts.forEach(product => {
           recommendations.trackView({
             productId: product.id,
             productName: product.name,

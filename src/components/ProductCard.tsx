@@ -5,7 +5,7 @@ import { Heart, ShoppingCart, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { isValidImageUrl, getDefaultProductImage } from "@/utils/imageUtils";
+import { isValidImageUrl, getDefaultProductImage, processProductImages } from "@/utils/imageUtils";
 
 export interface ProductCardProps {
   id: number;
@@ -29,19 +29,28 @@ export const ProductCard = ({
   rating,
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgSrc, setImgSrc] = useState(isValidImageUrl(image) ? image : getDefaultProductImage());
+  const [imgSrc, setImgSrc] = useState("");
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const isFavorite = isInWishlist(id);
 
+  // Process and set the image source on component mount and when props change
   useEffect(() => {
-    // If image URL changes, reset states
-    setImgSrc(isValidImageUrl(image) ? image : getDefaultProductImage());
+    // Use processProductImages to get better quality images
+    if (isValidImageUrl(image)) {
+      setImgSrc(image);
+    } else {
+      // Get category-specific or product-specific high quality images
+      const processedImages = processProductImages([image], id, category);
+      setImgSrc(processedImages[0] || getDefaultProductImage());
+    }
+    
+    // Reset states when image changes
     setImgLoaded(false);
     setImgError(false);
-  }, [image]);
+  }, [image, id, category]);
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -87,7 +96,9 @@ export const ProductCard = ({
 
   const handleImageError = () => {
     setImgError(true);
-    setImgSrc(getDefaultProductImage());
+    // On error, try to get a high-quality fallback image based on category or product ID
+    const fallbackImages = processProductImages([], id, category);
+    setImgSrc(fallbackImages[0] || getDefaultProductImage());
   };
 
   return (

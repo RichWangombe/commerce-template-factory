@@ -2,6 +2,13 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RecommendedProducts } from "@/components/RecommendedProducts";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
 
 interface RecommendationSectionProps {
   title?: string;
