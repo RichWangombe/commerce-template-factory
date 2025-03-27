@@ -10,37 +10,77 @@ type Provider = "google" | "facebook" | "github";
 export const SocialLoginButtons: React.FC = () => {
   const [isLoading, setIsLoading] = useState<Provider | null>(null);
   const [enabledProviders, setEnabledProviders] = useState<Provider[]>([]);
+  const [isCheckingProviders, setIsCheckingProviders] = useState(true);
 
   // Check which providers are enabled
   useEffect(() => {
     const checkProviders = async () => {
       try {
-        // Get the list of configured providers
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            queryParams: {
-              // This will intentionally fail but will tell us which providers are available
-              skipBrowserRedirect: "true"
-            }
-          }
-        });
+        setIsCheckingProviders(true);
+        // We'll use a safer approach that doesn't trigger the error in the UI
+        const providers: Provider[] = [];
         
-        if (error) {
-          // Parse the error message to see which providers are mentioned
-          const errorMessage = error.message.toLowerCase();
-          const providers: Provider[] = [];
+        // Check for Google
+        try {
+          const { error: googleError } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              queryParams: {
+                skipBrowserRedirect: "true"
+              }
+            }
+          });
           
-          // Check for each provider in the error message
-          if (errorMessage.includes("google")) providers.push("google");
-          if (errorMessage.includes("facebook")) providers.push("facebook");
-          if (errorMessage.includes("github")) providers.push("github");
-          
-          setEnabledProviders(providers);
-          console.log("Detected enabled providers:", providers);
+          // If the error doesn't contain "provider is not enabled", then it's enabled
+          if (googleError && !googleError.message.includes("provider is not enabled")) {
+            providers.push("google");
+          }
+        } catch (err) {
+          // Ignore errors here
         }
+        
+        // Check for Facebook
+        try {
+          const { error: facebookError } = await supabase.auth.signInWithOAuth({
+            provider: 'facebook',
+            options: {
+              queryParams: {
+                skipBrowserRedirect: "true"
+              }
+            }
+          });
+          
+          if (facebookError && !facebookError.message.includes("provider is not enabled")) {
+            providers.push("facebook");
+          }
+        } catch (err) {
+          // Ignore errors here
+        }
+        
+        // Check for GitHub
+        try {
+          const { error: githubError } = await supabase.auth.signInWithOAuth({
+            provider: 'github',
+            options: {
+              queryParams: {
+                skipBrowserRedirect: "true"
+              }
+            }
+          });
+          
+          if (githubError && !githubError.message.includes("provider is not enabled")) {
+            providers.push("github");
+          }
+        } catch (err) {
+          // Ignore errors here
+        }
+        
+        setEnabledProviders(providers);
+        console.log("Detected enabled providers:", providers);
       } catch (error) {
         console.error("Failed to check providers:", error);
+      } finally {
+        setIsCheckingProviders(false);
       }
     };
     
@@ -71,6 +111,14 @@ export const SocialLoginButtons: React.FC = () => {
       setIsLoading(null);
     }
   };
+
+  if (isCheckingProviders) {
+    return (
+      <div className="flex justify-center py-2">
+        <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (enabledProviders.length === 0) {
     return (
@@ -163,4 +211,3 @@ export const SocialLoginButtons: React.FC = () => {
     </div>
   );
 };
-
