@@ -2,13 +2,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RecommendedProducts } from "@/components/RecommendedProducts";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
 
 interface RecommendationSectionProps {
   title?: string;
@@ -22,7 +15,7 @@ export const RecommendationSection = ({
   showViewAll = true
 }: RecommendationSectionProps) => {
   return (
-    <section className="py-16">
+    <section className="py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-6">
         <div className="mb-10 flex items-center justify-between">
           <h2 className="text-2xl font-bold">{title}</h2>

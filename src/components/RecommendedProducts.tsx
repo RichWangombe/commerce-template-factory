@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
@@ -8,6 +7,7 @@ import { RecommendationFilter, ProductRecommendation } from "@/types/recommendat
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { processProductImages } from "@/utils/imageUtils";
+import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
 
 interface RecommendedProductsProps {
   productId?: number;
@@ -53,16 +53,8 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
           recommendedProducts = await recommendations.getRecommendations(count, filter);
         }
         
-        // Enhance each product with better images
-        const enhancedProducts = recommendedProducts.map(product => {
-          // Process images to ensure high quality
-          const betterImages = processProductImages([product.image], product.id, product.category);
-          
-          return {
-            ...product,
-            image: betterImages[0], // Use the first (best) image
-          };
-        });
+        // Enhance products with high-quality HD images
+        const enhancedProducts = enhanceRecommendationImages(recommendedProducts);
         
         setProducts(enhancedProducts);
         
