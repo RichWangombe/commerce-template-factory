@@ -73,13 +73,12 @@ export const AdminSidebar = () => {
     <aside className="hidden border-r bg-background lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:block lg:w-72 lg:pb-4">
       <div className="flex h-full flex-col">
         <div className="border-b px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center">
             <img 
               src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
               alt="GadgetHub Logo" 
               className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
             />
-            <span className="font-bold text-lg text-foreground">Admin Panel</span>
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
