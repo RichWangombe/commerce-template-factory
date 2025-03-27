@@ -21,7 +21,7 @@ export const SocialLoginButtons: React.FC = () => {
           options: {
             queryParams: {
               // This will intentionally fail but will tell us which providers are available
-              skipBrowserRedirect: true
+              skipBrowserRedirect: "true"
             }
           }
         });
