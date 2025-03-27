@@ -69,7 +69,7 @@ export const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[350px] flex flex-col">
                 <div className="px-2 py-6 flex-1">
-                  <Link to="/" className="font-semibold text-xl block mb-6 flex items-center gap-2">
+                  <Link to="/" className="font-semibold block mb-6 flex items-center">
                     <img 
                       src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                       alt="GadgetHub Logo" 
@@ -116,7 +116,7 @@ export const Navbar = () => {
             </Sheet>
             
             {/* Logo with blend mode to adapt to background */}
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center">
               <img 
                 src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                 alt="GadgetHub Logo" 
