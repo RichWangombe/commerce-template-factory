@@ -44,11 +44,11 @@ export const AdminHeader = ({ title }: AdminHeaderProps) => {
             <AdminSidebar />
           </SheetContent>
         </Sheet>
-        <h1 className="text-lg font-semibold">{title}</h1>
+        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       </div>
       
       <div className="hidden lg:block">
-        <h1 className="text-lg font-semibold">{title}</h1>
+        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
       </div>
       
       <div className="flex items-center gap-4">
@@ -78,7 +78,7 @@ export const AdminHeader = ({ title }: AdminHeaderProps) => {
                 <AvatarFallback>{getUserInitials()}</AvatarFallback>
               </Avatar>
               <div className="hidden flex-col items-start md:flex">
-                <span className="text-sm font-medium">{user?.fullName}</span>
+                <span className="text-sm font-medium text-foreground">{user?.fullName}</span>
                 <span className="text-xs text-muted-foreground">Admin</span>
               </div>
               <ChevronDown className="h-4 w-4 opacity-50" />

@@ -75,7 +75,7 @@ export const Navbar = () => {
                       alt="GadgetHub Logo" 
                       className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
                     />
-                    GadgetHub
+                    <span className="text-foreground">GadgetHub</span>
                   </Link>
                   <nav className="flex flex-col space-y-6">
                     <div className="space-y-3">
@@ -117,12 +117,13 @@ export const Navbar = () => {
             </Sheet>
             
             {/* Logo with blend mode to adapt to background */}
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center gap-2">
               <img 
                 src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                 alt="GadgetHub Logo" 
                 className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
               />
+              <span className="font-medium text-lg text-foreground">GadgetHub</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">

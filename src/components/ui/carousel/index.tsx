@@ -14,6 +14,6 @@ export {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  CarouselApi,
-  useCarousel
+  useCarousel,
+  type CarouselApi
 };
