@@ -59,7 +59,7 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 md:px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
+          <div className="flex items-center gap-8">
             <Sheet>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon" className="-ml-2">
@@ -116,13 +116,13 @@ export const Navbar = () => {
               </SheetContent>
             </Sheet>
             
-            <Link to="/" className="flex items-center gap-2 mr-6">
+            {/* Only show logo here, removed the text "GadgetHub" to prevent overlap */}
+            <Link to="/" className="flex items-center">
               <img 
                 src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
                 alt="GadgetHub Logo" 
                 className="h-6 w-auto"
               />
-              <span className="font-semibold text-xl text-primary">GadgetHub</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">
