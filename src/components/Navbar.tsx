@@ -75,7 +75,7 @@ export const Navbar = () => {
                       alt="GadgetHub Logo" 
                       className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
                     />
-                    <span className="text-foreground">GadgetHub</span>
+                    <span className="text-foreground/80">GadgetHub</span>
                   </Link>
                   <nav className="flex flex-col space-y-6">
                     <div className="space-y-3">
@@ -123,7 +123,7 @@ export const Navbar = () => {
                 alt="GadgetHub Logo" 
                 className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
               />
-              <span className="font-medium text-lg text-foreground">GadgetHub</span>
+              <span className="font-medium text-lg text-foreground/80">GadgetHub</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">
