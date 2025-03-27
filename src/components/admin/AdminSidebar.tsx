@@ -77,7 +77,7 @@ export const AdminSidebar = () => {
             <img 
               src="/lovable-uploads/63521127-b685-4b09-be8f-970b73ceb65f.png" 
               alt="GadgetHub Logo" 
-              className="h-6 w-auto"
+              className="h-6 w-auto object-contain mix-blend-multiply dark:mix-blend-screen"
             />
             <span className="font-bold text-lg">Admin Panel</span>
           </Link>
