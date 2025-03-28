@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Categories, Sparkles, Clock, TrendingUp, Users, CalendarDays } from "lucide-react";
+import { Layers, Sparkles, Clock, TrendingUp, Users, CalendarDays } from "lucide-react";
 
 const UserPreferencesTab = () => {
   const { preferences, updatePreferences } = useUserPreferences();
@@ -57,7 +57,7 @@ const UserPreferencesTab = () => {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Categories className="h-4 w-4 text-muted-foreground" />
+                  <Layers className="h-4 w-4 text-muted-foreground" />
                   <Label htmlFor="showSimilar" className="font-normal">Similar Products</Label>
                 </div>
                 <Switch 
