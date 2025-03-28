@@ -47,6 +47,7 @@ export interface UserPreferences {
   showTrending?: boolean;
   showSimilar?: boolean;
   showSeasonalOffers?: boolean;
+  showCollaborative?: boolean; // Added the missing property
   recommendationCount?: number;
 }
 

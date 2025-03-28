@@ -99,6 +99,17 @@ export const PreferencesTab = () => {
                 />
                 <Label htmlFor="seasonal">Seasonal Offers</Label>
               </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="collaborative" 
+                  checked={preferences.showCollaborative}
+                  onCheckedChange={(checked) => 
+                    updatePreferences({ showCollaborative: checked as boolean })
+                  }
+                />
+                <Label htmlFor="collaborative">Others Also Bought</Label>
+              </div>
             </div>
           </div>
           

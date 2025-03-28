@@ -18,6 +18,7 @@ const defaultPreferences: UserPreferences = {
   showTrending: true,
   showSimilar: true,
   showSeasonalOffers: true,
+  showCollaborative: true, // Set default value to true
   recommendationCount: 4,
 };
 
