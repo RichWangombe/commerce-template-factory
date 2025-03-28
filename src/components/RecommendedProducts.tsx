@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ProductCard } from "@/components/ProductCard";
@@ -6,7 +7,6 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { processProductImages } from "@/utils/imageUtils";
 import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
 
 interface RecommendedProductsProps {
@@ -36,10 +36,12 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
       if (preferences.showSimilar) enabledTypes.push('similar');
       if (preferences.showTrending) enabledTypes.push('trending');
       if (preferences.showSeasonalOffers) enabledTypes.push('seasonal');
-      
-      if (enabledTypes.length) {
-        filter.types = enabledTypes;
+      if (enabledTypes.length === 0) {
+        // Ensure at least one type is enabled by default
+        enabledTypes.push('trending', 'similar');
       }
+      
+      filter.types = enabledTypes;
       
       try {
         let recommendedProducts: ProductRecommendation[] = [];
@@ -53,7 +55,7 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
           recommendedProducts = await recommendations.getRecommendations(count, filter);
         }
         
-        // Enhance products with high-quality HD images
+        // Enhance products with high-quality HD images - ensure we get different images
         const enhancedProducts = enhanceRecommendationImages(recommendedProducts);
         
         setProducts(enhancedProducts);
