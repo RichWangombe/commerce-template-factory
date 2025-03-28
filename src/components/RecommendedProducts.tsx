@@ -36,8 +36,10 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
       if (preferences.showSimilar) enabledTypes.push('similar');
       if (preferences.showTrending) enabledTypes.push('trending');
       if (preferences.showSeasonalOffers) enabledTypes.push('seasonal');
+      if (preferences.showCollaborative) enabledTypes.push('collaborative');
+      
       if (enabledTypes.length === 0) {
-        // Ensure at least one type is enabled by default
+        // Ensure at least one type is enabled by default for better user experience
         enabledTypes.push('trending', 'similar');
       }
       
@@ -55,7 +57,7 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
           recommendedProducts = await recommendations.getRecommendations(count, filter);
         }
         
-        // Enhance products with high-quality HD images - ensure we get different images
+        // Use enhanced recommendation function that ensures we get high-quality diverse images
         const enhancedProducts = enhanceRecommendationImages(recommendedProducts);
         
         setProducts(enhancedProducts);
