@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/recommendations/PageHeader";
 import { RecommendationTabs } from "@/components/recommendations/RecommendationTabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
+import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
 
 const RecommendationsPage = () => {
   const { 
@@ -28,7 +29,10 @@ const RecommendationsPage = () => {
         // Small delay to show loading state
         await new Promise(resolve => setTimeout(resolve, 300));
         const recommendations = getPersonalizedRecommendations();
-        setFilteredProducts(recommendations);
+        
+        // Enhance recommendations with high-quality images
+        const enhancedRecommendations = enhanceRecommendationImages(recommendations);
+        setFilteredProducts(enhancedRecommendations);
       } catch (error) {
         console.error("Error loading recommendations:", error);
         toast({
@@ -47,7 +51,10 @@ const RecommendationsPage = () => {
   // Apply filters when they change
   const applyFilters = (filter: RecommendationFilter) => {
     setActiveFilter(filter);
-    setFilteredProducts(getPersonalizedRecommendations(filter));
+    const recommendations = getPersonalizedRecommendations(filter);
+    // Enhance with HD images after filtering
+    const enhancedRecommendations = enhanceRecommendationImages(recommendations);
+    setFilteredProducts(enhancedRecommendations);
   };
 
   return (
@@ -63,8 +70,8 @@ const RecommendationsPage = () => {
           
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <Loader className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2 text-lg">Loading your personalized recommendations...</span>
+              <Loader className="h-8 w-8 animate-spin text-primary mr-3" />
+              <span className="text-lg">Loading your personalized recommendations...</span>
             </div>
           ) : (
             <RecommendationTabs 

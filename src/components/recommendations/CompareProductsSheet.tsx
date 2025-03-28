@@ -1,177 +1,206 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { ProductRecommendation } from "@/types/recommendation";
-import { Check, X, Scale } from "lucide-react";
+import { Check, ArrowLeftRight, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useRecommendations } from "@/contexts/recommendation";
 
 interface CompareProductsSheetProps {
   products: ProductRecommendation[];
 }
 
-export const CompareProductsSheet = ({ products }: CompareProductsSheetProps) => {
+const CompareProductsSheet: React.FC<CompareProductsSheetProps> = ({ products }) => {
   const [selectedProducts, setSelectedProducts] = useState<ProductRecommendation[]>([]);
-  
-  const toggleProduct = (product: ProductRecommendation) => {
-    if (selectedProducts.some(p => p.id === product.id)) {
-      setSelectedProducts(selectedProducts.filter(p => p.id !== product.id));
-    } else {
-      // Limit to comparing only 3 products at once
-      if (selectedProducts.length < 3) {
-        setSelectedProducts([...selectedProducts, product]);
+  const [open, setOpen] = useState(false);
+  const { trackRecommendationClick } = useRecommendations();
+
+  const handleToggleProduct = (product: ProductRecommendation) => {
+    setSelectedProducts(prev => {
+      const isSelected = prev.some(p => p.id === product.id);
+      
+      if (isSelected) {
+        return prev.filter(p => p.id !== product.id);
+      } else {
+        // Limit to 3 products for comparison
+        if (prev.length >= 3) {
+          return [...prev.slice(1), product];
+        }
+        return [...prev, product];
       }
-    }
+    });
   };
-  
-  const isSelected = (productId: number) => {
-    return selectedProducts.some(p => p.id === productId);
-  };
-  
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" className="flex gap-2 items-center">
-          <Scale className="h-4 w-4" />
+        <Button variant="outline" className="gap-2">
+          <ArrowLeftRight className="h-4 w-4" />
           Compare Products
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-3xl">
+      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Compare Products</SheetTitle>
           <SheetDescription>
-            Select up to 3 products to compare their features and specifications.
+            Select up to 3 products to compare their features side by side.
           </SheetDescription>
         </SheetHeader>
-        
+
         <div className="mt-6 space-y-6">
-          {selectedProducts.length === 0 ? (
-            <div className="text-center p-6 border border-dashed rounded-md">
-              <p className="text-muted-foreground">Select products to compare</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {selectedProducts.map(product => (
-                <div key={product.id} className="border rounded-md p-4 relative">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute top-2 right-2"
-                    onClick={() => toggleProduct(product)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-24 h-24 object-contain mb-3"
-                    />
-                    <h3 className="text-sm font-medium">{product.name}</h3>
-                    <p className="text-sm font-bold">${product.price.toFixed(2)}</p>
-                    {product.category && (
-                      <Badge variant="secondary" className="mt-2">{product.category}</Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <Separator />
-          
+          {/* Product selection section */}
           <div className="space-y-4">
-            <h3 className="font-medium">Select Products to Compare</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <h3 className="font-medium">Select Products (Max 3)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {products.map(product => (
                 <div 
                   key={product.id} 
-                  className={`border rounded-md p-3 cursor-pointer transition ${isSelected(product.id) ? 'bg-primary/10 border-primary' : ''}`}
-                  onClick={() => toggleProduct(product)}
+                  className={`flex items-center space-x-3 p-3 border rounded-md ${
+                    selectedProducts.some(p => p.id === product.id) 
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 flex-shrink-0">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-contain"
-                      />
-                      {isSelected(product.id) && (
-                        <div className="absolute -top-2 -right-2 bg-primary text-white rounded-full p-0.5">
-                          <Check className="h-3 w-3" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium truncate">{product.name}</p>
-                      <p className="text-xs">${product.price.toFixed(2)}</p>
+                  <Checkbox 
+                    checked={selectedProducts.some(p => p.id === product.id)}
+                    onCheckedChange={() => handleToggleProduct(product)}
+                    id={`product-${product.id}`}
+                  />
+                  <div className="flex items-center flex-1 min-w-0">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-12 h-12 object-cover rounded-md mr-3"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop";
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <label 
+                        htmlFor={`product-${product.id}`}
+                        className="font-medium text-sm truncate block"
+                      >
+                        {product.name}
+                      </label>
+                      <div className="flex items-center text-xs text-muted-foreground mt-1">
+                        <span>${product.price.toFixed(2)}</span>
+                        {product.category && (
+                          <>
+                            <span className="mx-1">•</span>
+                            <span>{product.category}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          
+
+          {/* Comparison table */}
           {selectedProducts.length > 0 && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <h3 className="font-medium">Comparison</h3>
-                <table className="w-full text-sm">
+            <div className="mt-6">
+              <h3 className="font-medium mb-4">Comparison</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-left py-2 px-3 border-b">Feature</th>
+                      {selectedProducts.map(product => (
+                        <th key={product.id} className="text-left py-2 px-3 border-b">
+                          <div className="flex items-center justify-between">
+                            <span className="truncate max-w-[120px]">{product.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => setSelectedProducts(prev => prev.filter(p => p.id !== product.id))}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
                   <tbody>
                     <tr>
-                      <td className="py-2 px-3 font-medium">Price</td>
+                      <td className="py-2 px-3 border-b">Price</td>
                       {selectedProducts.map(product => (
-                        <td key={`price-${product.id}`} className="py-2 px-3">
+                        <td key={product.id} className="py-2 px-3 border-b">
                           ${product.price.toFixed(2)}
-                          {product.discount && (
-                            <span className="text-green-600 ml-1">-{product.discount}%</span>
+                          {product.discount && product.discount > 0 && (
+                            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
+                              {product.discount}% off
+                            </Badge>
                           )}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-medium">Category</td>
+                      <td className="py-2 px-3 border-b">Category</td>
                       {selectedProducts.map(product => (
-                        <td key={`category-${product.id}`} className="py-2 px-3">
+                        <td key={product.id} className="py-2 px-3 border-b">
                           {product.category || "N/A"}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-medium">New Release</td>
+                      <td className="py-2 px-3 border-b">New Release</td>
                       {selectedProducts.map(product => (
-                        <td key={`new-${product.id}`} className="py-2 px-3">
+                        <td key={product.id} className="py-2 px-3 border-b">
                           {product.isNew ? (
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-5 w-5 text-green-600" />
                           ) : (
-                            <X className="h-4 w-4 text-neutral-300" />
+                            <X className="h-5 w-5 text-muted-foreground" />
                           )}
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-medium">Recommendation Type</td>
+                      <td className="py-2 px-3 border-b">Recommendation Type</td>
                       {selectedProducts.map(product => (
-                        <td key={`type-${product.id}`} className="py-2 px-3">
-                          {product.source.type}
+                        <td key={product.id} className="py-2 px-3 border-b">
+                          <Badge variant="secondary">
+                            {product.source.type.charAt(0).toUpperCase() + product.source.type.slice(1)}
+                          </Badge>
                         </td>
                       ))}
                     </tr>
                     <tr>
-                      <td className="py-2 px-3 font-medium">Confidence Score</td>
+                      <td className="py-2 px-3 border-b">Confidence</td>
                       {selectedProducts.map(product => (
-                        <td key={`confidence-${product.id}`} className="py-2 px-3">
-                          {(product.source.confidence * 100).toFixed(0)}%
+                        <td key={product.id} className="py-2 px-3 border-b">
+                          {Math.round(product.source.confidence * 100)}%
                         </td>
                       ))}
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </>
+
+              <div className="mt-6 flex justify-end">
+                <Button
+                  onClick={() => {
+                    // Track clicks for all selected products
+                    selectedProducts.forEach(product => {
+                      trackRecommendationClick(product);
+                    });
+                    
+                    // Open the first product in a new tab
+                    if (selectedProducts.length > 0) {
+                      window.open(`/product/${selectedProducts[0].id}`, '_blank');
+                      setOpen(false);
+                    }
+                  }}
+                >
+                  View Details
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </SheetContent>

@@ -1,4 +1,3 @@
-
 import { mockProducts } from "@/data/mockProducts";
 import { ProductRecommendation, RecommendationFilter, RecommendationClickEvent } from "@/types/recommendation";
 
@@ -107,11 +106,11 @@ export const getHighQualityProductImages = (productId: number, category?: string
       "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1580910051074-3eb694886505?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1605236453806-6ff36851218e?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1550367083-9fa5bee3b3c7?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1597740985671-2a8a3b80502e?q=80&w=1600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1605170439002-90845e8c0137?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=1600&auto=format&fit=crop"
     ],
     headphones: [
       "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop",
@@ -148,10 +147,10 @@ export const getHighQualityProductImages = (productId: number, category?: string
       "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1504903271097-d7e7c7f5f7ad?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1631105241036-055f32c2cc1d?q=80&w=1600&auto=format&fit=crop"
+      "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?q=80&w=1600&auto=format&fit=crop"
     ],
     televisions: [
       "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=1600&auto=format&fit=crop",
@@ -178,7 +177,7 @@ export const getHighQualityProductImages = (productId: number, category?: string
       "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1542751110-97427bbecf20?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1591105575639-a334978de1a3?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1598550476439-6847785fcea6?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?q=80&w=1600&auto=format&fit=crop"
@@ -369,8 +368,29 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
   // Create a map to track used images for each category to ensure variety
   const usedImagesMap: Record<string, Set<string>> = {};
   
+  // Additional HD images to ensure we have plenty of options
+  const additionalHdImages = [
+    "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1600&auto=format&fit=crop", 
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1603145733146-ae562a55031e?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1600&auto=format&fit=crop"
+  ];
+  
   return recommendations.map(product => {
+    // Get HD images for this product's category or by product ID
     const hdImages = getHighQualityProductImages(product.id, product.category);
+    
+    // Add our additional HD images to ensure we always have options
+    const allImages = [...hdImages, ...additionalHdImages];
     
     // Initialize category in used images map if needed
     const category = product.category?.toLowerCase() || 'default';
@@ -379,7 +399,7 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
     }
     
     // Try to find an image that hasn't been used yet for this category
-    const availableImages = hdImages.filter(img => !usedImagesMap[category].has(img));
+    const availableImages = allImages.filter(img => !usedImagesMap[category].has(img));
     
     // If we have unused images, pick one randomly
     let enhancedImage = product.image;
@@ -387,10 +407,15 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
       const randomIndex = Math.floor(Math.random() * availableImages.length);
       enhancedImage = availableImages[randomIndex];
       usedImagesMap[category].add(enhancedImage);
-    } else if (hdImages.length > 0) {
+    } else if (allImages.length > 0) {
       // If all images have been used, just pick a random one
-      const randomIndex = Math.floor(Math.random() * hdImages.length);
-      enhancedImage = hdImages[randomIndex];
+      const randomIndex = Math.floor(Math.random() * allImages.length);
+      enhancedImage = allImages[randomIndex];
+    }
+    
+    // Ensure we don't return invalid images
+    if (!enhancedImage || enhancedImage.includes('undefined') || enhancedImage === '/placeholder.svg') {
+      enhancedImage = additionalHdImages[product.id % additionalHdImages.length];
     }
     
     return {
@@ -399,4 +424,3 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
     };
   });
 };
-
