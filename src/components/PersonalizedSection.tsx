@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProductRecommendation } from "@/types/recommendation";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
+import { enhanceRecommendationImages } from "@/utils/recommendation";
 
 interface PersonalizedSectionProps {
   title: string;

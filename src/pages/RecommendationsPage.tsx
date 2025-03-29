@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/recommendations/PageHeader";
 import { RecommendationTabs } from "@/components/recommendations/RecommendationTabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "lucide-react";
-import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
+import { enhanceRecommendationImages } from "@/utils/recommendation";
 
 const RecommendationsPage = () => {
   const { 

@@ -7,7 +7,7 @@ import { useUserPreferences } from "@/contexts/UserPreferencesContext";
 import { RecommendationFilter, ProductRecommendation } from "@/types/recommendation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
+import { enhanceRecommendationImages } from "@/utils/recommendation";
 
 interface RecommendedProductsProps {
   productId?: number;
