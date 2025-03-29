@@ -25,7 +25,7 @@ export const PersonalizedSection = ({
 }: PersonalizedSectionProps) => {
   const recommendations = useRecommendations();
   const { preferences } = useUserPreferences();
-  const { isSignedIn } = useAuth(); // Use our AuthContext instead of Clerk's useUser
+  const { isSignedIn } = useAuth();
   const [products, setProducts] = useState<ProductRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export const PersonalizedSection = ({
               : undefined,
           });
           
-          // Apply enhanced HD images, with special handling for trending products
+          // Apply enhanced HD images, prioritizing trending products
           const enhancedProducts = enhanceRecommendationImages(recommendedProducts);
           setProducts(enhancedProducts);
           

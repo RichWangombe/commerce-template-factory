@@ -1,4 +1,3 @@
-
 import { mockProducts } from "@/data/mockProducts";
 import { ProductRecommendation, RecommendationFilter, RecommendationClickEvent } from "@/types/recommendation";
 
@@ -408,7 +407,16 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
     "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1618478594486-c65b899c4936?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1610438250910-01cb6a214594?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop"
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop",
+    // Adding more high-quality trending images
+    "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1472396961693-142e6e269027?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1466721591366-2d5fba72006d?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1661961110372-8a7682543120?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1560343090-f0409e92791a?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop"
   ];
   
   return recommendations.map((product, index) => {
