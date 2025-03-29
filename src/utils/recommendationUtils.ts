@@ -1,3 +1,4 @@
+
 import { mockProducts } from "@/data/mockProducts";
 import { ProductRecommendation, RecommendationFilter, RecommendationClickEvent } from "@/types/recommendation";
 
@@ -363,12 +364,13 @@ const getProductSpecificImages = (productId: number): string[] => {
 
 /**
  * Enhance recommendation products with high-quality images
+ * Updated to ensure trending products always have HD images
  */
 export const enhanceRecommendationImages = (recommendations: ProductRecommendation[]): ProductRecommendation[] => {
   // Create a map to track used images for each category to ensure variety
   const usedImagesMap: Record<string, Set<string>> = {};
   
-  // Additional HD images to ensure we have plenty of options
+  // Additional HD images to ensure we have plenty of options - expanded with more high quality images
   const additionalHdImages = [
     "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1600&auto=format&fit=crop", 
     "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1600&auto=format&fit=crop",
@@ -376,16 +378,51 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
     "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1603145733146-ae562a55031e?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1600&auto=format&fit=crop"
+    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1600&auto=format&fit=crop",
+    // Adding more guaranteed HD images for trending products
+    "https://images.unsplash.com/photo-1661961110372-8a7682543120?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1593642533144-3d62aa4783ec?q=80&w=1600&auto=format&fit=crop"
   ];
   
-  return recommendations.map(product => {
+  // Special HD images specifically for trending products - guaranteed to be visually appealing
+  const trendingImages = [
+    "https://images.unsplash.com/photo-1600186279796-720bd34978c1?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1580522154872-fd24ae2f9164?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1593508195009-71567a7a104c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1593642634402-b0eb5e2eebc9?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1527698266440-12104e498b76?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1587033411391-5d9e51cce126?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1526726538690-5cbf956ae2fd?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1585565804030-349e12e4f937?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1618478594486-c65b899c4936?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1610438250910-01cb6a214594?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop"
+  ];
+  
+  return recommendations.map((product, index) => {
+    // For trending products, prioritize using our special trending images
+    if (product.source.type === 'trending') {
+      // Use modulo operation to cycle through trending images if we have more trending products than images
+      const trendingImageIndex = index % trendingImages.length;
+      return {
+        ...product,
+        image: trendingImages[trendingImageIndex]
+      };
+    }
+    
+    // For other products, continue with the existing logic but with improved fallbacks
     // Get HD images for this product's category or by product ID
     const hdImages = getHighQualityProductImages(product.id, product.category);
     
@@ -415,7 +452,9 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
     
     // Ensure we don't return invalid images
     if (!enhancedImage || enhancedImage.includes('undefined') || enhancedImage === '/placeholder.svg') {
-      enhancedImage = additionalHdImages[product.id % additionalHdImages.length];
+      // More robust fallback using modulo to ensure we always get a valid image
+      const fallbackIndex = (product.id + index) % additionalHdImages.length;
+      enhancedImage = additionalHdImages[fallbackIndex];
     }
     
     return {

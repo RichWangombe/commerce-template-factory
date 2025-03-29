@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProductRecommendation } from "@/types/recommendation";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { enhanceRecommendationImages } from "@/utils/recommendationUtils";
 
 interface PersonalizedSectionProps {
   title: string;
@@ -43,10 +44,12 @@ export const PersonalizedSection = ({
               : undefined,
           });
           
-          setProducts(recommendedProducts);
+          // Apply enhanced HD images, with special handling for trending products
+          const enhancedProducts = enhanceRecommendationImages(recommendedProducts);
+          setProducts(enhancedProducts);
           
           // Track that these recommendations were viewed
-          recommendedProducts.forEach(product => {
+          enhancedProducts.forEach(product => {
             recommendations.trackView({
               productId: product.id,
               productName: product.name,
