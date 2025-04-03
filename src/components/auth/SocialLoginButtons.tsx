@@ -14,8 +14,8 @@ export const SocialLoginButtons: React.FC = () => {
 
   // Check which providers are enabled
   useEffect(() => {
-    // Simply set all providers to disabled by default
-    setEnabledProviders([]);
+    // Enable Google provider by default
+    setEnabledProviders(["google"]);
     setIsCheckingProviders(false);
   }, []);
 
