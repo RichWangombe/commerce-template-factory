@@ -14,7 +14,9 @@ export const SocialLoginButtons: React.FC = () => {
 
   // Check which providers are enabled
   useEffect(() => {
-    // Enable Google provider by default
+    // Check if Google provider is configured properly
+    // In a production app, we would check this with the backend
+    // For now, we'll assume only Google is enabled but show an error if it fails
     setEnabledProviders(["google"]);
     setIsCheckingProviders(false);
   }, []);
@@ -30,6 +32,10 @@ export const SocialLoginButtons: React.FC = () => {
       });
 
       if (error) {
+        // Handle specific error for provider not enabled
+        if (error.message?.includes("provider is not enabled")) {
+          throw new Error(`The ${provider} provider is not enabled. Please enable it in your Supabase dashboard.`);
+        }
         throw error;
       }
     } catch (error: any) {
