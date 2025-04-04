@@ -1,4 +1,3 @@
-
 import { ProductRecommendation } from "@/types/recommendation";
 
 /**
@@ -52,7 +51,7 @@ export const getHighQualityProductImages = (productId: number, category?: string
       "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1575311373937-040b8e1fd17fe?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop",
@@ -138,7 +137,7 @@ export const getHighQualityProductImages = (productId: number, category?: string
     
     return hdImages.default;
   };
-  
+
   // Get product-specific images if available
   const productSpecificImages = getProductSpecificImages(productId);
   if (productSpecificImages.length > 0) {
@@ -197,7 +196,7 @@ const getProductSpecificImages = (productId: number): string[] => {
       "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1631981542149-6dde269de00f?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1576008931785-8f88da4b2d9e?q=80&w=1600&auto=format&fit=crop"
     ],
     // High-end Tablet (ID: 10)
@@ -214,43 +213,4 @@ const getProductSpecificImages = (productId: number): string[] => {
       "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1593642702821-c8e775f4e811?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1593642634524-b40b5baae6bb?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1593642532400-2682810df011?q=80&w=1600&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1600&auto=format&fit=crop"
-    ]
-  };
-  
-  return productImages[productId] || [];
-};
-
-/**
- * Get trending images for trending recommendations
- */
-export const getTrendingImages = (): string[] => {
-  return [
-    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1593642702821-c8e775f4e811?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1605901309584-818e25960a8f?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1561154464-82e9adf32764?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop"
-  ];
-};
-
-/**
- * Get additional HD images to ensure we never have insufficient images
- */
-export const getAdditionalHdImages = (): string[] => {
-  return [
-    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1593642702821-c8e775f4e811?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1504903271097-d7e7c7f5f7ad?q=80&w=1600&auto=format&fit=crop"
-  ];
-};
+      "https://images.unsplash.com/photo-1593642634524-b40b5

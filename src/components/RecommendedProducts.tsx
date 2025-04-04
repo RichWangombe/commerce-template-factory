@@ -111,7 +111,7 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
       case 'similar':
         return 'Similar to Viewed Items';
       case 'trending':
-        return 'Trending Now';
+        return ''; // Empty string instead of "Trending Now" to avoid overlap
       case 'collaborative':
         return 'Others Also Bought';
       case 'seasonal':
@@ -150,12 +150,15 @@ export const RecommendedProducts = ({ productId }: RecommendedProductsProps) => 
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 fade-in-group">
       {products.map((product) => (
         <div key={product.id} className="relative">
-          <Badge 
-            variant="outline" 
-            className={`absolute left-2 top-2 z-10 ${getBadgeStyle(product.source.type)}`}
-          >
-            {getRecommendationLabel(product.source.type)}
-          </Badge>
+          {/* Only show badge if it has a non-empty label */}
+          {getRecommendationLabel(product.source.type) && (
+            <Badge 
+              variant="outline" 
+              className={`absolute left-2 top-2 z-10 ${getBadgeStyle(product.source.type)}`}
+            >
+              {getRecommendationLabel(product.source.type)}
+            </Badge>
+          )}
           <ProductCard
             id={product.id}
             name={product.name}
