@@ -12,23 +12,37 @@ export const Hero = () => {
       title: "Discover cutting-edge tech",
       subtitle: "Products for your lifestyle",
       description: "Browse gadgets by category or deals available",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-slate-100 to-slate-200",
     },
     {
       title: "New Photography Gear",
       subtitle: "Capture Every Moment",
       description: "Professional cameras and accessories for enthusiasts",
-      image: "https://images.unsplash.com/photo-1542567455-cd733f23fbb1?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-amber-50 to-amber-100",
     },
     {
       title: "Smart Home Solutions",
       subtitle: "Transform Your Space",
       description: "Devices that make everyday life easier and more connected",
-      image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=800&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1558002038-1055953a7b91?q=80&w=800&auto=format&fit=crop",
       className: "bg-gradient-to-r from-emerald-50 to-teal-100",
     },
+    {
+      title: "Gaming Excellence",
+      subtitle: "Level Up Your Experience",
+      description: "High-performance gear for the ultimate gaming setup",
+      image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=800&auto=format&fit=crop",
+      className: "bg-gradient-to-r from-indigo-50 to-purple-100",
+    },
+    {
+      title: "Premium Audio",
+      subtitle: "Sound That Moves You",
+      description: "Immersive listening experiences with top-quality speakers and headphones",
+      image: "https://images.unsplash.com/photo-1545127398-14699f92334b?q=80&w=800&auto=format&fit=crop",
+      className: "bg-gradient-to-r from-rose-50 to-pink-100",
+    }
   ];
 
   useEffect(() => {
@@ -193,3 +207,4 @@ export const Hero = () => {
     </section>
   );
 };
+
