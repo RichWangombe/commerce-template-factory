@@ -3,7 +3,9 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { Loader } from "lucide-react";
+import { Loader, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
 
 type Provider = "google" | "facebook" | "github";
 
@@ -11,12 +13,12 @@ export const SocialLoginButtons: React.FC = () => {
   const [isLoading, setIsLoading] = useState<Provider | null>(null);
   const [enabledProviders, setEnabledProviders] = useState<Provider[]>([]);
   const [isCheckingProviders, setIsCheckingProviders] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   // Check which providers are enabled
   useEffect(() => {
-    // Check if Google provider is configured properly
     // In a production app, we would check this with the backend
-    // For now, we'll assume only Google is enabled but show an error if it fails
+    // For now, we'll assume Google is enabled
     setEnabledProviders(["google"]);
     setIsCheckingProviders(false);
   }, []);
@@ -24,6 +26,8 @@ export const SocialLoginButtons: React.FC = () => {
   const handleSocialLogin = async (provider: Provider) => {
     try {
       setIsLoading(provider);
+      setConfigError(null);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -32,13 +36,15 @@ export const SocialLoginButtons: React.FC = () => {
       });
 
       if (error) {
-        // Handle specific error for provider not enabled
+        // Handle specific error for provider not enabled or not configured
         if (error.message?.includes("provider is not enabled")) {
-          throw new Error(`The ${provider} provider is not enabled. Please enable it in your Supabase dashboard.`);
+          throw new Error(`The ${provider} provider needs to be configured in your Supabase dashboard.`);
         }
         throw error;
       }
     } catch (error: any) {
+      console.error("Social login error:", error);
+      setConfigError(error.message || "Failed to login with social provider");
       toast.error("Login failed", {
         description: error.message || "Failed to login with social provider",
       });
@@ -65,6 +71,18 @@ export const SocialLoginButtons: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-3 w-full">
+      {configError && (
+        <Alert variant="destructive" className="mb-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            {configError}
+            <p className="mt-1 text-xs">
+              You need to configure Google OAuth in your Supabase project dashboard under Authentication &gt; Providers &gt; Google.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {enabledProviders.includes("google") && (
         <Button
           type="button"
