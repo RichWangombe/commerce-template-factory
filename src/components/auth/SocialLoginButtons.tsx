@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import { Loader, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 type Provider = "google" | "facebook" | "github";
 
