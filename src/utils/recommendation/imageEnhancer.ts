@@ -10,14 +10,21 @@ export const enhanceRecommendationImages = (recommendations: ProductRecommendati
   const additionalHdImages = getAdditionalHdImages();
 
   return recommendations.map((product) => {
-    // Get product-specific HD images
-    const hdImages = getHighQualityProductImages(product.id, product.category);
-
-    // If we have HD images for this specific product, use the first one
-    if (hdImages && hdImages.length > 0) {
+    // First try product-specific images
+    const specificImages = getProductSpecificImages(product.id);
+    if (specificImages.length > 0) {
       return {
         ...product,
-        image: hdImages[0]
+        image: specificImages[0]
+      };
+    }
+
+    // Then try category-based images
+    const categoryImages = getImagesByCategory(product.category);
+    if (categoryImages.length > 0) {
+      return {
+        ...product,
+        image: categoryImages[0]
       };
     }
 

@@ -45,16 +45,22 @@ export const ProductCard = ({
         return;
       }
 
-      // If not valid, get product-specific images
-      const productSpecificImages = processProductImages([], id, category);
-      if (productSpecificImages.length > 0) {
-        // Use the first product-specific image
-        setImgSrc(productSpecificImages[0]);
+      // Try to get high-quality product images
+      const hdImages = getProductSpecificImages(id);
+      if (hdImages.length > 0) {
+        setImgSrc(hdImages[0]);
         return;
       }
 
-      // Final fallback to default image
-      setImgSrc(getDefaultProductImage());
+      // Try category-based images
+      const categoryImages = getImagesByCategory(category);
+      if (categoryImages.length > 0) {
+        setImgSrc(categoryImages[0]);
+        return;
+      }
+
+      // Final fallback to a reliable default image
+      setImgSrc("https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop");
     };
 
     setupImage();
