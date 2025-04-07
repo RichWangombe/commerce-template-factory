@@ -15,7 +15,7 @@ export const wearableProducts: MockProduct[] = [
     id: 7,
     name: "Fitness Tracker",
     price: 129,
-    image: "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=800&auto=format&fit=crop",
     category: "Wearable",
     isNew: true,
     rating: 4.3
