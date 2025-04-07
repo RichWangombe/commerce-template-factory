@@ -1,20 +1,16 @@
-
 /**
  * This file contains trending and additional high-quality images
  * Separated from main imageUtils.ts for better organization
  */
 
 // Helper function to get trending images for the app
-export const getTrendingImages = (): string[] => {
-  return [
-    "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1522273500616-6b4757e4c184?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1570101945621-945409a6370f?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1519834995681-a87f80e96da3?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1541807360746-039080941306?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1599423423923-43884a1d4783?q=80&w=1600&auto=format&fit=crop"
-  ];
-};
+export const getTrendingImages = (): string[] => [
+  "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=1600&auto=format&fit=crop",
+];
 
 // Additional HD images for fallback and variety
 export const getAdditionalHdImages = (): string[] => {
