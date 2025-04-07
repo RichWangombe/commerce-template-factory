@@ -13,6 +13,9 @@ import { useProduct, useProductReviews } from "@/utils/dataFetchers";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { processProductImages, getProductSpecificImages } from "@/utils/imageUtils";
+import { ProductDetails } from "@/components/product/ProductDetails";
+import { InventoryTracker } from "@/components/product/InventoryTracker"; // Added import
+import { SizeGuide } from "@/components/product/SizeGuide"; // Added import
 
 // Placeholder SEO component - needs further implementation for full functionality
 const SEO = ({ title, description, image, product }: any) => {
@@ -190,6 +193,8 @@ const ProductDetailPage = () => {
             showViewAll={false}
           />
         </ErrorBoundary>
+        <InventoryTracker productId={productId}/> {/* Added InventoryTracker */}
+        <SizeGuide productId={productId}/> {/* Added SizeGuide */}
       </div>
       <ProductViewTracker productId={product.id} />
     </MainLayout>
