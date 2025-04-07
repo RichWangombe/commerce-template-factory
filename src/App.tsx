@@ -68,7 +68,7 @@ function App() {
           </CartProvider>
         </AuthProvider>
       </QueryProvider>
-    </HelmetProvider> {/* Added closing HelmetProvider */}
+    </HelmetProvider>
   );
 }
 
