@@ -8,7 +8,6 @@ import { UserPreferencesProvider } from '@/contexts/UserPreferencesContext';
 import { RecommendationProvider } from '@/contexts/recommendation';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import { QueryProvider } from '@/providers/QueryProvider';
-import { HelmetProvider } from 'react-helmet-async'; // Added import
 import { HomePage } from '@/pages/HomePage';
 import { AboutPage } from '@/pages/AboutPage';
 import { CartPage } from '@/pages/CartPage';
@@ -31,8 +30,7 @@ import RecommendationsPage from '@/pages/RecommendationsPage';
 
 function App() {
   return (
-    <HelmetProvider> {/* Added HelmetProvider */}
-      <QueryProvider>
+    <QueryProvider>
         <AuthProvider>
           <CartProvider>
             <UserPreferencesProvider>
@@ -68,7 +66,6 @@ function App() {
           </CartProvider>
         </AuthProvider>
       </QueryProvider>
-    </HelmetProvider>
   );
 }
 
