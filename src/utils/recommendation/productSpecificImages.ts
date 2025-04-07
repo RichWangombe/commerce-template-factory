@@ -35,16 +35,18 @@ export const productSpecificImages: Record<number, string[]> = {
   ],
   // Bluetooth Speaker (ID: 6)
   6: [
-    "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop", 
+    "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1595433707802-6b2626ef1c91?q=80&w=1600&auto=format&fit=crop"
   ],
   // Fitness Tracker (ID: 7)
   7: [
+    "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1626197031507-c17099753214?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1631981542149-6dde269de00f?q=80&w=1600&auto=format&fit=crop",
