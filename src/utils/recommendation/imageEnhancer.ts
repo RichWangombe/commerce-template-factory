@@ -2,7 +2,9 @@ import { ProductRecommendation } from "@/types/recommendation";
 import { 
   getHighQualityProductImages,
   getTrendingImages,
-  getAdditionalHdImages
+  getAdditionalHdImages,
+  getProductSpecificImages,
+  getImagesByCategory
 } from './imageUtils';
 
 export const enhanceRecommendationImages = (recommendations: ProductRecommendation[]): ProductRecommendation[] => {

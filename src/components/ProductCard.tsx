@@ -5,7 +5,7 @@ import { Heart, ShoppingCart, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { isValidImageUrl, getDefaultProductImage, processProductImages } from "@/utils/imageUtils";
+import { isValidImageUrl, getDefaultProductImage, processProductImages, getProductSpecificImages, getImagesByCategory } from "@/utils/imageUtils";
 
 export interface ProductCardProps {
   id: number;
