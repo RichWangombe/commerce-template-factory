@@ -35,11 +35,11 @@ export const productSpecificImages: Record<number, string[]> = {
   ],
   // Bluetooth Speaker (ID: 6)
   6: [
-    "https://images.unsplash.com/photo-1543814663-2a21eeb97cf7?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1544427920-c49ccfb85579?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1420161900862-9a86fa1f5c79?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1608068810705-72606a77d2a4?q=80&w=1600&auto=format&fit=crop"
+    "https://images.unsplash.com/photo-1589491106922-a8c2ca727f3c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1551816230-ef5deaed4a26?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1563330232-57114bb0823c?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1545454675-3531b543be5d?q=80&w=1600&auto=format&fit=crop"
   ],
   // Fitness Tracker (ID: 7)
   7: [

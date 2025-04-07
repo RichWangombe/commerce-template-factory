@@ -16,7 +16,7 @@ export const audioProducts: MockProduct[] = [
     id: 6,
     name: "Bluetooth Speaker",
     price: 79,
-    image: "https://images.unsplash.com/photo-1543814663-2a21eeb97cf7?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=1600&auto=format&fit=crop",
     category: "Audio",
     discount: 10,
     rating: 3.9
