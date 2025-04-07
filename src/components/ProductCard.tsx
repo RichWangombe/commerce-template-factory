@@ -38,16 +38,26 @@ export const ProductCard = ({
 
   // Process and set the image source on component mount and when props change
   useEffect(() => {
-    // Use processProductImages to get better quality images
-    if (isValidImageUrl(image)) {
-      setImgSrc(image);
-    } else {
-      // Get category-specific or product-specific high quality images
-      const processedImages = processProductImages([image], id, category);
-      setImgSrc(processedImages[0] || getDefaultProductImage());
-    }
-    
-    // Reset states when image changes
+    const setupImage = () => {
+      // First try the direct image if valid
+      if (isValidImageUrl(image)) {
+        setImgSrc(image);
+        return;
+      }
+
+      // If not valid, get product-specific images
+      const productSpecificImages = processProductImages([], id, category);
+      if (productSpecificImages.length > 0) {
+        // Use the first product-specific image
+        setImgSrc(productSpecificImages[0]);
+        return;
+      }
+
+      // Final fallback to default image
+      setImgSrc(getDefaultProductImage());
+    };
+
+    setupImage();
     setImgLoaded(false);
     setImgError(false);
   }, [image, id, category]);
@@ -96,9 +106,15 @@ export const ProductCard = ({
 
   const handleImageError = () => {
     setImgError(true);
-    // On error, try to get a high-quality fallback image based on category or product ID
+    // Try product-specific images first
     const fallbackImages = processProductImages([], id, category);
-    setImgSrc(fallbackImages[0] || getDefaultProductImage());
+    if (fallbackImages.length > 0) {
+      const randomIndex = Math.floor(Math.random() * fallbackImages.length);
+      setImgSrc(fallbackImages[randomIndex]);
+      return;
+    }
+    // Ultimate fallback
+    setImgSrc(getDefaultProductImage());
   };
 
   return (
