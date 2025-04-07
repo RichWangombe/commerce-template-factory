@@ -126,6 +126,10 @@ export const ProductCard = ({
           <img
             src={imgSrc}
             alt={name}
+            loading="lazy"
+            decoding="async"
+            width="400"
+            height="400"
             className={cn(
               "h-full w-full object-contain transition-transform duration-500", 
               isHovered ? "scale-105" : "scale-100",

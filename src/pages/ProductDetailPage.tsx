@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layouts/MainLayout";
@@ -15,14 +14,53 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { processProductImages, getProductSpecificImages } from "@/utils/imageUtils";
 
+// Placeholder SEO component - needs further implementation for full functionality
+const SEO = ({ title, description, image, product }: any) => {
+  return (
+    <>
+      {/* Add meta tags here */}
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      {/* Add other meta tags as needed */}
+      {/* Add structured data here -  Schema.org JSON-LD */}
+      <script type="application/ld+json">
+        {`
+        {
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          "name": "${product.name}",
+          "description": "${product.description}",
+          "image": "${image}",
+          "sku": "${product.sku}",
+          "brand": "${product.brand}",
+          "category": "${product.category}",
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "USD",
+            "price": "${product.price}",
+            "availability": "https://schema.org/InStock"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "${product.rating}",
+            "reviewCount": "${product.reviewCount}"
+          }
+        }
+        `}
+      </script>
+    </>
+  );
+};
+
+
 const ProductDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { recordProductView } = useRecommendations();
   const productId = parseInt(id || "0");
-  
+
   const { data: product, isLoading, error } = useProduct(productId);
   const { data: reviews, isLoading: isLoadingReviews } = useProductReviews(productId);
-  
+
   useEffect(() => {
     if (product && recordProductView) {
       recordProductView(product.id);
@@ -36,13 +74,13 @@ const ProductDetailPage = () => {
     if (specificImages.length > 0) {
       return specificImages;
     }
-    
+
     // Build array starting with the main product image if valid
     const images = [];
     if (mainImage && mainImage.trim() !== '' && !mainImage.includes('undefined')) {
       images.push(mainImage);
     }
-    
+
     // Process and return the images, falling back to category-based images if needed
     return processProductImages(images, productId, category);
   };
@@ -78,6 +116,22 @@ const ProductDetailPage = () => {
 
   return (
     <MainLayout>
+      <SEO 
+        title={product.name}
+        description={product.description}
+        image={product.image}
+        product={{
+          name: product.name,
+          description: product.description || '',
+          price: product.price,
+          image: product.image,
+          sku: `SKU-${product.id}`,
+          brand: product.brand,
+          category: product.category,
+          rating: product.rating,
+          reviewCount: product.reviewCount
+        }}
+      />
       <div className="space-y-8">
         <Breadcrumbs 
           items={[
@@ -86,7 +140,7 @@ const ProductDetailPage = () => {
             { label: product.name }
           ]}
         />
-        
+
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <ErrorBoundary fallback={<div>Error loading product images</div>}>
             <ProductImageCarousel 
@@ -94,7 +148,7 @@ const ProductDetailPage = () => {
               productName={product.name}
             />
           </ErrorBoundary>
-          
+
           <ErrorBoundary fallback={<div>Error loading product information</div>}>
             <ProductInfo 
               product={{
@@ -111,7 +165,7 @@ const ProductDetailPage = () => {
             />
           </ErrorBoundary>
         </div>
-        
+
         <ErrorBoundary fallback={<div>Error loading product details</div>}>
           <ProductTabs 
             product={{
@@ -128,7 +182,7 @@ const ProductDetailPage = () => {
             specifications={product.specifications}
           />
         </ErrorBoundary>
-        
+
         <ErrorBoundary fallback={<div>Error loading recommendations</div>}>
           <RecommendationSection 
             title="You Might Also Like" 

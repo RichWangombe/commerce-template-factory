@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ToastProvider } from '@/components/ui/toast';
@@ -9,6 +8,7 @@ import { UserPreferencesProvider } from '@/contexts/UserPreferencesContext';
 import { RecommendationProvider } from '@/contexts/recommendation';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { HelmetProvider } from 'react-helmet-async'; // Added import
 import { HomePage } from '@/pages/HomePage';
 import { AboutPage } from '@/pages/AboutPage';
 import { CartPage } from '@/pages/CartPage';
@@ -31,42 +31,44 @@ import RecommendationsPage from '@/pages/RecommendationsPage';
 
 function App() {
   return (
-    <QueryProvider>
-      <AuthProvider>
-        <CartProvider>
-          <UserPreferencesProvider>
-            <RecommendationProvider>
-              <WishlistProvider>
-                <ToastProvider>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="/product/:id" element={<ProductDetailPage />} />
-                    <Route path="/category/:categoryName" element={<CategoryPage />} />
-                    <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-                    <Route path="/order/:id" element={<OrderDetailPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/search" element={<SearchPage />} />
-                    <Route path="/products" element={<AllProductsPage />} />
-                    <Route path="/categories" element={<CategoriesPage />} />
-                    <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-                    <Route path="/sign-in" element={<SignInPage />} />
-                    <Route path="/wishlist" element={<WishlistPage />} />
-                    <Route path="/recommendations" element={<RecommendationsPage />} />
-                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <Toaster />
-                </ToastProvider>
-              </WishlistProvider>
-            </RecommendationProvider>
-          </UserPreferencesProvider>
-        </CartProvider>
-      </AuthProvider>
-    </QueryProvider>
+    <HelmetProvider> {/* Added HelmetProvider */}
+      <QueryProvider>
+        <AuthProvider>
+          <CartProvider>
+            <UserPreferencesProvider>
+              <RecommendationProvider>
+                <WishlistProvider>
+                  <ToastProvider>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/checkout" element={<CheckoutPage />} />
+                      <Route path="/product/:id" element={<ProductDetailPage />} />
+                      <Route path="/category/:categoryName" element={<CategoryPage />} />
+                      <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+                      <Route path="/order/:id" element={<OrderDetailPage />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/search" element={<SearchPage />} />
+                      <Route path="/products" element={<AllProductsPage />} />
+                      <Route path="/categories" element={<CategoriesPage />} />
+                      <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+                      <Route path="/sign-in" element={<SignInPage />} />
+                      <Route path="/wishlist" element={<WishlistPage />} />
+                      <Route path="/recommendations" element={<RecommendationsPage />} />
+                      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    <Toaster />
+                  </ToastProvider>
+                </WishlistProvider>
+              </RecommendationProvider>
+            </UserPreferencesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </QueryProvider>
+    </HelmetProvider> {/* Added closing HelmetProvider */}
   );
 }
 
