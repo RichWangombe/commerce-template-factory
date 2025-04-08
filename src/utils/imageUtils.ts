@@ -1,4 +1,3 @@
-
 /**
  * Image utility functions for validating and processing images across the application
  */
@@ -13,7 +12,7 @@ export const isValidImageUrl = (url?: string): boolean => {
   if (url.trim() === '') return false;
   if (url.includes('undefined')) return false;
   if (url === '/placeholder.svg') return false;
-  
+
   // Check if image URL has valid format
   return (
     url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) !== null || 
@@ -174,7 +173,7 @@ export const getProductSpecificImages = (productId: number): string[] => {
       "https://images.unsplash.com/photo-1600375226700-5c934bca4e4f?q=80&w=1600&auto=format&fit=crop"
     ],
   };
-  
+
   return productImages[productId] || [];
 };
 
@@ -192,12 +191,12 @@ export const processProductImages = (
 ): string[] => {
   // Filter valid images from the provided array
   const validImages = images.filter(img => isValidImageUrl(img));
-  
+
   // If we have valid images, return them
   if (validImages.length > 0) {
     return validImages;
   }
-  
+
   // If product ID is provided, try to get product-specific images
   if (productId) {
     const specificImages = getProductSpecificImages(productId);
@@ -205,7 +204,7 @@ export const processProductImages = (
       return specificImages;
     }
   }
-  
+
   // Fallback to category-based images based on the updated categories
   if (category) {
     if (category.toLowerCase().includes('smartphone')) {
@@ -234,7 +233,7 @@ export const processProductImages = (
       return sampleProductImages.home;
     }
   }
-  
+
   // Final fallback to default images
   return sampleProductImages.default;
 };
@@ -342,4 +341,3 @@ export const sampleProductImages = {
     "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1600&auto=format&fit=crop"
   ]
 };
-
