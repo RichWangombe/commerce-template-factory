@@ -238,6 +238,39 @@ export const processProductImages = (
   return sampleProductImages.default;
 };
 
+/**
+ * Get images based on product category
+ * @param category The product category
+ * @returns Array of image URLs for the category
+ */
+export const getImagesByCategory = (category?: string): string[] => {
+  if (!category) return sampleProductImages.default;
+  
+  const normalizedCategory = category.toLowerCase();
+  
+  if (normalizedCategory.includes('smartphone')) {
+    return sampleProductImages.smartphones;
+  } else if (normalizedCategory.includes('laptop')) {
+    return sampleProductImages.laptops;
+  } else if (normalizedCategory.includes('wearable')) {
+    return sampleProductImages.wearables;
+  } else if (normalizedCategory.includes('audio')) {
+    return sampleProductImages.audio;
+  } else if (normalizedCategory.includes('tablet')) {
+    return sampleProductImages.tablets;
+  } else if (normalizedCategory.includes('gaming')) {
+    return sampleProductImages.gaming;
+  } else if (normalizedCategory.includes('photo')) {
+    return sampleProductImages.photography;
+  } else if (normalizedCategory.includes('accessory')) {
+    return sampleProductImages.accessories;
+  } else if (normalizedCategory.includes('home')) {
+    return sampleProductImages.home;
+  }
+  
+  return sampleProductImages.default;
+};
+
 // Higher quality sample product images for fallback by category
 export const sampleProductImages = {
   smartphones: [
