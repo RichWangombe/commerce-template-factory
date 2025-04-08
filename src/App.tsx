@@ -27,10 +27,31 @@ import SignInPage from '@/pages/SignInPage';
 import WishlistPage from '@/pages/WishlistPage';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import RecommendationsPage from '@/pages/RecommendationsPage';
+//Error Boundary component needs to be defined elsewhere and imported here.  This is a placeholder
+const ErrorBoundary = ({ children }) => {
+  return (
+  <>{children}</>
+  );
+}
+
 
 function App() {
+  // Assuming Router is the Routes component from react-router-dom
+  const Router = Routes;
+  if (!Router) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Loading Application...</h1>
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
         <AuthProvider>
           <CartProvider>
             <UserPreferencesProvider>
@@ -66,6 +87,7 @@ function App() {
           </CartProvider>
         </AuthProvider>
       </QueryProvider>
+    </ErrorBoundary>
   );
 }
 
