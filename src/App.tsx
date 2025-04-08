@@ -27,12 +27,7 @@ import SignInPage from '@/pages/SignInPage';
 import WishlistPage from '@/pages/WishlistPage';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import RecommendationsPage from '@/pages/RecommendationsPage';
-//Error Boundary component needs to be defined elsewhere and imported here.  This is a placeholder
-const ErrorBoundary = ({ children }) => {
-  return (
-  <>{children}</>
-  );
-}
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 
 function App() {
