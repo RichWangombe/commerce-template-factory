@@ -15,7 +15,7 @@ export const isValidImageUrl = (url?: string): boolean => {
 
   // Check if image URL has valid format
   return (
-    url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) !== null || 
+    url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) !== null ||
     url.startsWith('data:image/') ||
     url.startsWith('http')
   );
@@ -156,7 +156,7 @@ export const getProductSpecificImages = (productId: number): string[] => {
     ],
     // Tablet Pro (ID: 29)
     29: [
-      "https://images.unsplash.com/photo-1561154464-82e9adf32764?q=80&w=1600&auto=format&fit=crop", 
+      "https://images.unsplash.com/photo-1561154464-82e9adf32764?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1589739900875-8453b348aa0e?q=80&w=1600&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1537434096881-d4c1d0f778fc?q=80&w=1600&auto=format&fit=crop",
@@ -185,7 +185,7 @@ export const getProductSpecificImages = (productId: number): string[] => {
  * @returns Array of valid image URLs
  */
 export const processProductImages = (
-  images: string[], 
+  images: string[],
   productId?: number,
   category?: string
 ): string[] => {
@@ -222,12 +222,12 @@ export const processProductImages = (
     } else if (category.toLowerCase().includes('photo')) {
       return sampleProductImages.photography;
     } else if (
-      category.toLowerCase().includes('accessory') || 
+      category.toLowerCase().includes('accessory') ||
       category.toLowerCase().includes('accessories')
     ) {
       return sampleProductImages.accessories;
     } else if (
-      category.toLowerCase().includes('home') || 
+      category.toLowerCase().includes('home') ||
       category.toLowerCase().includes('smart')
     ) {
       return sampleProductImages.home;
@@ -244,32 +244,11 @@ export const processProductImages = (
  * @returns Array of image URLs for the category
  */
 export const getImagesByCategory = (category?: string): string[] => {
-  if (!category) return sampleProductImages.default;
-  
-  const normalizedCategory = category.toLowerCase();
-  
-  if (normalizedCategory.includes('smartphone')) {
-    return sampleProductImages.smartphones;
-  } else if (normalizedCategory.includes('laptop')) {
-    return sampleProductImages.laptops;
-  } else if (normalizedCategory.includes('wearable')) {
-    return sampleProductImages.wearables;
-  } else if (normalizedCategory.includes('audio')) {
-    return sampleProductImages.audio;
-  } else if (normalizedCategory.includes('tablet')) {
-    return sampleProductImages.tablets;
-  } else if (normalizedCategory.includes('gaming')) {
-    return sampleProductImages.gaming;
-  } else if (normalizedCategory.includes('photo')) {
-    return sampleProductImages.photography;
-  } else if (normalizedCategory.includes('accessory')) {
-    return sampleProductImages.accessories;
-  } else if (normalizedCategory.includes('home')) {
-    return sampleProductImages.home;
-  }
-  
-  return sampleProductImages.default;
+  if (!category) return [DEFAULT_IMAGE];
+
+  return sampleProductImages[category.toLowerCase()] || [DEFAULT_IMAGE];
 };
+
 
 // Higher quality sample product images for fallback by category
 export const sampleProductImages = {
@@ -298,7 +277,7 @@ export const sampleProductImages = {
     "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop`
     "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop"
@@ -373,4 +352,36 @@ export const sampleProductImages = {
     "https://images.unsplash.com/photo-1533022139389-e3c0313cdbf1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1600&auto=format&fit=crop"
   ]
+};
+
+import { sampleProductImages } from '@/data/mockProducts';
+
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1557821552-17105176677c?q=80&w=800&auto=format&fit=crop";
+
+export const getImageFallback = (category?: string): string => {
+  if (!category) return DEFAULT_IMAGE;
+
+  const categoryImages = sampleProductImages[category.toLowerCase()] || [];
+  return categoryImages[0] || DEFAULT_IMAGE;
+};
+
+export const validateImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+export const getProductImage = async (productUrl: string, category?: string): Promise<string> => {
+  if (!productUrl || !(await validateImageUrl(productUrl))) {
+    return getImageFallback(category);
+  }
+  return productUrl;
+};
+
+export const getImagesByCategory = (category?: string): string[] => {
+  if (!category) return [DEFAULT_IMAGE];
+  return sampleProductImages[category.toLowerCase()] || [DEFAULT_IMAGE];
 };

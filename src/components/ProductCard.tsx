@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, ImageOff } from "lucide-react";
@@ -28,45 +27,39 @@ export const ProductCard = ({
   discount = 0,
   rating,
 }: ProductCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [imgSrc, setImgSrc] = useState("");
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  const [imageUrl, setImageUrl] = useState(image);
+  const [isLoading, setIsLoading] = useState(true);
+  const [imgError, setImgError] = useState(false); // Retained for fallback scenarios
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const isFavorite = isInWishlist(id);
 
-  // Process and set the image source on component mount and when props change
+  //Improved Image Loading Logic
   useEffect(() => {
-    const setupImage = () => {
-      // First try the direct image if valid
+    const loadImage = async () => {
+      setIsLoading(true);
+      setImgError(false);
       if (isValidImageUrl(image)) {
-        setImgSrc(image);
-        return;
+        setImageUrl(image);
+      } else {
+        const hdImages = getProductSpecificImages(id);
+        if (hdImages.length > 0) {
+          setImageUrl(hdImages[0]);
+        } else {
+          const categoryImages = getImagesByCategory(category);
+          if (categoryImages.length > 0) {
+            setImageUrl(categoryImages[0]);
+          } else {
+            setImageUrl(getDefaultProductImage());
+          }
+        }
       }
-
-      // Try to get high-quality product images
-      const hdImages = getProductSpecificImages(id);
-      if (hdImages.length > 0) {
-        setImgSrc(hdImages[0]);
-        return;
-      }
-
-      // Try category-based images
-      const categoryImages = getImagesByCategory(category);
-      if (categoryImages.length > 0) {
-        setImgSrc(categoryImages[0]);
-        return;
-      }
-
-      // Final fallback to a reliable default image
-      setImgSrc("https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop");
+      setIsLoading(false);
     };
 
-    setupImage();
-    setImgLoaded(false);
-    setImgError(false);
+    loadImage();
   }, [image, id, category]);
+
 
   const formattedPrice = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -83,12 +76,12 @@ export const ProductCard = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     addItem({
       id,
       name,
       price,
-      image: imgError ? getDefaultProductImage() : imgSrc,
+      image: imgError ? getDefaultProductImage() : imageUrl,
       quantity: 1
     });
   };
@@ -96,7 +89,7 @@ export const ProductCard = ({
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isFavorite) {
       removeFromWishlist(id);
     } else {
@@ -104,7 +97,7 @@ export const ProductCard = ({
         id,
         name,
         price,
-        image: imgError ? getDefaultProductImage() : imgSrc,
+        image: imgError ? getDefaultProductImage() : imageUrl,
         category
       });
     }
@@ -116,11 +109,11 @@ export const ProductCard = ({
     const fallbackImages = processProductImages([], id, category);
     if (fallbackImages.length > 0) {
       const randomIndex = Math.floor(Math.random() * fallbackImages.length);
-      setImgSrc(fallbackImages[randomIndex]);
+      setImageUrl(fallbackImages[randomIndex]);
       return;
     }
     // Ultimate fallback
-    setImgSrc(getDefaultProductImage());
+    setImageUrl(getDefaultProductImage());
   };
 
   return (
@@ -132,21 +125,21 @@ export const ProductCard = ({
       {/* Product Image */}
       <Link to={`/product/${id}`} className="block overflow-hidden">
         <div className="relative aspect-square overflow-hidden bg-neutral-50 p-6">
-          {!imgLoaded && !imgError && (
+          {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 animate-pulse">
               <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
             </div>
           )}
-          
+
           {imgError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-100 text-neutral-400">
               <ImageOff className="h-10 w-10 mb-2" />
               <span className="text-xs">Image unavailable</span>
             </div>
           )}
-          
+
           <img
-            src={imgSrc}
+            src={imageUrl}
             alt={name}
             loading="lazy"
             decoding="async"
@@ -155,18 +148,18 @@ export const ProductCard = ({
             className={cn(
               "h-full w-full object-contain transition-transform duration-500", 
               isHovered ? "scale-105" : "scale-100",
-              imgLoaded && !imgError ? "opacity-100" : "opacity-0"
+              !isLoading && !imgError ? "opacity-100" : "opacity-0"
             )}
-            onLoad={() => setImgLoaded(true)}
+            onLoad={() => setIsLoading(false)}
             onError={handleImageError}
           />
-          
+
           {discount > 0 && (
             <div className="absolute left-4 top-4 rounded-full bg-black px-2 py-1 text-xs font-medium text-white">
               {discount}% OFF
             </div>
           )}
-          
+
           {isNew && !discount && (
             <div className="absolute left-4 top-4 rounded-full bg-blue-500 px-2 py-1 text-xs font-medium text-white">
               New
@@ -182,16 +175,16 @@ export const ProductCard = ({
             {category}
           </span>
         )}
-        
+
         <Link to={`/product/${id}`} className="group-hover:text-blue-600">
           <h3 className="font-medium text-base">{name}</h3>
         </Link>
-        
+
         <div className="mt-1 flex items-center gap-2">
           <span className="font-medium">
             {discountedPrice || formattedPrice}
           </span>
-          
+
           {discountedPrice && (
             <span className="text-sm text-neutral-500 line-through">
               {formattedPrice}
@@ -218,7 +211,7 @@ export const ProductCard = ({
             {isFavorite ? "Remove from favorites" : "Add to favorites"}
           </span>
         </button>
-        
+
         <button 
           className="button-press ml-auto flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
           onClick={handleAddToCart}
@@ -229,4 +222,12 @@ export const ProductCard = ({
       </div>
     </div>
   );
+};
+
+// Placeholder - Replace with actual implementation
+const getProductImage = async (imageUrl: string, category?: string) => {
+  // Logic to fetch fallback image based on imageUrl and category
+  //This could involve hitting an API or using a different image url strategy.
+  //For this example we just return a default image.
+  return getDefaultProductImage();
 };
