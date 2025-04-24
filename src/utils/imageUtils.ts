@@ -277,7 +277,7 @@ export const sampleProductImages = {
     "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1557935728-e6d1eaabe558?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop`
+    "https://images.unsplash.com/photo-1575311373937-040b8e1fd1fe?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1617043786394-ae546b682959?q=80&w=1600&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1600&auto=format&fit=crop"
