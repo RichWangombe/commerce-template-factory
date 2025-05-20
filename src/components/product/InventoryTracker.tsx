@@ -64,7 +64,7 @@ export const InventoryTracker: React.FC<InventoryTrackerProps> = ({ productId, i
           </Button>
         </div>
       ) : status === 'low-stock' ? (
-        <Badge variant="warning">Low Stock - Only {inventory.quantity} left</Badge>
+        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Low Stock - Only {inventory.quantity} left</Badge>
       ) : (
         <Badge variant="success">In Stock</Badge>
       )}

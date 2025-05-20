@@ -1,29 +1,44 @@
 
-export interface SizeGuide {
-  category: string;
-  measurements: {
-    size: string;
-    dimensions: Record<string, string>;
-  }[];
-  measurementInstructions?: string;
-}
-
 export interface InventoryItem {
+  id: number;
   productId: number;
-  size?: string;
-  color?: string;
+  size: string;
+  color: string;
   quantity: number;
   lowStockThreshold: number;
-  sku: string;
+  lastRestocked: string;
+  location?: string;
+  sku?: string;
+  status?: 'active' | 'discontinued' | 'out-of-stock';
 }
 
 export interface StockNotification {
-  id: string;
+  id: number;
   productId: number;
   userId: string;
   email: string;
-  createdAt: string;
   size?: string;
   color?: string;
-  notified: boolean;
+  createdAt: string;
+  status: 'pending' | 'sent' | 'cancelled';
+  sentAt?: string;
+}
+
+export interface InventoryUpdate {
+  productId: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+  restockDate?: string;
+}
+
+export interface InventoryStats {
+  totalProducts: number;
+  lowStockItems: number;
+  outOfStockItems: number;
+  topSellingItems: Array<{
+    productId: number;
+    name: string;
+    salesCount: number;
+  }>;
 }

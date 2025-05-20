@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, ImageOff } from "lucide-react";
@@ -30,6 +31,7 @@ export const ProductCard = ({
   const [imageUrl, setImageUrl] = useState(image);
   const [isLoading, setIsLoading] = useState(true);
   const [imgError, setImgError] = useState(false); // Retained for fallback scenarios
+  const [isHovered, setIsHovered] = useState(false); // Added missing state
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const isFavorite = isInWishlist(id);

@@ -14,8 +14,8 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { processProductImages, getProductSpecificImages } from "@/utils/imageUtils";
 import { ProductDetails } from "@/components/product/ProductDetails";
-import { InventoryTracker } from "@/components/product/InventoryTracker"; // Added import
-import { SizeGuide } from "@/components/product/SizeGuide"; // Added import
+import { InventoryTracker } from "@/components/product/InventoryTracker";
+import { SizeGuide } from "@/components/product/SizeGuide";
 
 // Placeholder SEO component - needs further implementation for full functionality
 const SEO = ({ title, description, image, product }: any) => {
@@ -117,6 +117,17 @@ const ProductDetailPage = () => {
     );
   }
 
+  // Create a mock inventory item for demonstration purposes
+  const mockInventory: InventoryItem = {
+    id: 1,
+    productId: productId,
+    size: "M",
+    color: "Default",
+    quantity: 5,
+    lowStockThreshold: 3,
+    lastRestocked: new Date().toISOString()
+  };
+
   return (
     <MainLayout>
       <SEO 
@@ -145,14 +156,14 @@ const ProductDetailPage = () => {
         />
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-          <ErrorBoundary fallback={<div>Error loading product images</div>}>
+          <ErrorBoundary>
             <ProductImageCarousel 
               images={getProductImages(product.image, product.category)} 
               productName={product.name}
             />
           </ErrorBoundary>
 
-          <ErrorBoundary fallback={<div>Error loading product information</div>}>
+          <ErrorBoundary>
             <ProductInfo 
               product={{
                 id: product.id.toString(),
@@ -169,7 +180,7 @@ const ProductDetailPage = () => {
           </ErrorBoundary>
         </div>
 
-        <ErrorBoundary fallback={<div>Error loading product details</div>}>
+        <ErrorBoundary>
           <ProductTabs 
             product={{
               id: product.id.toString(),
@@ -186,15 +197,15 @@ const ProductDetailPage = () => {
           />
         </ErrorBoundary>
 
-        <ErrorBoundary fallback={<div>Error loading recommendations</div>}>
+        <ErrorBoundary>
           <RecommendationSection 
             title="You Might Also Like" 
             productId={product.id}
             showViewAll={false}
           />
         </ErrorBoundary>
-        <InventoryTracker productId={productId}/> {/* Added InventoryTracker */}
-        <SizeGuide productId={productId}/> {/* Added SizeGuide */}
+        <InventoryTracker productId={productId} inventory={mockInventory} />
+        <SizeGuide category={product.category} />
       </div>
       <ProductViewTracker productId={product.id} />
     </MainLayout>
