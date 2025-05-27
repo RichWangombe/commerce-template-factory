@@ -1,39 +1,49 @@
 
-import { Order } from "@/types/checkout";
+import { StockNotification } from "@/types/inventory";
 
-const EMAIL_TEMPLATES = {
-  orderConfirmation: (order: Order) => ({
-    subject: `Order Confirmed - #${order.id}`,
-    body: `Thank you for your order! We'll notify you when it ships.`
-  }),
-  orderShipped: (order: Order) => ({
-    subject: `Order Shipped - #${order.id}`,
-    body: `Your order is on its way! Track it here: ${order.trackingNumber}`
-  }),
-  orderDelivered: (order: Order) => ({
-    subject: `Order Delivered - #${order.id}`,
-    body: `Your order has been delivered! Thank you for shopping with us.`
-  }),
-  backInStock: (productName: string) => ({
-    subject: `${productName} is back in stock!`,
-    body: `The item you wanted is now available. Shop now before it's gone!`
-  })
-};
-
-export const emailService = {
-  async sendOrderStatusEmail(order: Order, status: Order['status']) {
-    // Implementation needed: Integrate with your email service provider
-    const template = EMAIL_TEMPLATES[status];
-    if (!template) return;
-    
-    const email = template(order);
-    console.log(`Sending email: ${email.subject}`);
-    // Send email implementation
-  },
-
-  async sendBackInStockNotification(notification: StockNotification, productName: string) {
-    const template = EMAIL_TEMPLATES.backInStock(productName);
-    console.log(`Sending back in stock notification for ${productName}`);
-    // Send email implementation
+// Email service for sending notifications
+export class EmailService {
+  private static instance: EmailService;
+  
+  public static getInstance(): EmailService {
+    if (!EmailService.instance) {
+      EmailService.instance = new EmailService();
+    }
+    return EmailService.instance;
   }
-};
+  
+  async sendWelcomeEmail(email: string, name: string): Promise<boolean> {
+    try {
+      // Implementation would go here
+      console.log(`Sending welcome email to ${email} for ${name}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send welcome email:', error);
+      return false;
+    }
+  }
+  
+  async sendOrderConfirmation(email: string, orderId: string): Promise<boolean> {
+    try {
+      // Implementation would go here
+      console.log(`Sending order confirmation to ${email} for order ${orderId}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send order confirmation:', error);
+      return false;
+    }
+  }
+  
+  async sendStockNotification(notification: StockNotification): Promise<boolean> {
+    try {
+      // Implementation would go here
+      console.log(`Sending stock notification to ${notification.email}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send stock notification:', error);
+      return false;
+    }
+  }
+}
+
+export const emailService = EmailService.getInstance();

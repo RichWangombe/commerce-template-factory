@@ -16,6 +16,7 @@ import { processProductImages, getProductSpecificImages } from "@/utils/imageUti
 import { ProductDetails } from "@/components/product/ProductDetails";
 import { InventoryTracker } from "@/components/product/InventoryTracker";
 import { SizeGuide } from "@/components/product/SizeGuide";
+import { InventoryItem } from "@/types/inventory";
 
 // Placeholder SEO component - needs further implementation for full functionality
 const SEO = ({ title, description, image, product }: any) => {
